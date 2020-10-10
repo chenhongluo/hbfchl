@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{18fa6a37-568b-4d9b-bc8d-9982769a1630}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{cdbdb09a-137a-4488-97b9-a79d67917b75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\graph">
+      <UniqueIdentifier>{66c0ed27-9435-4350-8a61-8735c8845c77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\graph">
+      <UniqueIdentifier>{10f8c670-e28b-4225-be24-a8ec65fef5a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\util">
+      <UniqueIdentifier>{6a0afd60-ca4c-4901-894e-79c02cb67987}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="graph.cpp">
+      <Filter>src\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="graphRead.cpp">
+      <Filter>src\graph</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="kernel.cu">
+      <Filter>src</Filter>
+    </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="graph.h">
+      <Filter>include\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="graphRead.h">
+      <Filter>include\graph</Filter>
+    </ClInclude>
+    <ClInclude Include="fUtil.h">
+      <Filter>include\util</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
