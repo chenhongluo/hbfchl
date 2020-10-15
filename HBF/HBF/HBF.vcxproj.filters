@@ -24,6 +24,9 @@
     <ClCompile Include="graphRead.cpp">
       <Filter>src\graph</Filter>
     </ClCompile>
+    <ClCompile Include="fUtil.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="kernel.cu">

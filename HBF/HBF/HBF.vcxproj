@@ -83,6 +83,7 @@
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="fUtil.cpp" />
     <ClCompile Include="graph.cpp" />
     <ClCompile Include="graphRead.cpp" />
   </ItemGroup>

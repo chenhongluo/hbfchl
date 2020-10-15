@@ -10,13 +10,37 @@
 #include <locale>			// numpunct<char>
 #include <string>
 #include <sstream>
-#include <iostream>
 #include <iomanip>      	// setprecision
 #include <cstdlib>			// exit
 #include <ostream>			// color
 #include <algorithm>		// sorting
 #include <exception>		// sorting
 #include <unordered_map>
+#include <random>
+
+#if !defined(__NVCC__)
+#define PRINT_ERR(ERR) "\n\n\033[91m--> "#ERR "\033[97m\n"
+#define PRINT_MSG(MSG) "\n\n\033[96m--> "#MSG "\033[97m\n"
+#else
+#define PRINT_ERR(ERR) "\n\n--> "#ERR "\n"
+#define PRINT_MSG(MSG) "\n\n--> "#MSG "\n"
+#endif
+
+#define __ENABLE(VAL, EXPR) {       \
+    if (VAL)  {                     \
+        EXPR                        \
+    }                               \
+}
+
+#define __PRINT(msg)  {             \
+    std::cout << msg << std::endl;  \
+}
+
+#define __ERROR(msg)  {                                                         \
+    std::cerr << std::endl << " ! ERROR : " << msg << std::endl << std::endl;   \
+    std::exit(EXIT_FAILURE);                                                    \
+}
+
 namespace StreamModifier {
 	/**
 	 * @enum Color change the color of the output stream
@@ -72,21 +96,57 @@ namespace fUtil {
 	}
 
 	template<typename T>
-	std::string typeStringObj(T Obj);
+	std::string typeStringObj(T Obj) {
+		int info;
+		return std::string(typeid(Obj).name());
+	}
+
 	template<typename T>
-	std::string typeString();
+	std::string typeString() {
+		int info;
+		return std::string(typeid(T).name());
+	}
 
-	void memInfoPrint(size_t total, size_t free, size_t Req);
-	void memInfoHost(int Req);
+	template<bool FAULT, typename T, typename R>
+	bool Compare(T* ArrayA, R* ArrayB, const int size) {
+		for (int i = 0; i < size; ++i) {
+			if (ArrayA[i] != ArrayB[i]) {
+				if (FAULT)
+					__ERROR("Array Difference at: " << i << " -> ArrayA: " << ArrayA[i] << " ArrayB: " << ArrayB[i]);
+				return false;
+			}
+		}
+		return true;
+	}
 
-	template<bool FAULT = true, typename T, typename R>
-	bool Compare(T* ArrayA, R* ArrayB, const int size);
+	template<bool FAULT, typename T, typename R>
+	bool Compare(T* ArrayA, R* ArrayB, const int size, bool(*areEqual)(T, R)) {
+		for (int i = 0; i < size; i++) {
+			if (!areEqual(ArrayA[i], ArrayB[i])) {
+				if (FAULT)
+					__ERROR("Array Difference at: " << i << " -> ArrayA: " << ArrayA[i] << " ArrayB: " << ArrayB[i]);
+				return false;
+			}
+		}
+		return true;
+	}
 
-	template<bool FAULT = true, typename T, typename R>
-	bool Compare(T* ArrayA, R* ArrayB, const int size, bool(*equalFunction)(T, R));
+	template<bool FAULT, typename T, typename R>
+	bool CompareAndSort(T* ArrayA, R* ArrayB, const int size) {
+		T* tmpArrayA = ArrayA; R* tmpArrayB = ArrayB;
+		tmpArrayA = new T[size];
+		tmpArrayB = new R[size];
+		std::copy(ArrayA, ArrayA + size, tmpArrayA);
+		std::copy(ArrayB, ArrayB + size, tmpArrayB);
+		std::sort(tmpArrayA, tmpArrayA + size);
+		std::sort(tmpArrayB, tmpArrayB + size);
 
-	template<bool FAULT = true, typename T, typename R>
-	bool CompareAndSort(T* ArrayA, R* ArrayB, const int size);
+		bool flag = Compare<FAULT>(tmpArrayA, tmpArrayB, size);
+
+		delete[] tmpArrayA;
+		delete[] tmpArrayB;
+		return flag;
+	}
 
 	bool isDigit(std::string str);
 
@@ -100,12 +160,6 @@ namespace fUtil {
 		void next(long long int progress);
 		void perCent(long long int progress);
 	};
-
-	template<typename T, typename R>
-	class UniqueMap : public std::unordered_map<T, R> {
-	public:
-		R insertValue(T id);
-	};
 }
 
 namespace fileUtil {
@@ -118,4 +172,27 @@ namespace fileUtil {
 
 	long long int fileSize(const char* File);
 	void skipLines(std::istream& fin, const int nof_lines = 1);
+}
+
+namespace randomUtil {
+	class IntRandom {
+	public:
+		virtual int getNextValue() = 0;
+	};
+
+	class IntRandomUniform : public IntRandom{
+		int seed;
+		std::default_random_engine generator;
+		std::uniform_int_distribution<int> distribution;
+	public:
+		IntRandomUniform(int seed = 0,int min = 1,int max = 100) {
+			this->seed = seed;
+			generator = std::default_random_engine(seed);
+			distribution = std::uniform_int_distribution<int>(min, max);
+		}
+
+		int getNextValue() {
+			return distribution(generator);
+		}
+	};
 }

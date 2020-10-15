@@ -17,16 +17,22 @@ __global__ void addKernel(int *c, const int *a, const int *b)
 
 int main()
 {
-	vector<TriTuple> ts;
-	ts.push_back(TriTuple(0, 2, 5));
-	ts.push_back(TriTuple(1, 2, 1));
-	ts.push_back(TriTuple(1, 3, 1));
-	ts.push_back(TriTuple(1, 4, 1));
-	ts.push_back(TriTuple(2, 4, 2));
-	ts.push_back(TriTuple(2, 3, 2));
-	ts.push_back(TriTuple(3, 4, 3));
-	ts.push_back(TriTuple(4, 1, 4));
-	GraphWeight graph(5,8,EdgeType::UNDIRECTED,ts);
+	//vector<TriTuple> ts;
+	//ts.push_back(TriTuple(0, 2, 5));
+	//ts.push_back(TriTuple(1, 2, 1));
+	//ts.push_back(TriTuple(1, 3, 1));
+	//ts.push_back(TriTuple(1, 4, 1));
+	//ts.push_back(TriTuple(2, 4, 2));
+	//ts.push_back(TriTuple(2, 3, 2));
+	//ts.push_back(TriTuple(3, 4, 3));
+	//ts.push_back(TriTuple(4, 1, 4));
+	//GraphWeight hostGraph(5,8,EdgeType::UNDIRECTED,ts);
+	GraphRead* reader = getGraphReader("F:/data_graph/delaunay_n20.graph",EdgeType::UNDEF_EDGE_TYPE,randomUtil::IntRandomUniform());
+	GraphWeight hostGraph = GraphWeight(reader);
+	hostGraph.toCSR();
+	vector<int2> v1 = hostGraph.getOutEdgesOfNode(0);
+	vector<int2> v2 = hostGraph.getInEdgesOfNode(186869);
+	//vector<int2> v2 = hostGraph.getInEdgesOfNode(1);
     return 0;
 }
 
