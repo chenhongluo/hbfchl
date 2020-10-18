@@ -5,6 +5,10 @@
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="gg|x64">
+      <Configuration>gg</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
@@ -29,6 +33,9 @@
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='gg|x64'">
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.1.props" />
@@ -42,7 +49,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(WindowsSDK_IncludePath);$(VC_IncludePath);$(CUDA_PATH)\include;$(ProjectDir)\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(WindowsSDK_IncludePath);$(VC_IncludePath);$(CUDA_PATH)\include;F:\boost_1_74_0\;$(IncludePath)</IncludePath>
     <LibraryPath>$(CUDA_PATH)\lib$(Platform);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -80,14 +87,18 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="HBFV0.cuh" />
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cudaGraph.cu" />
     <ClCompile Include="fUtil.cpp" />
-    <ClCompile Include="graph.cpp" />
+    <ClCompile Include="graphHost.cpp" />
+    <ClCompile Include="graphWeight.cpp" />
     <ClCompile Include="graphRead.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cudaGraph.cuh" />
     <ClInclude Include="fUtil.h" />
     <ClInclude Include="graph.h" />
     <ClInclude Include="graphRead.h" />

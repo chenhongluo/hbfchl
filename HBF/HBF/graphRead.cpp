@@ -36,7 +36,7 @@ namespace graph {
 		fin.close();
 	}
 
-	GraphRead* getGraphReader(const char* filename, EdgeType direction = EdgeType::UNDEF_EDGE_TYPE, IntRandom& ir = IntRandomUniform())
+	GraphRead* getGraphReader(const char* filename, EdgeType direction, IntRandom& ir)
 	{
 		ifstream f = ifstream(filename);
 		string s;

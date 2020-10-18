@@ -5,14 +5,15 @@ namespace graph {
 
 	}
 
-	vector<int2> GraphWeight::getOutEdgesOfNode(node_t v)
+	vector<int2> GraphWeight::getOutEdgesOfNode(node_t v) const
 	{
 		int s = outNodes[v];
 		int t = outNodes[v + 1];
-		return vector<int2>(&(outEdgeWeights[s]), &(outEdgeWeights[t]));
+		const int2* p = &outEdgeWeights[0];
+		return vector<int2>(p + s, p + t);
 	}
 
-	vector<int2> GraphWeight::getInEdgesOfNode(node_t v)
+	vector<int2> GraphWeight::getInEdgesOfNode(node_t v) const
 	{
 		int s = inNodes[v];
 		int t = inNodes[v + 1];

@@ -16,21 +16,36 @@
     <Filter Include="include\util">
       <UniqueIdentifier>{6a0afd60-ca4c-4901-894e-79c02cb67987}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\kernels">
+      <UniqueIdentifier>{f34f2f6b-578d-437c-8bab-e4e4a6916b12}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\util">
+      <UniqueIdentifier>{e314d5a1-fcce-46ae-a772-3d3ae49faec3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="graph.cpp">
-      <Filter>src\graph</Filter>
-    </ClCompile>
     <ClCompile Include="graphRead.cpp">
       <Filter>src\graph</Filter>
     </ClCompile>
+    <ClCompile Include="graphWeight.cpp">
+      <Filter>src\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="graphHost.cpp">
+      <Filter>src\graph</Filter>
+    </ClCompile>
+    <ClCompile Include="cudaGraph.cu">
+      <Filter>src\graph</Filter>
+    </ClCompile>
     <ClCompile Include="fUtil.cpp">
-      <Filter>src</Filter>
+      <Filter>src\util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="kernel.cu">
       <Filter>src</Filter>
+    </CudaCompile>
+    <CudaCompile Include="HBFV0.cuh">
+      <Filter>include\kernels</Filter>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
@@ -42,6 +57,9 @@
     </ClInclude>
     <ClInclude Include="fUtil.h">
       <Filter>include\util</Filter>
+    </ClInclude>
+    <ClInclude Include="cudaGraph.cuh">
+      <Filter>include\graph</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
