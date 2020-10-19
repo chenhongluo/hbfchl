@@ -36,6 +36,7 @@ set(HOST_SRC        ${PROJECT_SOURCE_DIR}/fUtil.cpp
                     ${PROJECT_SOURCE_DIR}/graphHost.cpp
 					${PROJECT_SOURCE_DIR}/graphRead.cpp
 					${PROJECT_SOURCE_DIR}/graphWeight.cpp
+)
 
 set(DEVICE_SRC 	    ${PROJECT_SOURCE_DIR}/cudaGraph.cu
 )
