@@ -39,7 +39,7 @@ namespace Kernels
 
 		for (int it = 0; it < writeCount; it++)
 		{
-			writeStartAddr[bias + sum + i] = data[it];
+			writeStartAddr[bias + sum + it] = data[it];
 		}
 	}
 
@@ -138,7 +138,7 @@ namespace Kernels
 		for (int i = tileID; i < devSizes[0]; i += IDStride)
 		{
 			int index = devF1[i];
-			int sourceWeight = devDistances[index].y;
+			int sourceWeight = devDistances[index];
 			// devPrintf(1, sourceWeight, "sourceWeight");
 			// devPrintf(128, tile.thread_rank(), "tile.thread_rank()");
 			int nodeS = devNodes[index];
@@ -153,7 +153,7 @@ namespace Kernels
 				{
 					dest = devEdges[k];
 					int newWeight = sourceWeight + dest.y;
-					int oldWeight = atomicMin(&devDistances[dest.x]), newWeight);
+					int oldWeight = atomicMin(&devDistances[dest.x], newWeight);
 					flag = oldWeight > newWeight;
 					if (flag) {
 						queue[founds++] = dest.x;
