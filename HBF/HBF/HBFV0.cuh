@@ -64,6 +64,7 @@ namespace Kernels
 		const int IDStride = gridDim.x * (blockdim / VW_SIZE);
 		const int threadLimit = sharedLimit / blockdim;
 		int* devF2Size = devSizes + 1;
+		int relaxEdges = 0;
 
 		// for write in shared mem
 		extern __shared__ int st[];
@@ -79,6 +80,7 @@ namespace Kernels
 			// devPrintf(128, tile.thread_rank(), "tile.thread_rank()");
 			int nodeS = devNodes[index];
 			int nodeE = devNodes[index + 1];
+			relaxEdges += (nodeE - nodeS);
 			// alloc edges in a warp
 			for (int k = nodeS + tile.thread_rank(); k < nodeE + tile.thread_rank(); k += VW_SIZE)
 			{
@@ -106,6 +108,9 @@ namespace Kernels
 		}
 		// write to global mem
 		VWWrite<VW_SIZE, int>(tile, devF2Size, devF2, founds, queue);
+		if (tile.thread_rank() == 0) {
+			atomic_add(devSizes + 2, relaxEdges);
+		}
 	}
 
 	template <int VW_SIZE>
@@ -128,6 +133,7 @@ namespace Kernels
 		const int IDStride = gridDim.x * (blockdim / VW_SIZE);
 		const int threadLimit = sharedLimit / blockdim;
 		int* devF2Size = devSizes + 1;
+		int relaxEdges = 0;
 
 		// for write in shared mem
 		extern __shared__ int st[];
@@ -143,6 +149,7 @@ namespace Kernels
 			// devPrintf(128, tile.thread_rank(), "tile.thread_rank()");
 			int nodeS = devNodes[index];
 			int nodeE = devNodes[index + 1];
+			relaxEdges += (nodeE - nodeS);
 			// alloc edges in a warp
 			for (int k = nodeS + tile.thread_rank(); k < nodeE + tile.thread_rank(); k += VW_SIZE)
 			{
@@ -167,5 +174,63 @@ namespace Kernels
 		}
 		// write to global mem
 		VWWrite<VW_SIZE, int>(tile, devF2Size, devF2, founds, queue);
+		if (tile.thread_rank() == 0) {
+			atomic_add(devSizes + 2, relaxEdges);
+		}
 	}
 }
+
+#define kernel2(vwSize,gridDim, blockDim, sharedLimit) \
+{ \
+HBFSearchV0Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
+(devUpOutNodes, devUpOutEdges, devInt2Distances, f1, f2, devSizes, sharedLimit, level) \
+}
+
+#define kernel(vwSize,gridDim, blockDim, sharedLimit) \
+{ \
+HBFSearchV0Atomic32<vwSize> << <gridDim, blockDim, sharedLimit >> > \
+(devUpOutNodes, devUpOutEdges, devIntDistances, f1, f2, devSizes, sharedLimit) \
+}
+
+
+
+// user interface gridDim, blockDim, sharedLimit, devUpOutNodes, devUpOutEdges, devIntDistances, devInt2Distances, f1, f2, devSizes, sharedLimit,level
+// name = {HBFSearchV0Atomic64,HBFSearchV0Atomic32}
+// vwSize = 1,2,4,8,16,32
+#define switchKernelV0(atomic64,vwSize,gridDim, blockDim, sharedLimit) \
+{\
+	if (atomic64) {  \
+		switch (vwSize) { \
+		case 1:\
+			kernel2(1,gridDim, blockDim, sharedLimit); break;\
+		case 2: \
+			kernel2(2,gridDim, blockDim, sharedLimit); break;\
+		case 4: \
+			kernel2(4,gridDim, blockDim, sharedLimit); break;\
+		case 8: \
+			kernel2(8,gridDim, blockDim, sharedLimit); break;\
+		case 16: \
+			kernel2(16,gridDim, blockDim, sharedLimit); break;\
+		case 32: \
+			kernel2(32,gridDim, blockDim, sharedLimit); break;\
+	} \
+	else { \
+		switch (vwSize) { \
+		case 1:\
+			kernel(1,gridDim, blockDim, sharedLimit); break;\
+		case 2: \
+			kernel(2,gridDim, blockDim, sharedLimit); break;\
+		case 4: \
+			kernel(4,gridDim, blockDim, sharedLimit); break;\
+		case 8: \
+			kernel(8,gridDim, blockDim, sharedLimit); break;\
+		case 16: \
+			kernel(16,gridDim, blockDim, sharedLimit); break;\
+		case 32: \
+			kernel(32,gridDim, blockDim, sharedLimit); break;\
+		} \
+	}\
+}
+
+#define switchKernelV0Config(configs) \
+	switchKernelV0(configs.atomic64,configs.vwSize,configs.gridDim, configs.blockDim, configs.sharedLimit)

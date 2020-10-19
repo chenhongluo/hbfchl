@@ -33,9 +33,6 @@
     <ClCompile Include="graphHost.cpp">
       <Filter>src\graph</Filter>
     </ClCompile>
-    <ClCompile Include="cudaGraph.cu">
-      <Filter>src\graph</Filter>
-    </ClCompile>
     <ClCompile Include="fUtil.cpp">
       <Filter>src\util</Filter>
     </ClCompile>
@@ -47,6 +44,15 @@
     <CudaCompile Include="HBFV1.cuh">
       <Filter>include\kernels</Filter>
     </CudaCompile>
+    <CudaCompile Include="HBFV0.cuh">
+      <Filter>include\kernels</Filter>
+    </CudaCompile>
+    <CudaCompile Include="cudaGraph.cuh">
+      <Filter>include\graph</Filter>
+    </CudaCompile>
+    <CudaCompile Include="cudaGraph.cu">
+      <Filter>src\graph</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="graph.h">
@@ -57,12 +63,6 @@
     </ClInclude>
     <ClInclude Include="fUtil.h">
       <Filter>include\util</Filter>
-    </ClInclude>
-    <ClInclude Include="cudaGraph.cuh">
-      <Filter>include\graph</Filter>
-    </ClInclude>
-    <ClInclude Include="HBFV0.cuh">
-      <Filter>include\kernels</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

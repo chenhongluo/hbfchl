@@ -1,5 +1,6 @@
 #include "cudaGraph.cuh"
 #include "HBFV0.cuh"
+
 namespace cuda_graph {
 	cuda_graph::CudaGraph::CudaGraph(GraphWeight & _gp, CudaConfigs & _configs)
 		:gp(_gp), configs(_configs), v(gp.v), e(gp.e)
@@ -10,7 +11,51 @@ namespace cuda_graph {
 
 	void CudaGraph::search(int source)
 	{
+		int f1Size = 1, f2Size, f3Size, f4Size;
+		f2Size = f3Size = f4Size = 0;
+		vector<int> hostSizes(4, 0);
+		int* devF1 = f1;
+		int* devF2 = f2;
+		int level = 1;
+		int iter = 0;
+		int relaxEdges = 0;
+		int relaxNodes = 0;
 
+		cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
+		while (1)
+		{
+			iter++;
+			// printf("%d:%d\n", iter, f1Size);
+			// hostPrintfSmall(f1Size, "f1Size: ");
+			// hostPrintfSmall(f3Size, "f3Size: ");
+			if (f1Size == 0)
+			{
+				level++;
+				break;
+			}
+			string &kv = configs.kernelVersion;
+			if (kv == "v0") {
+				switchKernelV0Config(configs)
+			}
+			else if (kv == "v1") {
+				switchKernelV1Config(configs)
+			}
+			else {
+				cout << "not known kernel version" << endl;
+				exit(-1);
+			}
+			std::swap<int *>(devF1, devF2);
+			cudaMemcpy(&(hostSizes[0]), devSizes, 4 * sizeof(int), cudaMemcpyDeviceToHost);
+			int f1s = hostSizes[0], f2s = hostSizes[1], re = hostSizes[2];
+			relaxEdges += re;
+			relaxNodes += f1s;
+			hostSizes[0] = f2s, hostSizes[1] = 0, hostSizes[2] = 0;
+			cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
+			__CUDA_ERROR("GNRSearchMain Kernel");
+			level++;
+		}
+		// printf("iter times:%d", iter);
+	}
 	}
 
 	cuda_graph::CudaGraph::~CudaGraph()

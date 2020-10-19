@@ -15,7 +15,7 @@ __global__ void addKernel(int *c, const int *a, const int *b)
     c[i] = a[i] + b[i];
 }
 
-int main()
+void test() 
 {
 	vector<TriTuple> ts;
 	ts.push_back(TriTuple(0, 2, 5));
@@ -26,7 +26,7 @@ int main()
 	ts.push_back(TriTuple(2, 3, 2));
 	ts.push_back(TriTuple(3, 4, 3));
 	ts.push_back(TriTuple(4, 1, 4));
-	GraphWeight hostGraph(5,8,EdgeType::UNDIRECTED,ts);
+	GraphWeight hostGraph(5, 8, EdgeType::UNDIRECTED, ts);
 	//EdgeType userEdgeType = EdgeType::UNDEF_EDGE_TYPE;
 	//IntRandomUniform ir = IntRandomUniform();
 	//GraphRead* reader = getGraphReader("F:/data_graph/delaunay_n20.graph", userEdgeType,ir);
@@ -35,12 +35,20 @@ int main()
 	//vector<int2> v2 = hostGraph.getInEdgesOfNode(186869);
 	hostGraph.toCSR();
 	GraphHost hg(hostGraph);
-	vector<dist_t> res1,res2;
-	double t1,t2;
+	vector<dist_t> res1, res2;
+	double t1, t2;
 	hg.computeAndTick(0, res1, t1, GraphHost::HostSelector::BoostD);
 	hg.computeAndTick(0, res2, t2, GraphHost::HostSelector::BellmanFord);
+}
 
-	//vector<int2> v2 = hostGraph.getInEdgesOfNode(1);
+int main()
+{
+	// 读取参数配置data和*.config
+	// config :cuda config ,graph config, nodeSize
+	// 构建图
+	// 生成GraphHost和CudaGraph
+	// 完成后生成source nodes开始search
+	// 取得结果后对比
     return 0;
 }
 

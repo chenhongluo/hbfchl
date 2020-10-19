@@ -27,7 +27,12 @@ using namespace graph;
 namespace cuda_graph {
 	class CudaConfigs {
 	public:
+		string kernelVersion;
 		bool atomic64;
+		int vwSize;
+		int gridDim;
+		int blockDim;
+		int sharedLimit;
 	};
 	class CudaGraph {
 	private:

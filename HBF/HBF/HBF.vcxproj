@@ -57,6 +57,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -87,22 +88,22 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="cudaGraph.cu" />
+    <CudaCompile Include="HBFV0.cuh" />
     <CudaCompile Include="HBFV1.cuh" />
     <CudaCompile Include="kernel.cu" />
+    <CudaCompile Include="cudaGraph.cuh" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cudaGraph.cu" />
     <ClCompile Include="fUtil.cpp" />
     <ClCompile Include="graphHost.cpp" />
     <ClCompile Include="graphWeight.cpp" />
     <ClCompile Include="graphRead.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cudaGraph.cuh" />
     <ClInclude Include="fUtil.h" />
     <ClInclude Include="graph.h" />
     <ClInclude Include="graphRead.h" />
-    <ClInclude Include="HBFV0.cuh" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
