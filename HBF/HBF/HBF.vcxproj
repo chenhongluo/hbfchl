@@ -87,7 +87,7 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CudaCompile Include="HBFV0.cuh" />
+    <CudaCompile Include="HBFV1.cuh" />
     <CudaCompile Include="kernel.cu" />
   </ItemGroup>
   <ItemGroup>
@@ -102,6 +102,10 @@
     <ClInclude Include="fUtil.h" />
     <ClInclude Include="graph.h" />
     <ClInclude Include="graphRead.h" />
+    <ClInclude Include="HBFV0.cuh" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

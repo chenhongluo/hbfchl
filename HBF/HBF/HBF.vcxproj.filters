@@ -44,7 +44,7 @@
     <CudaCompile Include="kernel.cu">
       <Filter>src</Filter>
     </CudaCompile>
-    <CudaCompile Include="HBFV0.cuh">
+    <CudaCompile Include="HBFV1.cuh">
       <Filter>include\kernels</Filter>
     </CudaCompile>
   </ItemGroup>
@@ -61,5 +61,13 @@
     <ClInclude Include="cudaGraph.cuh">
       <Filter>include\graph</Filter>
     </ClInclude>
+    <ClInclude Include="HBFV0.cuh">
+      <Filter>include\kernels</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt">
+      <Filter>src</Filter>
+    </Text>
   </ItemGroup>
 </Project>

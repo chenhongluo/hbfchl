@@ -1,4 +1,5 @@
 #include "cudaGraph.cuh"
+#include "HBFV0.cuh"
 namespace cuda_graph {
 	cuda_graph::CudaGraph::CudaGraph(GraphWeight & _gp, CudaConfigs & _configs)
 		:gp(_gp), configs(_configs), v(gp.v), e(gp.e)
