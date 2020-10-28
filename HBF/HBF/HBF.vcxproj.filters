@@ -70,4 +70,9 @@
       <Filter>src</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="config_default.ini">
+      <Filter>src</Filter>
+    </None>
+  </ItemGroup>
 </Project>

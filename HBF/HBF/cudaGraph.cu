@@ -1,5 +1,6 @@
 #include "cudaGraph.cuh"
 #include "HBFV0.cuh"
+#include "HBFV1.cuh"
 
 namespace cuda_graph {
 	cuda_graph::CudaGraph::CudaGraph(GraphWeight & _gp, CudaConfigs & _configs)
@@ -25,9 +26,6 @@ namespace cuda_graph {
 		while (1)
 		{
 			iter++;
-			// printf("%d:%d\n", iter, f1Size);
-			// hostPrintfSmall(f1Size, "f1Size: ");
-			// hostPrintfSmall(f3Size, "f3Size: ");
 			if (f1Size == 0)
 			{
 				level++;

@@ -33,6 +33,7 @@ namespace cuda_graph {
 		int gridDim;
 		int blockDim;
 		int sharedLimit;
+		CudaConfigs() {}
 	};
 	class CudaGraph {
 	private:
@@ -51,12 +52,12 @@ namespace cuda_graph {
 		CudaConfigs configs;
 		CudaGraph(GraphWeight & _gp, CudaConfigs & _configs);
 		void search(int source);
+		void cudaGetRes(vector<int> &res);
 		~CudaGraph();
 	private:
 		void cudaMallocMem();
 		void cudaFreeMem();
 		void cudaCopyMem();
 		void cudaInitComputer(int initNode);
-		void cudaGetRes(vector<int> &res);
 	};
 }

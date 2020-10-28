@@ -1,19 +1,13 @@
-
-#include "cuda_runtime.h"
-#include "device_launch_parameters.h"
+#include <boost/property_tree/ptree.hpp>  
+#include <boost/property_tree/ini_parser.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include <stdio.h>
 #include "graph.h"
+#include "cudaGraph.cuh"
 using namespace std;
 using namespace graph;
-
-cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
-
-__global__ void addKernel(int *c, const int *a, const int *b)
-{
-    int i = threadIdx.x;
-    c[i] = a[i] + b[i];
-}
 
 void test() 
 {
@@ -40,94 +34,113 @@ void test()
 	hg.computeAndTick(0, res1, t1, GraphHost::HostSelector::BoostD);
 	hg.computeAndTick(0, res2, t2, GraphHost::HostSelector::BellmanFord);
 }
+#define make_sure(expression,msg)\
+do{\
+if(!(expression))\
+{\
+	__ERROR(msg) \
+}\
+}while(0)
 
-int main()
+
+int main(int argc, char* argv[])
 {
 	// 读取参数配置data和*.config
-	// config :cuda config ,graph config, nodeSize
+	make_sure(argc==2,"argc!=2,input graph path and *.ini");
+	string graphPath = argv[0];
+	string ini = argv[1];
+	if (!boost::filesystem::exists(graphPath)) {
+		std::cerr << "graph not exists." << std::endl;
+		return -1;
+	}
+	if (!boost::filesystem::exists(ini)) {
+		std::cerr << "config.ini not exists." << std::endl;
+		return -1;
+	}
+	boost::property_tree::ptree m_pt, tag_setting;
+	try
+	{
+		read_ini(ini, m_pt);
+	}
+	catch (std::exception e)
+	{
+		__ERROR("config open error");
+	}
+	tag_setting = m_pt.get_child("cuda");
+	CudaConfigs configs;
+
+	configs.gridDim = tag_setting.get<int>("gridDim", 278);
+	configs.blockDim = tag_setting.get<int>("blockDim", 128);
+	configs.sharedLimit = tag_setting.get<int>("sharedLimit", 1024);
+	configs.kernel = tag_setting.get<string>("kernel", "v0");
+	configs.atomic64 = tag_setting.get<bool>("atomic64", true);
+
+	tag_setting = m_pt.get_child("host");
+	//Behind Camera Config ini
+	string randomOpt= tag_setting.get<string>("random", "uniform");
+	int seed = tag_setting.get<int>("seed", time(0));
+	int random_min = tag_setting.get<int>("random_min", 1);
+	int random_max = tag_setting.get<int>("random_max", 100);
+	int testNodeSize = tag_setting.get<int>("testNodeSize", 100);
+	bool compareFlag = tag_setting.get<bool>("compareFlag", false);
+	int edgeType = tag_setting.get<int>("testNodes", 0);
+
+	EdgeType userEdgeType = EdgeType::UNDEF_EDGE_TYPE;
+	if (edgeType == 1) {
+		userEdgeType = EdgeType::DIRECTED;
+	}
+	else if (edgeType == 2) {
+		userEdgeType = EdgeType::UNDIRECTED;
+	}
+	IntRandomUniform ir = IntRandomUniform();
+	if(randomOpt == "uniform"){
+		ir = IntRandomUniform(seed, random_min,random_max);
+	}
+	else {
+		__ERROR("not exists random option")
+	}
+	GraphRead* reader = getGraphReader(graphPath.c_str(), userEdgeType,ir);
+	GraphWeight graphWeight(reader);
+	//vector<int2> v1 = hostGraph.getOutEdgesOfNode(0);
+	//vector<int2> v2 = hostGraph.getInEdgesOfNode(186869);
+	GraphHost hg(graphWeight);
+	CudaGraph cg(graphWeight, configs);
 	// 构建图
 	// 生成GraphHost和CudaGraph
+
+	//生成测试的点
+	vector<int> testNodes(testNodeSize, 0);
+	IntRandomUniform iru(seed, 0, graphWeight.v);
+	for (int i = 0; i < testNodeSize; i++) {
+		testNodes[i] = iru.getNextValue();
+	}
+
+	for (int i = 0; i < testNodeSize; i++) {
+		vector<int> cudaRes,hostRes;
+		double t;
+		cg.search();
+		cg.cudaGetRes(cudaRes);
+		hg.computeAndTick(0, hostRes, t, GraphHost::HostSelector::Dijistra);
+		int flag = compareRes(hostRes, cudaRes);
+		if(flag == -2)
+			__ERROR("compareRes flag==-2")
+		else if(flag == -1)
+			__ERROR("compareRes flag==-1")
+	}
 	// 完成后生成source nodes开始search
-	// 取得结果后对比
+	// 取得结果后对比 指标采集是下一步的任务
     return 0;
 }
 
-// Helper function for using CUDA to add vectors in parallel.
-cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size)
+int compareRes(vector<int>& res1, vector<int>& res2)
 {
-    int *dev_a = 0;
-    int *dev_b = 0;
-    int *dev_c = 0;
-    cudaError_t cudaStatus;
-
-    // Choose which GPU to run on, change this on a multi-GPU system.
-    cudaStatus = cudaSetDevice(0);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
-        goto Error;
-    }
-
-    // Allocate GPU buffers for three vectors (two input, one output)    .
-    cudaStatus = cudaMalloc((void**)&dev_c, size * sizeof(int));
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!");
-        goto Error;
-    }
-
-    cudaStatus = cudaMalloc((void**)&dev_a, size * sizeof(int));
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!");
-        goto Error;
-    }
-
-    cudaStatus = cudaMalloc((void**)&dev_b, size * sizeof(int));
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMalloc failed!");
-        goto Error;
-    }
-
-    // Copy input vectors from host memory to GPU buffers.
-    cudaStatus = cudaMemcpy(dev_a, a, size * sizeof(int), cudaMemcpyHostToDevice);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!");
-        goto Error;
-    }
-
-    cudaStatus = cudaMemcpy(dev_b, b, size * sizeof(int), cudaMemcpyHostToDevice);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!");
-        goto Error;
-    }
-
-    // Launch a kernel on the GPU with one thread for each element.
-    addKernel<<<1, size>>>(dev_c, dev_a, dev_b);
-
-    // Check for any errors launching the kernel
-    cudaStatus = cudaGetLastError();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "addKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
-        goto Error;
-    }
-    
-    // cudaDeviceSynchronize waits for the kernel to finish, and returns
-    // any errors encountered during the launch.
-    cudaStatus = cudaDeviceSynchronize();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
-        goto Error;
-    }
-
-    // Copy output vector from GPU buffer to host memory.
-    cudaStatus = cudaMemcpy(c, dev_c, size * sizeof(int), cudaMemcpyDeviceToHost);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaMemcpy failed!");
-        goto Error;
-    }
-
-Error:
-    cudaFree(dev_c);
-    cudaFree(dev_a);
-    cudaFree(dev_b);
-    
-    return cudaStatus;
+	if (res1.size() != res2.size()) {
+		return -2;
+	}
+	for (int i = 0; i < res1.size(); i++) {
+		if (res1[i] != res2[i]) {
+			return -1;
+		}
+	}
+	return 0;
 }

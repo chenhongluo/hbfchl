@@ -180,13 +180,13 @@ namespace Kernels
 	}
 }
 
-#define kernel2(vwSize,gridDim, blockDim, sharedLimit) \
+#define kernelV0Atomic64(vwSize,gridDim, blockDim, sharedLimit) \
 { \
 HBFSearchV0Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
 (devUpOutNodes, devUpOutEdges, devInt2Distances, f1, f2, devSizes, sharedLimit, level) \
 }
 
-#define kernel(vwSize,gridDim, blockDim, sharedLimit) \
+#define kernelV0Atomic32(vwSize,gridDim, blockDim, sharedLimit) \
 { \
 HBFSearchV0Atomic32<vwSize> << <gridDim, blockDim, sharedLimit >> > \
 (devUpOutNodes, devUpOutEdges, devIntDistances, f1, f2, devSizes, sharedLimit) \
@@ -202,32 +202,37 @@ HBFSearchV0Atomic32<vwSize> << <gridDim, blockDim, sharedLimit >> > \
 	if (atomic64) {  \
 		switch (vwSize) { \
 		case 1:\
-			kernel2(1,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atomic64(1,gridDim, blockDim, sharedLimit); break;\
 		case 2: \
-			kernel2(2,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atomic64(2,gridDim, blockDim, sharedLimit); break;\
 		case 4: \
-			kernel2(4,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atomic64(4,gridDim, blockDim, sharedLimit); break;\
 		case 8: \
-			kernel2(8,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atomic64(8,gridDim, blockDim, sharedLimit); break;\
 		case 16: \
-			kernel2(16,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atomic64(16,gridDim, blockDim, sharedLimit); break;\
 		case 32: \
-			kernel2(32,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atomic64(32,gridDim, blockDim, sharedLimit); break;\
+		default: \
+			__ERROR("no this vwsize")\
+		}\
 	} \
 	else { \
 		switch (vwSize) { \
 		case 1:\
-			kernel(1,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atomic32(1,gridDim, blockDim, sharedLimit); break;\
 		case 2: \
-			kernel(2,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atomic32(2,gridDim, blockDim, sharedLimit); break;\
 		case 4: \
-			kernel(4,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atomic32(4,gridDim, blockDim, sharedLimit); break;\
 		case 8: \
-			kernel(8,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atomic32(8,gridDim, blockDim, sharedLimit); break;\
 		case 16: \
-			kernel(16,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atomic32(16,gridDim, blockDim, sharedLimit); break;\
 		case 32: \
-			kernel(32,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atomic32(32,gridDim, blockDim, sharedLimit); break;\
+		default: \
+			__ERROR("no this vwsize")\
 		} \
 	}\
 }
