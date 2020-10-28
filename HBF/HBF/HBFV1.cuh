@@ -1,6 +1,5 @@
-#include "cuda_runtime.h"
-#include "cuda_runtime_api.h"
-// Primary header is compatible with pre-C++11, collective algorithm headers require C++11
+#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 #include <cooperative_groups.h>
 using namespace cooperative_groups;
 
@@ -97,7 +96,7 @@ namespace Kernels
 			devF2[globalBias + j] = queue[j];
 
 		if (tile.thread_rank() == 0) {
-			atomic_add(devSizes + 2, relaxEdges);
+			atomicAdd(devSizes + 2, relaxEdges);
 		}
 	}
 
@@ -135,7 +134,7 @@ namespace Kernels
 		for (int i = tileID; i < devSizes[0]; i += IDStride)
 		{
 			int index = devF1[i];
-			int sourceWeight = devDistances[index].y;
+			int sourceWeight = devDistances[index];
 			// devPrintf(1, sourceWeight, "sourceWeight");
 			// devPrintf(128, tile.thread_rank(), "tile.thread_rank()");
 			int nodeS = devNodes[index];
@@ -189,28 +188,22 @@ namespace Kernels
 			devF2[globalBias + j] = queue[j];
 
 		if (tile.thread_rank() == 0) {
-			atomic_add(devSizes + 2, relaxEdges);
+			atomicAdd(devSizes + 2, relaxEdges);
 		}
 	}
 }
 
 #define kernelV1Atmoic64(vwSize,gridDim, blockDim, sharedLimit) \
-{ \
 HBFSearchV1Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
-(devUpOutNodes, devUpOutEdges, devInt2Distances, f1, f2, devSizes, sharedLimit, level) \
-}
+(devUpOutNodes, devUpOutEdges, devInt2Distances, devF1, devF2, devSizes, sharedLimit, level)
 
 #define kerneV1Atmoic32(vwSize,gridDim, blockDim, sharedLimit) \
-{ \
 HBFSearchV1Atomic32<vwSize> << <gridDim, blockDim, sharedLimit >> > \
-(devUpOutNodes, devUpOutEdges, devIntDistances, f1, f2, devSizes, sharedLimit) \
-}
+(devUpOutNodes, devUpOutEdges, devIntDistances, devF1, devF2, devSizes, sharedLimit)
 
-
-
-// user interface gridDim, blockDim, sharedLimit, devUpOutNodes, devUpOutEdges, devIntDistances, devInt2Distances, f1, f2, devSizes, sharedLimit,level
-// name = {HBFSearchV0Atomic64,HBFSearchV0Atomic32}
-// vwSize = 1,2,4,8,16,32
+ //user interface gridDim, blockDim, sharedLimit, devUpOutNodes, devUpOutEdges, devIntDistances, devInt2Distances, f1, f2, devSizes, sharedLimit,level
+ //name = {HBFSearchV0Atomic64,HBFSearchV0Atomic32}
+ //vwSize = 1,2,4,8,16,32
 #define switchKernelV1(atomic64,vwSize,gridDim, blockDim, sharedLimit) \
 {\
 	if (atomic64) {  \

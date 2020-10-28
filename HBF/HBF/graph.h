@@ -1,4 +1,6 @@
 #pragma once
+
+#include <iostream>
 #include <vector>
 #include <vector_types.h>
 #include <vector_functions.hpp>

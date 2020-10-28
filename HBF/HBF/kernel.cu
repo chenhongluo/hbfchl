@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include "graph.h"
 #include "cudaGraph.cuh"
-using namespace std;
 using namespace graph;
+using namespace cuda_graph;
 
 void test() 
 {
@@ -42,13 +42,14 @@ if(!(expression))\
 }\
 }while(0)
 
+int compareRes(vector<int>& res1, vector<int>& res2);
 
 int main(int argc, char* argv[])
 {
 	// 读取参数配置data和*.config
-	make_sure(argc==2,"argc!=2,input graph path and *.ini");
-	string graphPath = argv[0];
-	string ini = argv[1];
+	make_sure(argc==3,"argc!=2,input graph path and *.ini");
+	string graphPath = argv[1];
+	string ini = argv[2];
 	if (!boost::filesystem::exists(graphPath)) {
 		std::cerr << "graph not exists." << std::endl;
 		return -1;
@@ -64,11 +65,13 @@ int main(int argc, char* argv[])
 	}
 	catch (std::exception e)
 	{
-		__ERROR("config open error");
+		__ERROR("config open error")
 	}
 	tag_setting = m_pt.get_child("cuda");
 	CudaConfigs configs;
 
+	int gpuIndex = tag_setting.get<int>("gpu", 0);
+	cudaSetDevice(gpuIndex);
 	configs.gridDim = tag_setting.get<int>("gridDim", 278);
 	configs.blockDim = tag_setting.get<int>("blockDim", 128);
 	configs.sharedLimit = tag_setting.get<int>("sharedLimit", 1024);
@@ -101,6 +104,7 @@ int main(int argc, char* argv[])
 	}
 	GraphRead* reader = getGraphReader(graphPath.c_str(), userEdgeType,ir);
 	GraphWeight graphWeight(reader);
+	graphWeight.toCSR();
 	//vector<int2> v1 = hostGraph.getOutEdgesOfNode(0);
 	//vector<int2> v2 = hostGraph.getInEdgesOfNode(186869);
 	GraphHost hg(graphWeight);
@@ -118,7 +122,7 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < testNodeSize; i++) {
 		vector<int> cudaRes,hostRes;
 		double t;
-		cg.search();
+		cg.search(0);
 		cg.cudaGetRes(cudaRes);
 		hg.computeAndTick(0, hostRes, t, GraphHost::HostSelector::Dijistra);
 		int flag = compareRes(hostRes, cudaRes);

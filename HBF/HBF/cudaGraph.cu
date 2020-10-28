@@ -1,6 +1,7 @@
 #include "cudaGraph.cuh"
 #include "HBFV0.cuh"
 #include "HBFV1.cuh"
+#include <iostream>
 
 namespace cuda_graph {
 	cuda_graph::CudaGraph::CudaGraph(GraphWeight & _gp, CudaConfigs & _configs)
@@ -10,7 +11,7 @@ namespace cuda_graph {
 		cudaCopyMem();
 	}
 
-	void CudaGraph::search(int source)
+	void cuda_graph::CudaGraph::search(int source)
 	{
 		int f1Size = 1, f2Size, f3Size, f4Size;
 		f2Size = f3Size = f4Size = 0;
@@ -42,7 +43,7 @@ namespace cuda_graph {
 				cout << "not known kernel version" << endl;
 				exit(-1);
 			}
-			std::swap<int *>(devF1, devF2);
+			std::swap(devF1, devF2);
 			cudaMemcpy(&(hostSizes[0]), devSizes, 4 * sizeof(int), cudaMemcpyDeviceToHost);
 			int f1s = hostSizes[0], f2s = hostSizes[1], re = hostSizes[2];
 			relaxEdges += re;
@@ -53,7 +54,6 @@ namespace cuda_graph {
 			level++;
 		}
 		// printf("iter times:%d", iter);
-	}
 	}
 
 	cuda_graph::CudaGraph::~CudaGraph()
@@ -97,14 +97,14 @@ namespace cuda_graph {
 		__CUDA_ERROR("copy");
 	}
 
-	void CudaGraph::cudaCopyMem()
+	void cuda_graph::CudaGraph::cudaCopyMem()
 	{
 		cudaMemcpy(devUpOutNodes, &(gp.outNodes[0]), (v + 1) * sizeof(int), cudaMemcpyHostToDevice);
 		cudaMemcpy(devUpOutEdges, &(gp.outEdgeWeights[0]), e * sizeof(int2), cudaMemcpyHostToDevice);
 		__CUDA_ERROR("copy");
 	}
 
-	void CudaGraph::cudaInitComputer(int initNode)
+	void cuda_graph::CudaGraph::cudaInitComputer(int initNode)
 	{
 		//init devDistance
 		int2 INF2 = make_int2(0, INT_MAX);
@@ -129,7 +129,7 @@ namespace cuda_graph {
 		__CUDA_ERROR("copy");
 	}
 
-	void CudaGraph::cudaGetRes(vector<int>& res)
+	void cuda_graph::CudaGraph::cudaGetRes(vector<int>& res)
 	{
 		res.resize(v);
 		if (configs.atomic64 == true) {

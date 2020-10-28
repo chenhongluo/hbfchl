@@ -101,7 +101,7 @@ elseif (ARCH STREQUAL "75")
 	message("\nGPU architecture: 7.5\n")
 	list(APPEND CUDA_NVCC_FLAGS "-arch=sm_75" "-DARCH=750")
 else()
-	message(FATAL_ERROR "\nplease select GPU architecture: \"cmake -DARCH=[ 30 | 32 | 35 | 37 | 50 | 52 | 53 | 70]\"")
+	message(FATAL_ERROR "\nplease select GPU architecture: \"cmake -DARCH=[ 30 | 32 | 35 | 37 | 50 | 52 | 53 | 70 | 75]\"")
 endif()
 
 # ------------------------------------------------------------------------------

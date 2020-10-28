@@ -1,8 +1,7 @@
 #pragma once
 #include "graph.h"
-#include "cuda_runtime.h"
-#include "cuda_runtime_api.h"
-
+#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 
 inline void __getLastCudaError(const char *errorMessage, const char *file, const int line) {
 	cudaError_t err = cudaGetLastError();
@@ -21,8 +20,9 @@ inline void __getLastCudaError(const char *errorMessage, const char *file, const
 #define __CUDA_ERROR(msg)                                                       \
                     {                                                           \
                         cudaDeviceSynchronize();                                \
-                        __getLastCudaError (msg, __FILE__, __LINE__);\
+                        __getLastCudaError (msg, __FILE__, __LINE__);			\
                     }
+
 using namespace graph;
 namespace cuda_graph {
 	class CudaConfigs {
@@ -33,6 +33,7 @@ namespace cuda_graph {
 		int gridDim;
 		int blockDim;
 		int sharedLimit;
+		string kernel;
 		CudaConfigs() {}
 	};
 	class CudaGraph {

@@ -109,7 +109,7 @@ namespace Kernels
 		// write to global mem
 		VWWrite<VW_SIZE, int>(tile, devF2Size, devF2, founds, queue);
 		if (tile.thread_rank() == 0) {
-			atomic_add(devSizes + 2, relaxEdges);
+			atomicAdd(devSizes + 2, relaxEdges);
 		}
 	}
 
@@ -175,28 +175,26 @@ namespace Kernels
 		// write to global mem
 		VWWrite<VW_SIZE, int>(tile, devF2Size, devF2, founds, queue);
 		if (tile.thread_rank() == 0) {
-			atomic_add(devSizes + 2, relaxEdges);
+			atomicAdd(devSizes + 2, relaxEdges);
 		}
 	}
 }
 
+using namespace Kernels;
+
 #define kernelV0Atomic64(vwSize,gridDim, blockDim, sharedLimit) \
-{ \
 HBFSearchV0Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
-(devUpOutNodes, devUpOutEdges, devInt2Distances, f1, f2, devSizes, sharedLimit, level) \
-}
+(devUpOutNodes, devUpOutEdges, devInt2Distances, devF1, devF2, devSizes, sharedLimit, level)
 
 #define kernelV0Atomic32(vwSize,gridDim, blockDim, sharedLimit) \
-{ \
 HBFSearchV0Atomic32<vwSize> << <gridDim, blockDim, sharedLimit >> > \
-(devUpOutNodes, devUpOutEdges, devIntDistances, f1, f2, devSizes, sharedLimit) \
-}
-
+(devUpOutNodes, devUpOutEdges, devIntDistances, devF1, devF2, devSizes, sharedLimit)
 
 
 // user interface gridDim, blockDim, sharedLimit, devUpOutNodes, devUpOutEdges, devIntDistances, devInt2Distances, f1, f2, devSizes, sharedLimit,level
 // name = {HBFSearchV0Atomic64,HBFSearchV0Atomic32}
 // vwSize = 1,2,4,8,16,32
+
 #define switchKernelV0(atomic64,vwSize,gridDim, blockDim, sharedLimit) \
 {\
 	if (atomic64) {  \
