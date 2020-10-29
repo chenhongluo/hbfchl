@@ -18,20 +18,14 @@ namespace cuda_graph {
 		vector<int> hostSizes(4, 0);
 		int* devF1 = f1;
 		int* devF2 = f2;
-		int level = 1;
-		int iter = 0;
+		int level = 0;
 		int relaxEdges = 0;
 		int relaxNodes = 0;
 
 		cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
 		while (1)
 		{
-			iter++;
-			if (f1Size == 0)
-			{
-				level++;
-				break;
-			}
+			level++;
 			string &kv = configs.kernelVersion;
 			if (kv == "v0") {
 				switchKernelV0Config(configs)
@@ -45,14 +39,14 @@ namespace cuda_graph {
 			}
 			std::swap(devF1, devF2);
 			cudaMemcpy(&(hostSizes[0]), devSizes, 4 * sizeof(int), cudaMemcpyDeviceToHost);
-			int f1s = hostSizes[0], f2s = hostSizes[1], re = hostSizes[2];
-			relaxEdges += re;
-			relaxNodes += f1s;
+			f1Size = hostSizes[0], f2Size = hostSizes[1], f3Size = hostSizes[2];
+			if (f1Size == 0) break;
+			relaxEdges += f3Size;
+			relaxNodes += f1Size;
 			hostSizes[0] = f2s, hostSizes[1] = 0, hostSizes[2] = 0;
 			cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
 			__CUDA_ERROR("GNRSearchMain Kernel");
 			cout << "level: " << level << "\tf1Size: " << f1s << "\trelaxEdges: " << re << endl;
-			level++;
 		}
 	}
 
