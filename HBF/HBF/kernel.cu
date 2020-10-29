@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 	//vector<int2> v1 = hostGraph.getOutEdgesOfNode(0);
 	//vector<int2> v2 = hostGraph.getInEdgesOfNode(186869);
 	GraphHost hg(graphWeight);
-	CudaGraph cg(graphWeight, configs);
+	//CudaGraph cg(graphWeight, configs);
 	// 构建图
 	// 生成GraphHost和CudaGraph
 
@@ -123,13 +123,14 @@ int main(int argc, char* argv[])
 
 	for (int i = 0; i < testNodeSize; i++) {
 		int source = testNodes[i];
+		source = 6;
 		cout << "source = " << source << endl;
 		double t1,t2;
 		vector<int> cudaRes, hostRes;
-		cg.computeAndTick(source,cudaRes,t1);
+		//cg.computeAndTick(source,cudaRes,t1);
 		//hg.computeAndTick(source, cudaRes, t1, GraphHost::HostSelector::BoostD);
 		if (compareFlag) {
-			hg.computeAndTick(source, hostRes, t2, GraphHost::HostSelector::Dijistra);
+			hg.computeAndTick(source, hostRes, t2, GraphHost::HostSelector::BellmanFordQueue);
 			int flag = compareRes(hostRes, cudaRes);
 			if (flag == -2)
 				__ERROR("compareRes flag==-2")

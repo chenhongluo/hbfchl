@@ -2,6 +2,7 @@
 #include <cuda_runtime.h>
 #include <cuda_runtime_api.h>
 #include <cooperative_groups.h>
+#include <cstdio>
 using namespace cooperative_groups;
 
 #define WARPSIZE 32
@@ -98,7 +99,7 @@ namespace Kernels
 					flag = ((oldNode2Weight.y > newWeight) && (level > oldNode2Weight.x));
 					if (flag) {
 						queue[founds++] = dest.x;
-						printf("relax node :%d\n", dest.x);
+						printf("relax node :%d level:%d oldLevel:%d newWeight:%d oldWeight:%d \n", dest.x,level,oldNode2Weight.x,newWeight, oldNode2Weight.y);
 					}
 				}
 				if (tile.any(founds >= threadLimit)) {
