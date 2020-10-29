@@ -77,6 +77,8 @@ int main(int argc, char* argv[])
 	configs.sharedLimit = tag_setting.get<int>("sharedLimit", 1024);
 	configs.kernelVersion = tag_setting.get<string>("kernel", "v0");
 	configs.atomic64 = tag_setting.get<bool>("atomic64", true);
+	configs.vwSize = tag_setting.get<int>("vwSize", true);
+
 
 	tag_setting = m_pt.get_child("host");
 	//Behind Camera Config ini
