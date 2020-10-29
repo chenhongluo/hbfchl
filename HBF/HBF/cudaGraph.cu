@@ -17,7 +17,7 @@ namespace cuda_graph {
 		res.reserve(size);
 		cudaMemcpy(array, &(res[0]), size * sizeof(T), cudaMemcpyHostToDevice);
 		for (T t : res) {
-			cout << "frontier: " t << " ";
+			cout << "frontier: "<< t << " ";
 		}
 		cout << endl;
 	}
