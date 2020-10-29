@@ -50,7 +50,7 @@ namespace cuda_graph {
 		int *devIntDistances;
 		int2 *devInt2Distances;
 
-		CudaConfigs configs;
+		CudaConfigs& configs;
 		CudaGraph(GraphWeight & _gp, CudaConfigs & _configs);
 		void search(int source);
 		void cudaGetRes(vector<int> &res);

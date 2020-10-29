@@ -210,7 +210,7 @@ namespace graph {
 				node_t index1, index2;
 				weight_t weight;
 				fin >> nil >> index1 >> index2 >> weight;
-				originEdges.push_back(TriTuple(index1, index2, weight));
+				originEdges.push_back(TriTuple(index1 - 1, index2 - 1, weight));
 				lines++;
 				progress.next(lines + 1);
 			}
