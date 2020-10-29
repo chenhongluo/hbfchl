@@ -2,8 +2,8 @@ set(PROJECT "HBF")
 project(${PROJECT})
 
 cmake_minimum_required(VERSION 3.0)
-FIND_PACKAGE(CUDA REQUIRED COMPONENTS filesystem)
-FIND_PACKAGE(Boost REQUIRED)
+FIND_PACKAGE(CUDA REQUIRED)
+FIND_PACKAGE(Boost REQUIRED COMPONENTS filesystem)
 
 message("\nTest on cmake v" ${CMAKE_VERSION} "  System: " ${CMAKE_SYSTEM} "\n")
 
