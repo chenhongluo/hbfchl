@@ -3,7 +3,7 @@ project(${PROJECT})
 
 cmake_minimum_required(VERSION 3.0)
 FIND_PACKAGE(CUDA REQUIRED)
-FIND_PACKAGE(Boost)
+FIND_PACKAGE(Boost REQUIRED)
 
 message("\nTest on cmake v" ${CMAKE_VERSION} "  System: " ${CMAKE_SYSTEM} "\n")
 
@@ -40,10 +40,6 @@ set(HOST_SRC        ${PROJECT_SOURCE_DIR}/fUtil.cpp
 
 set(DEVICE_SRC 	    ${PROJECT_SOURCE_DIR}/cudaGraph.cu
 )
-
-if (!Boost_FOUND)
-    set(BOOST_FLAG -DBOOST_FOUND)
-endif()
 
 #set(HOST_W_FLAGS "-Wall -Wextra")
 #set(DEVICE_W_FLAGS -Wall,-Wextra)
@@ -129,13 +125,15 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -funroll-loops")
 endif()
 # ------------------------------------------------------------------------------
 
-MESSAGE( STATUS "this var key = ${CMAKE_CXX_FLAGS}.")
-MESSAGE( STATUS "this var key = ${CUDA_NVCC_FLAGS}.")
-
 find_library(
 	DEVRT_LIBRARY cudadevrt
     HINTS  ${CUDA_TOOLKIT_ROOT_DIR}/lib64
 )
+
+MESSAGE( STATUS "this var key = ${CMAKE_CXX_FLAGS}.")
+MESSAGE( STATUS "this var key = ${CUDA_NVCC_FLAGS}.")
+MESSAGE( STATUS "this var key = ${PROPERTIES}.")
+MESSAGE( STATUS "this var key = ${DEVRT_LIBRARY}.")
 
 cuda_add_executable(HBF ${PROJECT_SOURCE_DIR}/kernel.cu ${HOST_SRC} ${DEVICE_SRC})
 
