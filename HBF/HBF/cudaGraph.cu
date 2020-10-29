@@ -37,7 +37,7 @@ namespace cuda_graph {
 		while (1)
 		{
 			level++;
-			debugCudaArray<int>(devF1, hostSizes[0]);
+			// debugCudaArray<int>(devF1, hostSizes[0]);
 			string &kv = configs.kernelVersion;
 			if (kv == "v0") {
 				switchKernelV0Config(configs)
