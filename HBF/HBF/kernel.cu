@@ -123,7 +123,6 @@ int main(int argc, char* argv[])
 
 	for (int i = 0; i < testNodeSize; i++) {
 		int source = testNodes[i];
-		cout << "source = " << source;
 		double t1,t2;
 		vector<int> cudaRes, hostRes;
 		cg.computeAndTick(source,cudaRes,t1);
@@ -135,8 +134,9 @@ int main(int argc, char* argv[])
 				__ERROR("compareRes flag==-2")
 			else if (flag == -1)
 				__ERROR("compareRes flag==-1")
-			else
-				cout << "pass test " << i << endl;
+			else if (i % 10 == 0) {
+				cout << "pass test " << i << " & source = " << source << endl;
+			}
 		}
 	}
 	// 完成后生成source nodes开始search
