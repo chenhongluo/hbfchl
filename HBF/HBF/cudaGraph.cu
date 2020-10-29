@@ -11,6 +11,17 @@ namespace cuda_graph {
 		cudaCopyMem();
 	}
 
+	template<class T>
+	void debugCudaArray(T* array, int size) {
+		vector<T> res;
+		res.reserve(size);
+		cudaMemcpy(array, &(res[0]), size * sizeof(T), cudaMemcpyHostToDevice);
+		for (T t : res) {
+			cout << t << " ";
+		}
+		cout << endl;
+	}
+
 	void cuda_graph::CudaGraph::search(int source)
 	{
 		vector<int> hostSizes(4, 0);
@@ -26,6 +37,7 @@ namespace cuda_graph {
 		while (1)
 		{
 			level++;
+			debugCudaArray(devF1, hostSizes[0]);
 			string &kv = configs.kernelVersion;
 			if (kv == "v0") {
 				switchKernelV0Config(configs)
