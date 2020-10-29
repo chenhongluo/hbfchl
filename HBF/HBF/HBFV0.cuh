@@ -98,6 +98,7 @@ namespace Kernels
 					flag = ((oldNode2Weight.y > newWeight) && (level > oldNode2Weight.x));
 					if (flag) {
 						queue[founds++] = dest.x;
+						printf("relax node :%d\n", dest.x);
 					}
 				}
 				if (tile.any(founds >= threadLimit)) {
