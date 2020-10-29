@@ -23,6 +23,7 @@ namespace cuda_graph {
 		int relaxNodes = 0;
 
 		cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(devF1, &source, 1 * sizeof(int), cudaMemcpyHostToDevice);
 		while (1)
 		{
 			level++;
@@ -113,13 +114,6 @@ namespace cuda_graph {
 			temp[initNode] = 0;
 			cudaMemcpy(devIntDistances, &temp[0], v * sizeof(int), cudaMemcpyHostToDevice);
 		}
-
-		vector<int> nodes;
-		nodes.push_back(initNode);
-		cudaMemcpy(f1, &nodes[0], 1 * sizeof(int), cudaMemcpyHostToDevice);
-		vector<int> sizes(4, 0);
-		sizes[0] = 1;
-		cudaMemcpy(devSizes, &sizes[0], 4 * sizeof(int), cudaMemcpyHostToDevice);
 		__CUDA_ERROR("copy");
 	}
 
@@ -136,5 +130,11 @@ namespace cuda_graph {
 		else {
 			cudaMemcpy(&(res[0]),devIntDistances , v * sizeof(int2), cudaMemcpyDeviceToHost);
 		}
+	}
+	void CudaGraph::computeAndTick(node_t source, vector<dist_t>& res, double & t)
+	{
+		cudaInitComputer(source);
+		search(source);
+		cudaGetRes(res);
 	}
 }

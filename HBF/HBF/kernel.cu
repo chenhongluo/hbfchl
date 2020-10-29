@@ -122,12 +122,12 @@ int main(int argc, char* argv[])
 	}
 
 	for (int i = 0; i < testNodeSize; i++) {
-		cg.search(testNodes[i]);
+		int source = testNodes[i];
+		double t1,t2;
+		vector<int> cudaRes, hostRes;
+		cg.computeAndTick(source,cudaRes,t1);
 		if (compareFlag) {
-			vector<int> cudaRes, hostRes;
-			double t;
-			hg.computeAndTick(0, hostRes, t, GraphHost::HostSelector::Dijistra);
-			cg.cudaGetRes(cudaRes);
+			hg.computeAndTick(source, hostRes, t2, GraphHost::HostSelector::Dijistra);
 			int flag = compareRes(hostRes, cudaRes);
 			if (flag == -2)
 				__ERROR("compareRes flag==-2")

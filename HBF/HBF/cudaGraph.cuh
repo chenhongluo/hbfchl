@@ -51,13 +51,14 @@ namespace cuda_graph {
 
 		CudaConfigs& configs;
 		CudaGraph(GraphWeight & _gp, CudaConfigs & _configs);
-		void search(int source);
 		void cudaGetRes(vector<int> &res);
+		void computeAndTick(node_t source, vector<dist_t>& res, double &t);
 		~CudaGraph();
 	private:
 		void cudaMallocMem();
 		void cudaFreeMem();
 		void cudaCopyMem();
 		void cudaInitComputer(int initNode);
+		void search(int source);
 	};
 }
