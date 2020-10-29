@@ -139,7 +139,7 @@ MESSAGE( STATUS "this var key = ${CUDA_NVCC_FLAGS}.")
 MESSAGE( STATUS "this var key = ${COMPILE_FLAGS}.")
 MESSAGE( STATUS "this var key = ${DEVRT_LIBRARY}.")
 MESSAGE( STATUS "this var key = ${CUDA}.")
-MESSAGE( STATUS "this var key = ${Boost}.")
+MESSAGE( STATUS "this var key = ${DBOOST}.")
 
 cuda_add_executable(HBF ${PROJECT_SOURCE_DIR}/kernel.cu ${HOST_SRC} ${DEVICE_SRC})
 
