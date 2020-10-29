@@ -15,7 +15,7 @@ namespace cuda_graph {
 	void debugCudaArray(T* array, int size) {
 		vector<T> res;
 		res.reserve(size);
-		cudaMemcpy(array, &(res[0]), size * sizeof(T), cudaMemcpyHostToDevice);
+		cudaMemcpy(&(res[0]), array, size * sizeof(int), cudaMemcpyDeviceToHost);
 		for (T t : res) {
 			cout << "frontier: "<< t << " ";
 		}
