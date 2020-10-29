@@ -63,7 +63,7 @@ namespace Kernels
 		const int realID = g.group_index().x * blockdim + g.thread_rank();
 		const int tileID = realID / VW_SIZE;
 		const int IDStride = gridDim.x * (blockdim / VW_SIZE);
-		const int threadLimit = sharedLimit / blockdim;
+		const int threadLimit = (sharedLimit/4) / blockdim;
 		int* devF2Size = devSizes + 1;
 		int relaxEdges = 0;
 
@@ -133,7 +133,7 @@ namespace Kernels
 		const int realID = g.group_index().x * blockdim + g.thread_rank();
 		const int tileID = realID / VW_SIZE;
 		const int IDStride = gridDim.x * (blockdim / VW_SIZE);
-		const int threadLimit = sharedLimit / blockdim;
+		const int threadLimit = (sharedLimit / 4) / blockdim;
 		int* devF2Size = devSizes + 1;
 		int relaxEdges = 0;
 
