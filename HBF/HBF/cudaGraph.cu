@@ -13,11 +13,10 @@ namespace cuda_graph {
 
 	template<class T>
 	void debugCudaArray(T* array, int size) {
-		vector<T> res;
-		res.reserve(size);
+		vector<T> res(size);
 		cudaMemcpy(&(res[0]), array, size * sizeof(int), cudaMemcpyDeviceToHost);
-		for (T t : res) {
-			cout << "frontier: "<< t << " ";
+		for (int i = 0; i < size;i++) {
+			cout << "frontier: "<< res[i] << " ";
 		}
 		cout << endl;
 	}
@@ -37,7 +36,7 @@ namespace cuda_graph {
 		while (1)
 		{
 			level++;
-			debugCudaArray(devF1, hostSizes[0]);
+			debugCudaArray<int>(devF1, hostSizes[0]);
 			string &kv = configs.kernelVersion;
 			if (kv == "v0") {
 				switchKernelV0Config(configs)
