@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
 	configs.gridDim = tag_setting.get<int>("gridDim", 278);
 	configs.blockDim = tag_setting.get<int>("blockDim", 128);
 	configs.sharedLimit = tag_setting.get<int>("sharedLimit", 1024);
-	configs.kernel = tag_setting.get<string>("kernel", "v0");
+	configs.kernelVersion = tag_setting.get<string>("kernel", "v0");
 	configs.atomic64 = tag_setting.get<bool>("atomic64", true);
 
 	tag_setting = m_pt.get_child("host");
