@@ -122,16 +122,20 @@ int main(int argc, char* argv[])
 	}
 
 	for (int i = 0; i < testNodeSize; i++) {
-		vector<int> cudaRes,hostRes;
-		double t;
 		cg.search(0);
-		cg.cudaGetRes(cudaRes);
-		hg.computeAndTick(0, hostRes, t, GraphHost::HostSelector::Dijistra);
-		int flag = compareRes(hostRes, cudaRes);
-		if(flag == -2)
-			__ERROR("compareRes flag==-2")
-		else if(flag == -1)
-			__ERROR("compareRes flag==-1")
+		if (compareFlag) {
+			vector<int> cudaRes, hostRes;
+			double t;
+			hg.computeAndTick(0, hostRes, t, GraphHost::HostSelector::Dijistra);
+			cg.cudaGetRes(cudaRes);
+			int flag = compareRes(hostRes, cudaRes);
+			if (flag == -2)
+				__ERROR("compareRes flag==-2")
+			else if (flag == -1)
+				__ERROR("compareRes flag==-1")
+			else
+				cout << "pass test " << i << endl;
+		}
 	}
 	// 完成后生成source nodes开始search
 	// 取得结果后对比 指标采集是下一步的任务
