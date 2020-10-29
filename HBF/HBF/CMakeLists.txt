@@ -132,16 +132,12 @@ find_library(
 
 MESSAGE( STATUS "this var key = ${CMAKE_CXX_FLAGS}.")
 MESSAGE( STATUS "this var key = ${CUDA_NVCC_FLAGS}.")
-MESSAGE( STATUS "this var key = ${COMPILE_FLAGS}.")
-MESSAGE( STATUS "this var key = ${DEVRT_LIBRARY}.")
-
-include_directories(${Boost_INCLUDE_DIRS})
 
 cuda_add_executable(HBF ${PROJECT_SOURCE_DIR}/kernel.cu ${HOST_SRC} ${DEVICE_SRC})
 
 # set_target_properties(HBF PROPERTIES COMPILE_FLAGS ${BOOST_FLAG})
 
-target_link_libraries(HBF ${DEVRT_LIBRARY} ${Boost_LIBRARIES})
+target_link_libraries(HBF ${DEVRT_LIBRARY} Boost::filesystem)
 
 add_custom_target(clean-all rm -rf *)
 
