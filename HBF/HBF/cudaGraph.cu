@@ -43,10 +43,10 @@ namespace cuda_graph {
 			if (f1Size == 0) break;
 			relaxEdges += f3Size;
 			relaxNodes += f1Size;
-			hostSizes[0] = f2s, hostSizes[1] = 0, hostSizes[2] = 0;
+			hostSizes[0] = f2Size, hostSizes[1] = 0, hostSizes[2] = 0;
 			cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
 			__CUDA_ERROR("GNRSearchMain Kernel");
-			cout << "level: " << level << "\tf1Size: " << f1s << "\trelaxEdges: " << re << endl;
+			cout << "level: " << level << "\tf1Size: " << f1Size << "\trelaxEdges: " << f3Size << endl;
 		}
 	}
 
