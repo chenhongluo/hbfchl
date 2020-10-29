@@ -49,6 +49,7 @@ namespace cuda_graph {
 				cout << "not known kernel version" << endl;
 				exit(-1);
 			}
+			__CUDA_ERROR("GNRSearchMain Kernel");
 			std::swap(devF1, devF2);
 			cudaMemcpy(&(hostSizes[0]), devSizes, 4 * sizeof(int), cudaMemcpyDeviceToHost);
 			relaxEdges += hostSizes[2];
@@ -57,7 +58,6 @@ namespace cuda_graph {
 			hostSizes[0] = hostSizes[1], hostSizes[1] = 0, hostSizes[2] = 0;
 			if (hostSizes[0] == 0) break;
 			cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
-			__CUDA_ERROR("GNRSearchMain Kernel");
 		}
 	}
 
