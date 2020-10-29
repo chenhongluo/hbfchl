@@ -97,9 +97,9 @@ namespace Kernels
 						reinterpret_cast<unsigned long long &>(toWrite));
 					int2 &oldNode2Weight = reinterpret_cast<int2 &>(aa);
 					flag = ((oldNode2Weight.y > newWeight) && (level > oldNode2Weight.x));
+					printf("relax node :%d level:%d oldLevel:%d newWeight:%d oldWeight:%d \n", dest.x, level, oldNode2Weight.x, newWeight, oldNode2Weight.y);
 					if (flag) {
 						queue[founds++] = dest.x;
-						printf("relax node :%d level:%d oldLevel:%d newWeight:%d oldWeight:%d \n", dest.x,level,oldNode2Weight.x,newWeight, oldNode2Weight.y);
 					}
 				}
 				if (tile.any(founds >= threadLimit)) {
