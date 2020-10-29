@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
 	}
 
 	for (int i = 0; i < testNodeSize; i++) {
-		cg.search(0);
+		cg.search(testNodes[i]);
 		if (compareFlag) {
 			vector<int> cudaRes, hostRes;
 			double t;

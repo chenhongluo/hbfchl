@@ -51,9 +51,9 @@ namespace cuda_graph {
 			hostSizes[0] = f2s, hostSizes[1] = 0, hostSizes[2] = 0;
 			cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
 			__CUDA_ERROR("GNRSearchMain Kernel");
+			cout << "level: " << level << "\tf1Size: " << f1s << "\trelaxEdges: " << re << endl;
 			level++;
 		}
-		// printf("iter times:%d", iter);
 	}
 
 	cuda_graph::CudaGraph::~CudaGraph()
