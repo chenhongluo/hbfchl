@@ -2,7 +2,7 @@ set(PROJECT "HBF")
 project(${PROJECT})
 
 cmake_minimum_required(VERSION 3.0)
-FIND_PACKAGE(CUDA REQUIRED)
+FIND_PACKAGE(CUDA REQUIRED COMPONENTS filesystem)
 FIND_PACKAGE(Boost REQUIRED)
 
 message("\nTest on cmake v" ${CMAKE_VERSION} "  System: " ${CMAKE_SYSTEM} "\n")
@@ -130,22 +130,18 @@ find_library(
     HINTS  ${CUDA_TOOLKIT_ROOT_DIR}/lib64
 )
 
-find_library(
-	DBOOST boost
-)
-
 MESSAGE( STATUS "this var key = ${CMAKE_CXX_FLAGS}.")
 MESSAGE( STATUS "this var key = ${CUDA_NVCC_FLAGS}.")
 MESSAGE( STATUS "this var key = ${COMPILE_FLAGS}.")
 MESSAGE( STATUS "this var key = ${DEVRT_LIBRARY}.")
-MESSAGE( STATUS "this var key = ${CUDA}.")
-MESSAGE( STATUS "this var key = ${DBOOST}.")
+
+include_directories(${Boost_INCLUDE_DIRS})
 
 cuda_add_executable(HBF ${PROJECT_SOURCE_DIR}/kernel.cu ${HOST_SRC} ${DEVICE_SRC})
 
 # set_target_properties(HBF PROPERTIES COMPILE_FLAGS ${BOOST_FLAG})
 
-target_link_libraries(HBF ${DEVRT_LIBRARY} ${DBOOST})
+target_link_libraries(HBF ${DEVRT_LIBRARY} ${Boost_LIBRARIES})
 
 add_custom_target(clean-all rm -rf *)
 
