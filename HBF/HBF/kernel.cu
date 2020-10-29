@@ -123,9 +123,11 @@ int main(int argc, char* argv[])
 
 	for (int i = 0; i < testNodeSize; i++) {
 		int source = testNodes[i];
+		cout << "source = " << source << endl;
 		double t1,t2;
 		vector<int> cudaRes, hostRes;
 		cg.computeAndTick(source,cudaRes,t1);
+		//hg.computeAndTick(source, cudaRes, t1, GraphHost::HostSelector::BoostD);
 		if (compareFlag) {
 			hg.computeAndTick(source, hostRes, t2, GraphHost::HostSelector::Dijistra);
 			int flag = compareRes(hostRes, cudaRes);

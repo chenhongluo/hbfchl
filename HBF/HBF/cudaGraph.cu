@@ -13,9 +13,8 @@ namespace cuda_graph {
 
 	void cuda_graph::CudaGraph::search(int source)
 	{
-		int f1Size = 1, f2Size, f3Size, f4Size;
-		f2Size = f3Size = f4Size = 0;
 		vector<int> hostSizes(4, 0);
+		hostSizes[0] = 1;
 		int* devF1 = f1;
 		int* devF2 = f2;
 		int level = 0;
@@ -40,11 +39,10 @@ namespace cuda_graph {
 			}
 			std::swap(devF1, devF2);
 			cudaMemcpy(&(hostSizes[0]), devSizes, 4 * sizeof(int), cudaMemcpyDeviceToHost);
-			f1Size = hostSizes[0], f2Size = hostSizes[1], f3Size = hostSizes[2];
-			if (f1Size == 0) break;
-			relaxEdges += f3Size;
-			relaxNodes += f1Size;
-			hostSizes[0] = f2Size, hostSizes[1] = 0, hostSizes[2] = 0;
+			relaxEdges += hostSizes[2];
+			relaxNodes += hostSizes[0];
+			hostSizes[0] = hostSizes[1], hostSizes[1] = 0, hostSizes[2] = 0;
+			if (hostSizes[0] == 0) break;
 			cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
 			__CUDA_ERROR("GNRSearchMain Kernel");
 			cout << "level: " << level << "\tf1Size: " << f1Size << "\trelaxEdges: " << f3Size << endl;
@@ -58,15 +56,18 @@ namespace cuda_graph {
 
 	void cuda_graph::CudaGraph::cudaMallocMem()
 	{
-		cudaMalloc((void**)&f1, 1 * v * sizeof(int));
-		cudaMalloc((void**)&f2, 1 * v * sizeof(int));
+		cudaMalloc((void**)&devUpOutNodes, (v + 1) * sizeof(int));
+		cudaMalloc((void**)&devUpOutEdges, e * sizeof(int2));
 
 		cudaMalloc((void**)&devSizes, 4 * sizeof(int));
-		if (configs.atomic64 == true) 
-			cudaMalloc((void**)&devUpOutNodes, (v + 1) * sizeof(int));
-		else
-			cudaMalloc((void**)&devUpOutNodes, 10 * (v + 1) * sizeof(int));
-		cudaMalloc((void**)&devUpOutEdges, e * sizeof(int2));
+		if (configs.atomic64 == true) {
+			cudaMalloc((void**)&f1, 1 * v * sizeof(int));
+			cudaMalloc((void**)&f2, 1 * v * sizeof(int));
+		}
+		else {
+			cudaMalloc((void**)&f1, 10 * v * sizeof(int));
+			cudaMalloc((void**)&f2, 10 * v * sizeof(int));
+		}
 
 		if (configs.atomic64 == true)
 			cudaMalloc((void**)&devInt2Distances, v * sizeof(int2));

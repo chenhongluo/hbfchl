@@ -50,6 +50,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(WindowsSDK_IncludePath);$(VC_IncludePath);$(CUDA_PATH)\include;F:\boost_1_74_0\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(CUDA_PATH)\lib$(Platform);F:\boost_lib\lib64-msvc-14.1;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>F:\boost_1_74_0\;$(CUDA_PATH)\include;$(IncludePath)</IncludePath>
     <LibraryPath>F:\boost_lib\lib64-msvc-14.1;$(CUDA_PATH)\lib$(Platform);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
