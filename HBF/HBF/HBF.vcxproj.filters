@@ -74,5 +74,6 @@
     <None Include="config_default.ini">
       <Filter>src</Filter>
     </None>
+    <None Include="readme.md" />
   </ItemGroup>
 </Project>

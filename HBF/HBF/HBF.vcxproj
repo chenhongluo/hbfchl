@@ -116,6 +116,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="config_default.ini" />
+    <None Include="readme.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

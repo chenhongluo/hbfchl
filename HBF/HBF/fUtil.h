@@ -163,7 +163,6 @@ namespace fUtil {
 }
 
 namespace fileUtil {
-
 	void checkRegularFile(const char* File);
 	void checkRegularFile(std::ifstream& fin);
 	std::string extractFileName(std::string s);

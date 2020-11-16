@@ -35,6 +35,11 @@ namespace cuda_graph {
 		int sharedLimit;
 		CudaConfigs() {}
 	};
+	class CudaProfiles {
+	public:
+		int relaxNodes;
+		int relaxEdges;
+	};
 	class CudaGraph {
 	private:
 		int v,e;
@@ -52,13 +57,13 @@ namespace cuda_graph {
 		CudaConfigs& configs;
 		CudaGraph(GraphWeight & _gp, CudaConfigs & _configs);
 		void cudaGetRes(vector<int> &res);
-		void computeAndTick(node_t source, vector<dist_t>& res, double &t);
+		CudaProfiles computeAndTick(node_t source, vector<dist_t>& res, double &t);
 		~CudaGraph();
 	private:
 		void cudaMallocMem();
 		void cudaFreeMem();
 		void cudaCopyMem();
 		void cudaInitComputer(int initNode);
-		void search(int source);
+		void search(int source, CudaProfiles& profiles);
 	};
 }

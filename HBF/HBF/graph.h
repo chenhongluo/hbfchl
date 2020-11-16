@@ -46,6 +46,7 @@ namespace graph {
 		vector<TriTuple> originEdges;
 	public:
 		int v, e;
+		string name;
 		GraphRead* reader;
 		vector<node_t> inNodes, outNodes;
 		vector<int2> inEdgeWeights, outEdgeWeights;
@@ -58,49 +59,88 @@ namespace graph {
 		vector<int2> getOutEdgesOfNode(node_t v) const;
 		vector<int2> getInEdgesOfNode(node_t v) const;
 
+		void toGC(const char *filename);
+		void reCode(int n, int way);
+		void preCompute(int n);
+		void analyseSimple();
+		void analyseDetail();
+
 		GraphWeight(GraphRead* reader);
 		GraphWeight(const int _V, const int _E, const EdgeType _edgeType, vector<TriTuple>& edges);
 		~GraphWeight();
 		void toCSR();
 	};
 
-	class GraphHost {
+	class CTHostGraph {
+	public:
+		vector<dist_t> distances;
 		const GraphWeight& graphWeight;
-		dist_t* distances;
 		const int v;
 		const int e;
-		typedef std::pair < int, int > Edge;
+		virtual void compute(node_t source) = 0;
+		static CTHostGraph* getHostGraph(const GraphWeight& hg, string selector);
+		CTHostGraph (const GraphWeight& hg) : graphWeight(hg),v(hg.v),e(hg.e) {
+			distances.resize(v);
+		}
+
+		~CTHostGraph() {
+		}
+		void bellmanFord_Queue_reset();
+		virtual void computeAndTick(node_t source, vector<dist_t>& res, double &t);
+	};
+
+	class DJHostGraph : public CTHostGraph {
+	public:
+		DJHostGraph(const GraphWeight& hg):CTHostGraph(hg){}
+		void compute(node_t source);
+	};
+
+	class BFHostGraph : public CTHostGraph {
+	public:
+		BFHostGraph(const GraphWeight& hg) :CTHostGraph(hg) {}
+		void compute(node_t source);
+	};
+
+
+	class BDJHostGraph : public CTHostGraph {
+	public:
+		typedef std::pair<node_t, node_t> Edge;
+
 		Edge* edge_array;
 		weight_t* weights;
-	public:
-		enum HostSelector { BellmanFord, BellmanFordQueue, Dijistra, BoostBF, BoostD };
-
-		GraphHost(const GraphWeight& g) :graphWeight(g),v(g.v),e(g.e) {
-			distances = new dist_t[v];
+		BDJHostGraph(const GraphWeight& hg) :CTHostGraph(hg) {
 			edge_array = new Edge[e];
 			weights = new weight_t[e];
 			int k = 0;
 			for (int i = 0; i < v; i++) {
 				for (int j = graphWeight.outNodes[i]; j < graphWeight.outNodes[i + 1]; j++) {
 					edge_array[k] = Edge(i, graphWeight.outEdgeWeights[j].x);
-					weights[k] = graphWeight.outEdgeWeights[j].y;
-					k = k + 1;
+					weights[k++] = graphWeight.outEdgeWeights[j].y;
 				}
 			}
 		}
-		~GraphHost() { delete[] distances; delete[]edge_array; delete[]weights; }
-		dist_t* BellmanFord_Result();
-		void computeAndTick(node_t source, vector<dist_t> &res, double &t,HostSelector selector);
-	private:
-		void bellmanFord_Queue_reset();
+		void compute(node_t source);
+		void computeAndTick(node_t source, vector<dist_t>& res, double &t);
+	};
 
-		void bellmanFord_Queue(const node_t source);
-		void bellmanFord_Frontier(const node_t source);
-		void dijkstraSET(const node_t source);
-		void boostDijkstra(const node_t source);
-		void boostBellmanFord(const node_t source);
+	class BBLHostGraph : public CTHostGraph {
+	public:
+		typedef std::pair<node_t, node_t> Edge;
+		Edge* edge_array;
+		weight_t* weights;
+		BBLHostGraph(const GraphWeight& hg) :CTHostGraph(hg) {
+			edge_array = new Edge[e];
+			weights = new weight_t[e];
+			int k = 0;
+			for (int i = 0; i < v; i++) {
+				for (int j = graphWeight.outNodes[i]; j < graphWeight.outNodes[i + 1]; j++) {
+					edge_array[k] = Edge(i, graphWeight.outEdgeWeights[j].x);
+					weights[k++] = graphWeight.outEdgeWeights[j].y;
+				}
+			}
+		}
+		void compute(node_t source);
+		void computeAndTick(node_t source, vector<dist_t>& res, double &t);
 	};
-	struct EdgeProperties {
-		int weight;
-	};
+
 }

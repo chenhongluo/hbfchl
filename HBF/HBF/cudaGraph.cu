@@ -2,9 +2,10 @@
 #include "HBFV0.cuh"
 #include "HBFV1.cuh"
 #include <iostream>
+#include <chrono>
 
 namespace cuda_graph {
-	cuda_graph::CudaGraph::CudaGraph(GraphWeight & _gp, CudaConfigs & _configs)
+	CudaGraph::CudaGraph(GraphWeight & _gp, CudaConfigs & _configs)
 		:gp(_gp), configs(_configs), v(_gp.v), e(_gp.e)
 	{
 		cudaMallocMem();
@@ -22,15 +23,15 @@ namespace cuda_graph {
 		cout << endl;
 	}
 
-	void cuda_graph::CudaGraph::search(int source)
+	void CudaGraph::search(int source, CudaProfiles& profiles)
 	{
 		vector<int> hostSizes(4, 0);
 		hostSizes[0] = 1;
 		int* devF1 = f1;
 		int* devF2 = f2;
 		int level = 0;
-		int relaxEdges = 0;
-		int relaxNodes = 0;
+		int &relaxNodes = profiles.relaxNodes;
+		int &relaxEdges = profiles.relaxEdges;
 
 		cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
 		cudaMemcpy(devF1, &source, 1 * sizeof(int), cudaMemcpyHostToDevice);
@@ -61,12 +62,12 @@ namespace cuda_graph {
 		}
 	}
 
-	cuda_graph::CudaGraph::~CudaGraph()
+	CudaGraph::~CudaGraph()
 	{
 		cudaFreeMem();
 	}
 
-	void cuda_graph::CudaGraph::cudaMallocMem()
+	void CudaGraph::cudaMallocMem()
 	{
 		cudaMalloc((void**)&devUpOutNodes, (v + 1) * sizeof(int));
 		cudaMalloc((void**)&devUpOutEdges, e * sizeof(int2));
@@ -88,7 +89,7 @@ namespace cuda_graph {
 		__CUDA_ERROR("copy");
 	}
 
-	void cuda_graph::CudaGraph::cudaFreeMem()
+	void CudaGraph::cudaFreeMem()
 	{
 		cudaFree(f1);
 		cudaFree(f2);
@@ -105,14 +106,14 @@ namespace cuda_graph {
 		__CUDA_ERROR("copy");
 	}
 
-	void cuda_graph::CudaGraph::cudaCopyMem()
+	void CudaGraph::cudaCopyMem()
 	{
 		cudaMemcpy(devUpOutNodes, &(gp.outNodes[0]), (v + 1) * sizeof(int), cudaMemcpyHostToDevice);
 		cudaMemcpy(devUpOutEdges, &(gp.outEdgeWeights[0]), e * sizeof(int2), cudaMemcpyHostToDevice);
 		__CUDA_ERROR("copy");
 	}
 
-	void cuda_graph::CudaGraph::cudaInitComputer(int initNode)
+	void CudaGraph::cudaInitComputer(int initNode)
 	{
 		//init devDistance
 		int2 INF2 = make_int2(0, INT_MAX);
@@ -130,7 +131,7 @@ namespace cuda_graph {
 		__CUDA_ERROR("copy");
 	}
 
-	void cuda_graph::CudaGraph::cudaGetRes(vector<int>& res)
+	void CudaGraph::cudaGetRes(vector<int>& res)
 	{
 		res.resize(v);
 		if (configs.atomic64 == true) {
@@ -144,10 +145,15 @@ namespace cuda_graph {
 			cudaMemcpy(&(res[0]),devIntDistances , v * sizeof(int2), cudaMemcpyDeviceToHost);
 		}
 	}
-	void CudaGraph::computeAndTick(node_t source, vector<dist_t>& res, double & t)
+	CudaProfiles CudaGraph::computeAndTick(node_t source, vector<dist_t>& res, double & t)
 	{
+		CudaProfiles cudaProdiles;
+		auto start = chrono::high_resolution_clock::now();
 		cudaInitComputer(source);
-		search(source);
+		search(source, cudaProdiles);
+		long long duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count();
+		t = duration * 0.001;
 		cudaGetRes(res);
+		return cudaProdiles;
 	}
 }

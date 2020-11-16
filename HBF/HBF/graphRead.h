@@ -64,5 +64,13 @@ namespace graph {
 		GraphHeader getHeader();
 		vector<TriTuple> getOriginalEdegs();
 	};
+
+	class GcReader :public GraphRead {
+	public:
+		GcReader(const char *filename, EdgeType direction, IntRandom& ir);
+		GraphHeader getHeader();
+		vector<TriTuple> getOriginalEdegs();
+	};
+
 	GraphRead * getGraphReader(const char * filename, EdgeType direction, randomUtil::IntRandom& ir);
 }

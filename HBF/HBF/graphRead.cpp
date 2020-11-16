@@ -43,13 +43,15 @@ namespace graph {
 		f >> s;
 		f.close();
 		if (s.compare("c") == 0 || s.compare("p") == 0)
-			return new Dimacs9Reader(filename,direction,ir);
+			return new Dimacs9Reader(filename, direction, ir);
 		else if (s.compare("%%MatrixMarket") == 0)
 			return new MatrixMarketReader(filename, direction, ir);
 		else if (s.compare("#") == 0)
 			return new SnapReader(filename, direction, ir);
 		else if (s.compare("%") == 0 || fUtil::isDigit(s.c_str()))
 			return new Dimacs10Reader(filename, direction, ir);
+		else if (s.compare("gc") == 0)
+			return new GcReader(filename, direction, ir);
 		else
 			__ERROR(" Error. Graph Type not recognized: " << filename << " " << s)
 	}
@@ -279,5 +281,36 @@ namespace graph {
 	}
 
 
+	GcReader::GcReader(const char * filename, EdgeType direction, IntRandom & ir):GraphRead(filename, direction, ir)
+	{
+		userDirection = EdgeType::DIRECTED;
+		fileDirection = EdgeType::DIRECTED;
+	}
+
+	GraphHeader GcReader::getHeader()
+	{
+		while (fin.peek() == 'gc')
+			fileUtil::skipLines(fin);
+
+		fin >> v >> nof_lines;
+		fileDirection = EdgeType::UNDIRECTED;
+		fileWeightFlag = true;
+		return makeSureDirection();
+	}
+
+	vector<TriTuple> GcReader::getOriginalEdegs()
+	{
+		vector<TriTuple> originEdges;
+		originEdges.reserve(e);
+		fUtil::Progress progress(nof_lines);
+		for (int lines = 0; lines < nof_lines; lines++) {
+			node_t x,y;
+			weight_t w;
+			fin >> x >> y >> w;
+			originEdges.push_back(TriTuple(x, y, w));
+			progress.next(lines + 1);
+		}
+		return originEdges;
+	}
 }
 
