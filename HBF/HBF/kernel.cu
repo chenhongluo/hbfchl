@@ -189,7 +189,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 	tag_setting = m_pt.get_child("cuda");
 	vector<node_t> testNodes = getTestNodes(testNodeSize, 0, graph.v);
 	vector<dist_t> dis(graph.v);
-	double t,all = 0;
+	double t,allt = 0;
 	double allRN = 0.0, allRE = 0.0;
 
 	if (subaction == "host") {
@@ -197,7 +197,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 		for (int i = 0; i < testNodes.size(); i++) {
 			ct->computeAndTick(testNodes[i], dis, t);
 			cout << "Relax Source: " << testNodes[i] << "\trelaxNodes: " << 0 << "\trelaxEdges: " << 0 << "\tuseTime: " << t << endl;
-			all += t;
+			allt += t;
 		}
 	}
 	else if (subaction == "cuda") {
@@ -208,7 +208,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 				<< "\trelaxNodes: " << pf.relaxNodes << "\trelaxNodes: " << (double)pf.relaxNodes / graph.v
 				<< "\trelaxEdges: " << pf.relaxEdges << "\trelaxEdgesDivE: " << (double)pf.relaxEdges / graph.e
 				<< "\tuseTime: " << t << endl;
-			all += t;
+			allt += t;
 			allRN += pf.relaxNodes;
 			allRE += pf.relaxEdges;
 		}
@@ -219,11 +219,12 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 
 	allRN /= testNodes.size();
 	allRE /= testNodes.size();
+	allt /= testNodes.size();
 
 	cout << " Avg Profile: " << endl;
-	cout << "\trelaxNodes: " << allRN << "\trelaxNodes: " << allRN / graph.v
+	cout << "\trelaxNodes: " << allRN << "\trelaxNodesDivV: " << allRN / graph.v
 		<< "\trelaxEdges: " << allRE << "\trelaxEdgesDivE: " << allRE / graph.e
-		<< "\tuseTime: " << t << endl;
+		<< "\tuseTime: " << allt << endl;
 }
 void predeal(GraphWeight &graph, boost::property_tree::ptree m_pt) 
 {
