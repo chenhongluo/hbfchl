@@ -54,3 +54,5 @@ avgRelaxEdges: 平均Relax多少个边
 
 cmake -DCMAKE_BUILD_TYPE=Debug ..
 cmake ..
+
+./HBF /home/chl/data/flickr.mtx ../config.ini

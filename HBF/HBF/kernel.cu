@@ -153,7 +153,12 @@ void test(GraphWeight &graph, boost::property_tree::ptree m_pt)
 		for (int i = 0; i < testNodes.size(); i++) {
 			ct->computeAndTick(testNodes[i], dis1, t1);
 			cmpCt->computeAndTick(testNodes[i], dis2, t2);
-			compareRes(dis1, dis2);
+			if (compareRes(dis1, dis2) == 0) {
+				cout << "the "<< i << " source node: " << testNodes[i] << " is correct" << endl;
+			}
+			else {
+				cout << "the " << i << " source node: " << testNodes[i] << " is wrong" << endl;
+			}
 		}
 	}
 	else if (subaction == "cuda") {
@@ -161,7 +166,12 @@ void test(GraphWeight &graph, boost::property_tree::ptree m_pt)
 		for (int i = 0; i < testNodes.size(); i++) {
 			cg->computeAndTick(testNodes[i], dis1, t1);
 			cmpCt->computeAndTick(testNodes[i], dis2, t2);
-			compareRes(dis1, dis2);
+			if (compareRes(dis1, dis2) == 0) {
+				cout << "the " << i << " source node: " << testNodes[i] << " is correct" << endl;
+			}
+			else {
+				cout << "the " << i << " source node: " << testNodes[i] << " is wrong" << endl;
+			}
 		}
 	}
 	else {
