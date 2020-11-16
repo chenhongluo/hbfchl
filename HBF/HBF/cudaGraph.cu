@@ -147,13 +147,13 @@ namespace cuda_graph {
 	}
 	CudaProfiles CudaGraph::computeAndTick(node_t source, vector<dist_t>& res, double & t)
 	{
-		CudaProfiles cudaProdiles;
+		CudaProfiles cudaProfiles;
 		auto start = chrono::high_resolution_clock::now();
 		cudaInitComputer(source);
-		search(source, cudaProdiles);
+		search(source, cudaProfiles);
 		long long duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count();
 		t = duration * 0.001;
 		cudaGetRes(res);
-		return cudaProdiles;
+		return cudaProfiles;
 	}
 }

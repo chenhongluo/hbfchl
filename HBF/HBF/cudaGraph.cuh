@@ -39,6 +39,10 @@ namespace cuda_graph {
 	public:
 		int relaxNodes;
 		int relaxEdges;
+
+		CudaProfiles() {
+			relaxNodes = relaxEdges = 0;
+		}
 	};
 	class CudaGraph {
 	private:

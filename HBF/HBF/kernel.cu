@@ -205,7 +205,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 		for (int i = 0; i < testNodes.size(); i++) {
 			CudaProfiles pf = cg->computeAndTick(testNodes[i], dis, t);
 			cout << "Relax Source: " << testNodes[i]
-				<< "\trelaxNodes: " << pf.relaxNodes << "\trelaxNodes: " << (double)pf.relaxNodes / graph.v
+				<< "\trelaxNodes: " << pf.relaxNodes << "\trelaxNodesDivV: " << (double)pf.relaxNodes / graph.v
 				<< "\trelaxEdges: " << pf.relaxEdges << "\trelaxEdgesDivE: " << (double)pf.relaxEdges / graph.e
 				<< "\tuseTime: " << t << endl;
 			allt += t;
