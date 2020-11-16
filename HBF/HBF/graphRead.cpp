@@ -289,11 +289,11 @@ namespace graph {
 
 	GraphHeader GcReader::getHeader()
 	{
-		while (fin.peek() == 'gc')
+		while (fin.peek() == 'g')
 			fileUtil::skipLines(fin);
 
 		fin >> v >> nof_lines;
-		fileDirection = EdgeType::UNDIRECTED;
+		fileDirection = EdgeType::DIRECTED;
 		fileWeightFlag = true;
 		return makeSureDirection();
 	}
