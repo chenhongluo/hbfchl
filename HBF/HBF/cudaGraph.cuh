@@ -54,8 +54,8 @@ namespace cuda_graph {
 		int *devIntDistances;
 		int2 *devInt2Distances;
 
-		CudaConfigs& configs;
-		CudaGraph(GraphWeight & _gp, CudaConfigs & _configs);
+		CudaConfigs configs;
+		CudaGraph(GraphWeight & _gp, CudaConfigs  _configs);
 		void cudaGetRes(vector<int> &res);
 		CudaProfiles computeAndTick(node_t source, vector<dist_t>& res, double &t);
 		~CudaGraph();
