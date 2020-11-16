@@ -107,9 +107,9 @@ namespace graph {
 				weight_t weight = x.second;
 				newEdges[dest] = weight;
 			}
-			for (auto &x : newEdges) {
-				newOriginalEdges.push_back(TriTuple(i, x.first, x.second));
-			}
+			//for (auto &x : newEdges) {
+			//	newOriginalEdges.push_back(TriTuple(i, x.first, x.second));
+			//}
 		}
 		originEdges = newOriginalEdges;
 		cout << "end preCompute: " << update << endl;

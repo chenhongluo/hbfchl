@@ -5,7 +5,7 @@
 #include <chrono>
 
 namespace cuda_graph {
-	CudaGraph::CudaGraph(GraphWeight & _gp, CudaConfigs & _configs)
+	CudaGraph::CudaGraph(GraphWeight & _gp, CudaConfigs _configs)
 		:gp(_gp), configs(_configs), v(_gp.v), e(_gp.e)
 	{
 		cudaMallocMem();

@@ -105,13 +105,13 @@ CudaGraph* getCudaGraphFromConfig(GraphWeight &graph, boost::property_tree::ptre
 	CudaConfigs configs;
 	boost::property_tree::ptree tag_setting = m_pt.get_child("cuda");
 	int gpuIndex = tag_setting.get<int>("gpu", 0);
-	cudaSetDevice(gpuIndex);
 	configs.gridDim = tag_setting.get<int>("gridDim", 278);
 	configs.blockDim = tag_setting.get<int>("blockDim", 128);
 	configs.sharedLimit = tag_setting.get<int>("sharedLimit", 1024);
 	configs.kernelVersion = tag_setting.get<string>("kernel", "v0");
 	configs.atomic64 = tag_setting.get<bool>("atomic64", true);
 	configs.vwSize = tag_setting.get<int>("vwSize", true);
+	cudaSetDevice(gpuIndex);
 	return new CudaGraph (graph, configs);
 }
 
