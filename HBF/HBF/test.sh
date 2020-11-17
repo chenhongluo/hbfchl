@@ -1,15 +1,16 @@
 #！/bin/bash
-dataDir=(circuit5M_dc.mtx delaunay_n20.graph flickr.mtx ldoor.mtx msdoor.mtx rmat.3Mv.20Me USA-road-d.CAL.gr USA-road-d.USA.gr as-Skitter.mtx asia.osm.graph)
+datas=(circuit5M_dc.mtx delaunay_n20.graph flickr.mtx ldoor.mtx msdoor.mtx rmat.3Mv.20Me USA-road-d.CAL.gr USA-road-d.USA.gr as-Skitter.mtx asia.osm.graph)
+configs=(test_v0_32 test_v0_16 test_v1_32 test_v1_16 run_v0_32 run_v0_16)
 cd /home/chl/HBF/hbf/HBF/HBF/build
-mkdir -p /home/chl/hbftest/
-for d in ${dataDir[@]}
-do
-	echo test ${d}
-	./HBF /home/chl/data/${d} ../config_test_v0_32.ini >> /home/chl/hbftest/test_v0_32.log
-done
+git pull && make
+mkdir -p /home/chl/hbflogs/
 
-for d in ${dataDir[@]}
+for c in ${configs[@]}
 do
-	echo test ${d}
-	./HBF /home/chl/data/${d} ../config_test_v0_16.ini >> /home/chl/hbftest/test_v0_16.log
+	echo "" > /home/chl/hbflogs/${c}.log
+	for d in ${datas[@]}
+	do
+		echo test ${d}
+		./HBF /home/chl/data/${d} /home/chl/hbfconfigs/config_${c}.ini >> /home/chl/hbflogs/${c}.log
+	done
 done
