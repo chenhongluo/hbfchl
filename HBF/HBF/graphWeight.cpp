@@ -172,7 +172,7 @@ namespace graph {
 				k = k + 1;
 				dis = (dis * (k - 1)) / k + getDis(nodes1) / k;
 			}
-			if (i % 10000 == 0) {
+			if (i % 1 == 0) {
 				cout << "now i = "<< i << " temp locality value: " << dis << endl;
 			}
 		}
