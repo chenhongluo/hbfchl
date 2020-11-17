@@ -155,7 +155,7 @@ namespace graph {
 		cout << " locality detail anaylse" << endl;
 		int k = 0;
 		double dis = 0.0;
-		int yield = 32;
+		int yield = 8;
 		int yieldk = 3;
 		for (int i = 0; i < v; i += 1) {
 			vector<node_t> nodes1,nodes2;
