@@ -155,11 +155,13 @@ namespace graph {
 		cout << " locality detail anaylse" << endl;
 		int k = 0;
 		double dis = 0.0;
-		int yield = 16;
+		int yield = 32;
+		int yieldk = 3;
 		for (int i = 0; i < v; i += 1) {
 			vector<node_t> nodes1,nodes2;
 			nodes1.push_back(i);
-			while (nodes1.size() > 0 && nodes1.size() < yield) {
+			int deep = 0;
+			while (nodes1.size() > 0 && nodes1.size() < yield && deep < yieldk) {
 				for (auto x : nodes1) {
 					for (auto y : getOutEdgesOfNode(x)) {
 						nodes2.push_back(y.x);
@@ -167,6 +169,7 @@ namespace graph {
 				}
 				swap(nodes1, nodes2);
 				nodes2.clear();
+				deep++;
 			}
 			if (nodes1.size() > 0) {
 				k = k + 1;
