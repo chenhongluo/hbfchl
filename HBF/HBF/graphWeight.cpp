@@ -117,15 +117,16 @@ namespace graph {
 
 	double getDis(vector<int> array) {
 		double sum = 0.0;
-		for (auto x : array) {
-			sum += x;
-		}
-		double avg = sum / array.size();
-		double dis = 0.0;
-		for (auto x : array) {
-			dis += (x - avg)*(x - avg);
-		}
-		return dis / array.size();
+		for (auto &x : array) { sum += x; }
+		double mean = sum / array.size(); //¾ùÖµ
+
+		double accum = 0.0;
+		std::for_each(std::begin(array), std::end(array), [&](const double d) {
+			accum += (d - mean)*(d - mean);
+		});
+
+		double stdev = sqrt(accum / (array.size() - 1)); //·½²î
+		return stdev;
 	}
 
 	void GraphWeight::analyseDetail()
@@ -171,8 +172,8 @@ namespace graph {
 				k = k + 1;
 				dis = (dis * (k - 1)) / k + getDis(nodes1) / k;
 			}
-			if (i % 100000 == 0) {
-				cout << "temp locality value: " << dis << endl;
+			if (i % 10000 == 0) {
+				cout << "now i = "<< i << " temp locality value: " << dis << endl;
 			}
 		}
 		cout << "locality yield: " << yield << "\tlocality value: " << dis << endl;
