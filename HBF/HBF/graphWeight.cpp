@@ -147,7 +147,7 @@ namespace graph {
 		for (int i = 0; i < dregreeDistribution.size(); i++) {
 			if (dregreeDistribution[i] > 0) {
 				cout << "degree: " << i << "\tnodesNum: " << dregreeDistribution[i] << "("
-					<< fixed << setprecision(4) << (double)dregreeDistribution[i] / v << ")";
+					<< fixed << setprecision(4) << (double)dregreeDistribution[i] / v << ")" << endl;
 			}
 		}
 
