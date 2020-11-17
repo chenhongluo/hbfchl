@@ -75,5 +75,7 @@
       <Filter>src</Filter>
     </None>
     <None Include="readme.md" />
+    <None Include="run.sh" />
+    <None Include="test.sh" />
   </ItemGroup>
 </Project>
