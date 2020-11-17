@@ -125,7 +125,7 @@ namespace graph {
 			accum += (d - mean)*(d - mean);
 		});
 
-		double stdev = sqrt(accum / (array.size() - 1)); //·½²î
+		double stdev = sqrt(accum / array.size() ); //·½²î
 		return stdev;
 	}
 
