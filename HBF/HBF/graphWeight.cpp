@@ -130,16 +130,18 @@ namespace graph {
 
 	void GraphWeight::analyseDetail()
 	{
-		cout << " degree detail anaylse" << endl;
+		cout << "graphName: " << name << endl;
+		cout << "degree detail anaylse" << endl;
 		int maxDegree = 0, minDegree = INT_MAX;
 		for (int i = 0; i < v; i++) {
-			int d = outNodes[v + 1] - outNodes[v];
+			int d = outNodes[i + 1] - outNodes[i];
 			maxDegree = max(maxDegree, d);
 			minDegree = min(minDegree, d);
 		}
+		cout << "maxDegree: " << maxDegree << "\tminDegree: " << minDegree << endl;
 		vector<int> dregreeDistribution(maxDegree + 1, 0);
 		for (int i = 0; i < v; i++) {
-			int d = outNodes[v + 1] - outNodes[v];
+			int d = outNodes[i + 1] - outNodes[i];
 			dregreeDistribution[d]++;
 		}
 		for (int i = 0; i < dregreeDistribution.size(); i++) {
@@ -153,7 +155,7 @@ namespace graph {
 		int k = 0;
 		double dis = 0.0;
 		int yield = 256;
-		for (int i = 0; i < v; i += 10) {
+		for (int i = 0; i < v; i += 1) {
 			vector<node_t> nodes1,nodes2;
 			nodes1.push_back(i);
 			while (nodes1.size() > 0 && nodes1.size() < yield) {
@@ -169,8 +171,11 @@ namespace graph {
 				k = k + 1;
 				dis = (dis * (k - 1)) / k + getDis(nodes1) / k;
 			}
+			if (i % 100000 == 0) {
+				cout << "temp locality value: " << dis << endl;
+			}
 		}
-		cout << "locality yield: " << yield << "\t locality value: " << dis << endl;
+		cout << "locality yield: " << yield << "\tlocality value: " << dis << endl;
 	}
 
 	void GraphWeight::analyseSimple()
