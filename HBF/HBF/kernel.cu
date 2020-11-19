@@ -209,8 +209,8 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 				<< "\trelaxNodes: " << pf.relaxNodes << "\trelaxNodesDivV: " << (double)pf.relaxNodes / graph.v
 				<< "\trelaxEdges: " << pf.relaxEdges << "\trelaxEdgesDivE: " << (double)pf.relaxEdges / graph.e
 				<< "\tdepth: " << pf.depth << "\tuseTime: " << t << endl;
-			cout << "Relax Detail Profile:" << endl;
 			if (pf.nodeDepthDetail.size() > 0 && cg->configs.profile) {
+				cout << "Relax Detail Profile:" << endl;
 				fUtil::analyseIntVec<true>(pf.nodeRelaxTap, "nodeRelaxTap:");
 				fUtil::analyseIntVec<true>(pf.nodeRelaxFrec, "nodeRelaxFrec:");
 			}
