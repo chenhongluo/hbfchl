@@ -212,7 +212,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 			cout << "Relax Detail Profile:" << endl;
 			if (pf.nodeDepthDetail.size() > 0 && cg->configs.profile) {
 				fUtil::analyseIntVec<true>(pf.nodeRelaxTap, "nodeRelaxTap:");
-				fUtil::analyseIntVec<true>(pf.nodeRelaxTap, "nodeRelaxFrec:");
+				fUtil::analyseIntVec<true>(pf.nodeRelaxFrec, "nodeRelaxFrec:");
 			}
 			allt += t;
 			allRN += pf.relaxNodes;
