@@ -52,6 +52,7 @@ testNodes: 总共有多个测试点
 avgRelaxNodes：平均Relax多少个节点
 avgRelaxEdges: 平均Relax多少个边
 
+git pull && make
 cmake -DCMAKE_BUILD_TYPE=Debug -DARCH=75 .. && make
 cmake -DCMAKE_BUILD_TYPE=Release -DARCH=75 .. && make
 
