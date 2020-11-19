@@ -132,25 +132,12 @@ namespace graph {
 	void GraphWeight::analyseDetail()
 	{
 		cout << "graphName: " << name << endl;
-		cout << "degree detail anaylse" << endl;
-		int maxDegree = 0, minDegree = INT_MAX;
+
+		vector<int> ds(v);
 		for (int i = 0; i < v; i++) {
-			int d = outNodes[i + 1] - outNodes[i];
-			maxDegree = max(maxDegree, d);
-			minDegree = min(minDegree, d);
+			ds[i] = outNodes[i + 1] - outNodes[i];
 		}
-		cout << "maxDegree: " << maxDegree << "\tminDegree: " << minDegree << endl;
-		vector<int> dregreeDistribution(maxDegree + 1, 0);
-		for (int i = 0; i < v; i++) {
-			int d = outNodes[i + 1] - outNodes[i];
-			dregreeDistribution[d]++;
-		}
-		for (int i = 0; i < dregreeDistribution.size(); i++) {
-			if (dregreeDistribution[i] > 0) {
-				cout << "degree: " << i << "\tnodesNum: " << dregreeDistribution[i] << "("
-					<< fixed << setprecision(4) << (double)dregreeDistribution[i] / v << ")" << endl;
-			}
-		}
+		fUtil::analyseIntVec<true>(ds, "degree detail anaylse");
 
 		cout << " locality detail anaylse" << endl;
 		int k = 0;

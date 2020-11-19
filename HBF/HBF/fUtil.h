@@ -17,6 +17,7 @@
 #include <exception>		// sorting
 #include <unordered_map>
 #include <random>
+#include<vector>
 
 #if !defined(__NVCC__)
 #define PRINT_ERR(ERR) "\n\n\033[91m--> "#ERR "\033[97m\n"
@@ -88,6 +89,23 @@ namespace StreamModifier {
 }
 
 namespace fUtil {
+
+	template<bool PRINT>
+	void analyseIntVec(const std::vector<int> &v,std::string s) {
+		if (PRINT) {
+			int minv = std::min(v);
+			int maxv = std::max(v);
+			std::vector<int> vv(maxv + 1,0);
+			for (auto &x : v) {
+				vv[x]++;
+			}
+			cout << s << endl;
+			cout << "minv: " << minv << "\tmaxv: " << maxv << endl;
+			for (int i = 0; i < v.size(); i++) {
+				cout << i << "\t" << vv[i] << "\t" << fixed << setprecision(4) << (double)vv[i] / v.size() << endl;
+			}
+		}
+	}
 
 	template<bool PRINT>
 	void print_info(const char* msg) {

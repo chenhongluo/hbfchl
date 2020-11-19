@@ -29,6 +29,7 @@ namespace cuda_graph {
 	public:
 		string kernelVersion;
 		bool atomic64;
+		bool profile;
 		int vwSize;
 		int gridDim;
 		int blockDim;
@@ -37,11 +38,37 @@ namespace cuda_graph {
 	};
 	class CudaProfiles {
 	public:
-		int relaxNodes;
-		int relaxEdges;
+		long relaxNodes;
+		long relaxEdges;
+		vector<vector<int>> devF1Detail;
+		vector<vector<int>> nodeDepthDetail;
+		vector<int> nodeRelaxTap;
+		vector<int> nodeRelaxFrec;
+		int depth;
+		int v, e;
 
 		CudaProfiles() {
 			relaxNodes = relaxEdges = 0;
+			depth = 0;
+		}
+
+		void analyse() {
+			if (devF1Detail.size() > 0) {
+				nodeDepthDetail.resize(v);
+				int level = 0;
+				for (auto & x : devF1Detail) {
+					for (auto & y : x) {
+						nodeDepthDetail[y].push_back(level);
+					}
+					level++;
+				}
+				nodeRelaxTap.resize(v);
+				nodeRelaxFrec.resize(v);
+				for (int i = 0; i < nodeRelaxTap.size(); i++) {
+					nodeRelaxTap[i] = *nodeDepthDetail[i].rbegin() - *nodeDepthDetail[i].begin();
+					nodeRelaxFrec[i] = nodeDepthDetail.size();
+				}
+			}
 		}
 	};
 	class CudaGraph {

@@ -111,6 +111,7 @@ CudaGraph* getCudaGraphFromConfig(GraphWeight &graph, boost::property_tree::ptre
 	configs.kernelVersion = tag_setting.get<string>("kernel", "v0");
 	configs.atomic64 = tag_setting.get<bool>("atomic64", true);
 	configs.vwSize = tag_setting.get<int>("vwSize", true);
+	configs.profile = tag_setting.get<bool>("profile", false);
 	cudaSetDevice(gpuIndex);
 	return new CudaGraph (graph, configs);
 }
@@ -207,7 +208,12 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 			cout << "Relax Source: " << testNodes[i]
 				<< "\trelaxNodes: " << pf.relaxNodes << "\trelaxNodesDivV: " << (double)pf.relaxNodes / graph.v
 				<< "\trelaxEdges: " << pf.relaxEdges << "\trelaxEdgesDivE: " << (double)pf.relaxEdges / graph.e
-				<< "\tuseTime: " << t << endl;
+				<< "\tdepth: " << pf.depth << "\tuseTime: " << t << endl;
+			cout << "Relax Detail Profile:" << endl;
+			if (pf.nodeDepthDetail.size() > 0 && cg->configs.profile) {
+				fUtil::analyseIntVec<true>(pf.nodeRelaxTap, "nodeRelaxTap:");
+				fUtil::analyseIntVec<true>(pf.nodeRelaxTap, "nodeRelaxFrec:");
+			}
 			allt += t;
 			allRN += pf.relaxNodes;
 			allRE += pf.relaxEdges;

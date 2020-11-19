@@ -23,21 +23,28 @@ namespace cuda_graph {
 		cout << endl;
 	}
 
-	void CudaGraph::search(int source, CudaProfiles& profiles)
+	void CudaGraph::search(int source, CudaProfiles& profile)
 	{
 		vector<int> hostSizes(4, 0);
 		hostSizes[0] = 1;
 		int* devF1 = f1;
 		int* devF2 = f2;
 		int level = 0;
-		int &relaxNodes = profiles.relaxNodes;
-		int &relaxEdges = profiles.relaxEdges;
+		long &relaxNodes = profile.relaxNodes;
+		long &relaxEdges = profile.relaxEdges;
+		int &depth = profile.depth;
 
 		cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
 		cudaMemcpy(devF1, &source, 1 * sizeof(int), cudaMemcpyHostToDevice);
 		while (1)
 		{
 			level++;
+			depth = level;
+			if (configs.profile) {
+				vector<int> devF1Vec(hostSizes[0]);
+				cudaMemcpy(&(devF1Vec[0]), devF1, hostSizes[0] * sizeof(int), cudaMemcpyDeviceToHost);
+				profile.devF1Detail.push_back(devF1Vec);
+			}
 			// debugCudaArray<int>(devF1, hostSizes[0]);
 			string &kv = configs.kernelVersion;
 			if (kv == "v0") {
@@ -59,6 +66,7 @@ namespace cuda_graph {
 			hostSizes[0] = hostSizes[1], hostSizes[1] = 0, hostSizes[2] = 0;
 			if (hostSizes[0] == 0) break;
 			cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
+
 		}
 	}
 
@@ -148,12 +156,15 @@ namespace cuda_graph {
 	CudaProfiles CudaGraph::computeAndTick(node_t source, vector<dist_t>& res, double & t)
 	{
 		CudaProfiles cudaProfiles;
+		cudaProfiles.v = v;
+		cudaProfiles.e = e;
 		auto start = chrono::high_resolution_clock::now();
 		cudaInitComputer(source);
 		search(source, cudaProfiles);
 		long long duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count();
 		t = duration * 0.001;
 		cudaGetRes(res);
+		cudaProfiles.analyse();
 		return cudaProfiles;
 	}
 }
