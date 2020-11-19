@@ -65,9 +65,10 @@ namespace cuda_graph {
 				nodeRelaxTap.resize(v);
 				nodeRelaxFrec.resize(v);
 				for (int i = 0; i < v; i++) {
-					nodeRelaxFrec[i] = nodeDepthDetail.size();
-					if (nodeRelaxFrec[i] > 0)
-						nodeRelaxTap[i] = *nodeDepthDetail[i].rbegin() - *nodeDepthDetail[i].begin();
+					vector<int> &nodeRelaxVec = nodeDepthDetail[i];
+					nodeRelaxFrec[i] = nodeRelaxVec.size();
+					if (nodeRelaxVec.size() > 0)
+						nodeRelaxTap[i] = *nodeRelaxVec.rbegin() - *nodeRelaxVec.begin();
 					else
 						nodeRelaxTap[i] = 0;
 				}
