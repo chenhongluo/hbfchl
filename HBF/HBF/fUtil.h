@@ -103,7 +103,7 @@ namespace fUtil {
 			cout << s << endl;
 			cout << "minv: " << minv << "\tmaxv: " << maxv << endl;
 			for (int i = 0; i < vv.size(); i++) {
-				cout << i << "\t" << vv[i] << "\t" << fixed << setprecision(4) << (double)vv[i] / v.size() << endl;
+				cout << i << "    " << vv[i] << "    " << fixed << setprecision(4) << (double)vv[i] / v.size() << endl;
 			}
 		}
 	}
