@@ -89,12 +89,13 @@ namespace StreamModifier {
 }
 
 namespace fUtil {
-
+	using namespace std;
 	template<bool PRINT>
 	void analyseIntVec(const std::vector<int> &v,std::string s) {
 		if (PRINT) {
-			int minv = std::min(v);
-			int maxv = std::max(v);
+			auto pair = std::minmax_element(v.begin(),v.end());
+			int minv = *pair.first;
+			int maxv = *pair.second;
 			std::vector<int> vv(maxv + 1,0);
 			for (auto &x : v) {
 				vv[x]++;
