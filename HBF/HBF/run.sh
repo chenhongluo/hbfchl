@@ -14,7 +14,7 @@ do
 	echo "" > ${logdir}/${c}.log
 	for d in ${datas[@]}
 	do
-		echo test ${d}
+		echo "run: ${d} ${c}"
 		./HBF ${datadir}/${d} ${configdir}/config_${c}.ini >> ${logdir}/${c}.log
 	done
 done

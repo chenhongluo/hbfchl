@@ -66,7 +66,6 @@ namespace cuda_graph {
 			hostSizes[0] = hostSizes[1], hostSizes[1] = 0, hostSizes[2] = 0;
 			if (hostSizes[0] == 0) break;
 			cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
-
 		}
 	}
 
