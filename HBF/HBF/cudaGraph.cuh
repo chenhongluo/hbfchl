@@ -28,6 +28,7 @@ namespace cuda_graph {
 	class CudaConfigs {
 	public:
 		string kernelVersion;
+		bool sort;
 		bool atomic64;
 		bool profile;
 		int vwSize;
@@ -40,6 +41,7 @@ namespace cuda_graph {
 	public:
 		long relaxNodes;
 		long relaxEdges;
+		double kernel_time, sort_time, copy_time;
 		vector<vector<int>> devF1Detail;
 		vector<vector<int>> nodeDepthDetail;
 		vector<int> nodeRelaxTap;
@@ -49,6 +51,7 @@ namespace cuda_graph {
 
 		CudaProfiles() {
 			relaxNodes = relaxEdges = 0;
+			kernel_time = sort_time = copy_time = 0.0;
 			depth = 0;
 		}
 

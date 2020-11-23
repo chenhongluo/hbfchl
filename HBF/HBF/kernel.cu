@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
 CudaGraph* getCudaGraphFromConfig(GraphWeight &graph, boost::property_tree::ptree m_pt) {
 	CudaConfigs configs;
 	boost::property_tree::ptree tag_setting = m_pt.get_child("cuda");
-	int gpuIndex = tag_setting.get<int>("gpu", 0);
+	int gpuIndex = tag_setting.get<int>("gpu", -1);
 	configs.gridDim = tag_setting.get<int>("gridDim", 278);
 	configs.blockDim = tag_setting.get<int>("blockDim", 128);
 	configs.sharedLimit = tag_setting.get<int>("sharedLimit", 1024);
@@ -112,7 +112,9 @@ CudaGraph* getCudaGraphFromConfig(GraphWeight &graph, boost::property_tree::ptre
 	configs.atomic64 = tag_setting.get<bool>("atomic64", true);
 	configs.vwSize = tag_setting.get<int>("vwSize", true);
 	configs.profile = tag_setting.get<bool>("profile", false);
-	cudaSetDevice(gpuIndex);
+	configs.sort = tag_setting.get<bool>("profile", false);
+	if(gpuIndex > 0)
+		cudaSetDevice(gpuIndex);
 	return new CudaGraph (graph, configs);
 }
 
@@ -190,8 +192,8 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 	tag_setting = m_pt.get_child("cuda");
 	vector<node_t> testNodes = getTestNodes(testNodeSize, 0, graph.v);
 	vector<dist_t> dis(graph.v);
-	double t,allt = 0;
-	double allRN = 0.0, allRE = 0.0;
+	double t, allt = 0.0, allkt = 0.0, allst = 0.0, allct = 0.0;
+	double allRN = 0.0, allRE = 0.0, allDP = 0.0;
 
 	if (subaction == "host") {
 		CTHostGraph* ct = getHostGraphFromConfig(graph, m_pt);
@@ -208,7 +210,9 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 			cout << "Relax Source: " << testNodes[i]
 				<< "\trelaxNodes: " << pf.relaxNodes << "\trelaxNodesDivV: " << (double)pf.relaxNodes / graph.v
 				<< "\trelaxEdges: " << pf.relaxEdges << "\trelaxEdgesDivE: " << (double)pf.relaxEdges / graph.e
-				<< "\tdepth: " << pf.depth << "\tuseTime: " << t << endl;
+				<< "\tdepth: " << pf.depth
+				<< "\tkernelTime: " << pf.kernel_time << "\tsortTime: " << pf.sort_time << "\tcopyTime: " << pf.copy_time
+				<< "\tuseTime: " << t << endl;
 			if (pf.nodeDepthDetail.size() > 0 && cg->configs.profile) {
 				cout << "Relax Detail Profile:" << endl;
 				fUtil::analyseIntVec<true>(pf.nodeRelaxTap, "nodeRelaxTap:");
@@ -217,6 +221,10 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 			allt += t;
 			allRN += pf.relaxNodes;
 			allRE += pf.relaxEdges;
+			allDP += pf.depth;
+			allkt += pf.kernel_time;
+			allst += pf.sort_time;
+			allct += pf.copy_time;
 		}
 	}
 	else {
@@ -226,10 +234,16 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 	allRN /= testNodes.size();
 	allRE /= testNodes.size();
 	allt /= testNodes.size();
+	allDP /= testNodes.size();
+	allkt /= testNodes.size();
+	allst /= testNodes.size();
+	allct /= testNodes.size();
 
 	cout << " Avg Profile: " << endl;
 	cout << "\trelaxNodes: " << allRN << "\trelaxNodesDivV: " << allRN / graph.v
 		<< "\trelaxEdges: " << allRE << "\trelaxEdgesDivE: " << allRE / graph.e
+		<< "\trelaxDepth: " << allDP
+		<< "\tkernelTime: " << allkt << "\tsortTime: " << allst << "\tcopyTime: " << allct
 		<< "\tuseTime: " << allt << endl;
 }
 void predeal(GraphWeight &graph, boost::property_tree::ptree m_pt) 

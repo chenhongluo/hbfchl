@@ -3,6 +3,7 @@
 #include "HBFV1.cuh"
 #include <iostream>
 #include <chrono>
+#include <algorithm>
 
 namespace cuda_graph {
 	CudaGraph::CudaGraph(GraphWeight & _gp, CudaConfigs _configs)
@@ -32,6 +33,7 @@ namespace cuda_graph {
 		int level = 0;
 		long &relaxNodes = profile.relaxNodes;
 		long &relaxEdges = profile.relaxEdges;
+		
 		int &depth = profile.depth;
 
 		cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
@@ -46,6 +48,7 @@ namespace cuda_graph {
 				profile.devF1Detail.push_back(devF1Vec);
 			}
 			// debugCudaArray<int>(devF1, hostSizes[0]);
+			auto time1 = chrono::high_resolution_clock::now();
 			string &kv = configs.kernelVersion;
 			if (kv == "v0") {
 				switchKernelV0Config(configs)
@@ -58,6 +61,7 @@ namespace cuda_graph {
 				exit(-1);
 			}
 			__CUDA_ERROR("GNRSearchMain Kernel");
+			auto time2 = chrono::high_resolution_clock::now();
 			std::swap(devF1, devF2);
 			cudaMemcpy(&(hostSizes[0]), devSizes, 4 * sizeof(int), cudaMemcpyDeviceToHost);
 			relaxEdges += hostSizes[2];
@@ -66,6 +70,22 @@ namespace cuda_graph {
 			hostSizes[0] = hostSizes[1], hostSizes[1] = 0, hostSizes[2] = 0;
 			if (hostSizes[0] == 0) break;
 			cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
+			auto time3 = chrono::high_resolution_clock::now();
+			auto time4 = time3;
+			auto time5 = time3;
+			auto time6 = time3;
+			if (configs.sort) {
+				vector<int> devF1Vec(hostSizes[0]);
+				cudaMemcpy(&(devF1Vec[0]), devF1, hostSizes[0] * sizeof(int), cudaMemcpyDeviceToHost);
+				time4 = chrono::high_resolution_clock::now();
+				sort(devF1Vec.begin(), devF1Vec.end());
+				time5 = chrono::high_resolution_clock::now();
+				cudaMemcpy(devF1, &(devF1Vec[0]), hostSizes[0] * sizeof(int), cudaMemcpyHostToDevice);
+				time6 = chrono::high_resolution_clock::now();
+			}
+			profile.kernel_time = chrono::duration_cast<chrono::microseconds>(time2-time1).count()* 0.001;
+			profile.sort_time = chrono::duration_cast<chrono::microseconds>(time5 - time4).count()* 0.001;
+			profile.copy_time = chrono::duration_cast<chrono::microseconds>(time4 - time2 + time6 - time5).count()* 0.001;
 		}
 	}
 
