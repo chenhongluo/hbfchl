@@ -83,10 +83,13 @@ namespace cuda_graph {
 				cudaMemcpy(devF1, &(devF1Vec[0]), hostSizes[0] * sizeof(int), cudaMemcpyHostToDevice);
 				time6 = chrono::high_resolution_clock::now();
 			}
-			profile.kernel_time = chrono::duration_cast<chrono::microseconds>(time2-time1).count()* 0.001;
-			profile.sort_time = chrono::duration_cast<chrono::microseconds>(time5 - time4).count()* 0.001;
-			profile.copy_time = chrono::duration_cast<chrono::microseconds>(time4 - time2 + time6 - time5).count()* 0.001;
+			profile.kernel_time += chrono::duration_cast<chrono::microseconds>(time2 - time1).count();
+			profile.sort_time += chrono::duration_cast<chrono::microseconds>(time5 - time4).count();
+			profile.copy_time += chrono::duration_cast<chrono::microseconds>(time4 - time2 + time6 - time5).count();
 		}
+		profile.kernel_time *= 0.001;
+		profile.sort_time *= 0.001;
+		profile.copy_time *= 0.001;
 	}
 
 	CudaGraph::~CudaGraph()
