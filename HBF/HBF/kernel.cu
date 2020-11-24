@@ -210,13 +210,15 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 		CudaGraph* cg = getCudaGraphFromConfig(graph, m_pt);
 		for (int i = 0; i < testNodes.size(); i++) {
 			CudaProfiles pf = cg->computeAndTick(testNodes[i], dis, t);
-			cout << "Relax Source: " << testNodes[i]
-				<< "\trelaxNodes: " << pf.relaxNodes << "\trelaxNodesDivV: " << (double)pf.relaxNodes / graph.v
-				<< "\trelaxEdges: " << pf.relaxEdges << "\trelaxEdgesDivE: " << (double)pf.relaxEdges / graph.e
-				<< "\tdepth: " << pf.depth
-				<< "\tuseTime: " << t 
-				<< "\tkernelTime: " << pf.kernel_time << "\tsortTime: " << pf.sort_time << "\tcopyTime: " << pf.copy_time
-				<< endl;
+			if (printDeatil) {
+				cout << "Relax Source: " << testNodes[i]
+					<< "\trelaxNodes: " << pf.relaxNodes << "\trelaxNodesDivV: " << (double)pf.relaxNodes / graph.v
+					<< "\trelaxEdges: " << pf.relaxEdges << "\trelaxEdgesDivE: " << (double)pf.relaxEdges / graph.e
+					<< "\tdepth: " << pf.depth
+					<< "\tuseTime: " << t
+					<< "\tkernelTime: " << pf.kernel_time << "\tsortTime: " << pf.sort_time << "\tcopyTime: " << pf.copy_time
+					<< endl;
+			}
 			if (pf.nodeDepthDetail.size() > 0 && cg->configs.profile) {
 				cout << "Relax Detail Profile:" << endl;
 				fUtil::analyseIntVec<true>(pf.nodeRelaxTap, "nodeRelaxTap:");
