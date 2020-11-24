@@ -5,8 +5,7 @@
 #include <cstdio>
 using namespace cooperative_groups;
 
-#define WARPSIZE 32
-namespace Kernels
+namespace KernelV0
 {
 	template <int VW_SIZE, typename T>
 	__device__ __forceinline__ void
@@ -181,7 +180,7 @@ namespace Kernels
 	}
 }
 
-using namespace Kernels;
+using namespace KernelV0;
 
 #define kernelV0Atomic64(vwSize,gridDim, blockDim, sharedLimit) \
 HBFSearchV0Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \

@@ -1,6 +1,8 @@
 #include "cudaGraph.cuh"
 #include "HBFV0.cuh"
 #include "HBFV1.cuh"
+#include "HBFV2.cuh"
+#include "HBFV3.cuh"
 #include <iostream>
 #include <chrono>
 #include <algorithm>
@@ -55,6 +57,12 @@ namespace cuda_graph {
 			}
 			else if (kv == "v1") {
 				switchKernelV1Config(configs)
+			}
+			else if (kv == "v2") {
+				switchKernelV2Config(configs)
+			}
+			else if (kv == "v3") {
+				switchKernelV3Config(configs)
 			}
 			else {
 				cout << "not known kernel version" << endl;

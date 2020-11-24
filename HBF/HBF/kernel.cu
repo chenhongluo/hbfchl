@@ -113,6 +113,8 @@ CudaGraph* getCudaGraphFromConfig(GraphWeight &graph, boost::property_tree::ptre
 	configs.vwSize = tag_setting.get<int>("vwSize", true);
 	configs.profile = tag_setting.get<bool>("profile", false);
 	configs.sort = tag_setting.get<bool>("sort", false);
+	configs.tileLimit = tag_setting.get<int>("tileLimit", 1);
+	
 	if(gpuIndex > 0)
 		cudaSetDevice(gpuIndex);
 	return new CudaGraph (graph, configs);

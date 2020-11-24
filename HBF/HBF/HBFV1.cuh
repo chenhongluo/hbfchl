@@ -4,7 +4,7 @@
 using namespace cooperative_groups;
 
 #define WARPSIZE 32
-namespace Kernels
+namespace KernelV1
 {
 	template <int VW_SIZE>
 	__global__ void HBFSearchV1Atomic64(
@@ -192,6 +192,7 @@ namespace Kernels
 		}
 	}
 }
+using namespace KernelV1;
 
 #define kernelV1Atmoic64(vwSize,gridDim, blockDim, sharedLimit) \
 HBFSearchV1Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \

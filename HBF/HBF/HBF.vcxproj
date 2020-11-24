@@ -111,6 +111,7 @@
     <ClInclude Include="graph.h" />
     <ClInclude Include="graphRead.h" />
     <ClInclude Include="HBFV2.cuh" />
+    <ClInclude Include="HBFV3.cuh" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />

@@ -35,6 +35,7 @@ namespace cuda_graph {
 		int gridDim;
 		int blockDim;
 		int sharedLimit;
+		int tileLimit;
 		CudaConfigs() {}
 	};
 	class CudaProfiles {
