@@ -74,21 +74,23 @@ namespace KernelV1
 				}
 				unsigned mask = tile.ballot(flag);
 
+
 				// devPrintfX(32, mask, "mask");
 
 				int sum = __popc(mask);
 
+				if (realID < 64) {
+					printf("blockId:%d\t threadId: %d\t flag = %d\n", blockIdx.x, g.thread_rank(), flag);
+					printf("blockId:%d\t threadId: %d\t mask = %d\n", blockIdx.x, g.thread_rank(), mask);
+					printf("blockId:%d\t threadId: %d\t sum = %d\n", blockIdx.x, g.thread_rank(), sum);
+				}
+
 				if (sum + founds > tileSharedLimit)
 				{
-					if (tile.thread_rank() == 0) {
-						printf("blockId:%d\t threadId: %d\t founds = %d\n", blockIdx.x, g.thread_rank(), founds);
-					}
+
 					// write to global mem if larger than shared mem
 					if (tile.thread_rank() == 0)
 						globalBias = atomicAdd(devF2Size, founds);
-					if (tile.thread_rank() == 0) {
-						printf("blockId:%d\t threadId: %d\t globalBias = %d\n", blockIdx.x, g.thread_rank(), globalBias);
-					}
 					globalBias = tile.shfl(globalBias, 0);
 					for (int j = tile.thread_rank(); j < founds; j += VW_SIZE)
 						devF2[globalBias + j] = queue[j];
