@@ -53,7 +53,7 @@ namespace cuda_graph {
 				vector<int> devF1Vec(hostSizes[0]);
 				cudaMemcpy(&(devF1Vec[0]), devF1, hostSizes[0] * sizeof(int), cudaMemcpyDeviceToHost);
 				for (auto &x : devF1Vec) {
-					cout << "%d " << x;
+					cout << x << " ";
 				}
 				cout << endl;
 			}
