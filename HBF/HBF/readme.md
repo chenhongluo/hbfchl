@@ -53,8 +53,9 @@ avgRelaxNodes：平均Relax多少个节点
 avgRelaxEdges: 平均Relax多少个边
 
 git pull && make
-cmake -DCMAKE_BUILD_TYPE=Debug -DARCH=75 .. && make
-cmake -DCMAKE_BUILD_TYPE=Release -DARCH=75 .. && make
+git pull && cmake -DCMAKE_BUILD_TYPE=Debug -DARCH=75 .. && make
+git pull && cmake -DCMAKE_BUILD_TYPE=Release -DARCH=75 .. && make
 
 CUDA_VISIBLE_DEVICES=1 ./HBF /home/chl/data/flickr.mtx ../config.ini
+cuda-memcheck ./HBF /home/chl/data/circuit5M_dc.mtx ../config.ini
 bash /home/chl/hbfrun/run.sh
