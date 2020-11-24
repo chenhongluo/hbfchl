@@ -26,7 +26,7 @@ namespace KernelV3
 		const int realID = g.group_index().x * blockdim + g.thread_rank();
 		const int tileID = realID / VW_SIZE;
 		const int IDStride = gridDim.x * (blockdim / VW_SIZE);
-		const int tileSharedLimit = sharedLimit / VW_SIZE;
+		const int tileSharedLimit = (sharedLimit / 4) / blockdim * VW_SIZE;
 		int* devF2Size = devSizes + 1;
 		int relaxEdges = 0;
 

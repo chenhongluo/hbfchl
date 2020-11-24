@@ -88,22 +88,22 @@ namespace fUtil {
 		progressC = 1L;
 		fchunk = (double)total / 100;
 		nextChunk = fchunk;
-		std::cout << "     0%" << std::flush;
+		// std::cout << "     0%" << std::flush;
 	}
 
 	Progress::~Progress() {
-		std::cout << "\b\b\b\b\b" << " 100% Complete!" << std::endl << std::endl << std::flush;
+		// std::cout << "\b\b\b\b\b" << " 100% Complete!" << std::endl << std::endl << std::flush;
 	}
 
 	void Progress::next(long long int progress) {
 		if (progress == nextChunk) {
-			std::cout << "\b\b\b\b\b" << std::setw(4) << progressC++ << "%" << std::flush;
+			// std::cout << "\b\b\b\b\b" << std::setw(4) << progressC++ << "%" << std::flush;
 			nextChunk = progressC * fchunk;
 		}
 	}
 
 	void Progress::perCent(long long int progress) {
-		std::cout << "\b\b\b\b\b" << std::left << std::setw(4) << std::setprecision(1) << ((float)progress / total) * 100 << "%" << std::flush;
+		// std::cout << "\b\b\b\b\b" << std::left << std::setw(4) << std::setprecision(1) << ((float)progress / total) * 100 << "%" << std::flush;
 	}
 }
 
