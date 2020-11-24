@@ -30,7 +30,7 @@ namespace KernelV1
 		int relaxEdges = 0;
 
 		// for write in shared mem
-		extern __shared__ int st[];
+		__shared__ int st[256 * 10];
 		int *queue = st + g.thread_rank() / VW_SIZE * tileSharedLimit;
 		int founds = 0;
 		unsigned mymask = (1 << tile.thread_rank()) - 1;

@@ -56,5 +56,5 @@ git pull && make
 cmake -DCMAKE_BUILD_TYPE=Debug -DARCH=75 .. && make
 cmake -DCMAKE_BUILD_TYPE=Release -DARCH=75 .. && make
 
-./HBF /home/chl/data/flickr.mtx ../config.ini
+CUDA_VISIBLE_DEVICES=1 ./HBF /home/chl/data/flickr.mtx ../config.ini
 bash /home/chl/hbfrun/run.sh
