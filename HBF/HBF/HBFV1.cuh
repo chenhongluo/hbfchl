@@ -36,8 +36,8 @@ namespace KernelV1
 		int *queue = st + g.thread_rank() / VW_SIZE * tileSharedLimit;
 		int founds = 0;
 		unsigned mymask = (1 << tile.thread_rank()) - 1;
-		printf("blockId:%d\t threadId: %d\t tile.thread_rank() = %d", gridDim.x, g.thread_rank(), tile.thread_rank());
-		printf("blockId:%d\t threadId: %d\t queue = %x", gridDim.x, g.thread_rank(), queue);
+		printf("blockId:%d\t threadId: %d\t tile.thread_rank() = %d\n", gridDim.x, g.thread_rank(), tile.thread_rank());
+		printf("blockId:%d\t threadId: %d\t queue = %x\n", gridDim.x, g.thread_rank(), queue);
 
 		int globalBias;
 
@@ -73,7 +73,7 @@ namespace KernelV1
 				int sum = __popc(mask);
 				if (sum + founds > tileSharedLimit)
 				{
-					printf("blockId:%d\t threadId: %d\t founds = %d", gridDim.x, g.thread_rank(), founds);
+					printf("blockId:%d\t threadId: %d\t founds = %d\n", gridDim.x, g.thread_rank(), founds);
 					// write to global mem if larger than shared mem
 					if (tile.thread_rank() == 0)
 						globalBias = atomicAdd(devF2Size, founds);
