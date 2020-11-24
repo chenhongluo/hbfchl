@@ -39,10 +39,11 @@ namespace KernelV1
 		int globalBias;
 
 		if (realID == 0) {
-			printf("blockId:%d\t threadId: %d\t devSizes[0] = %d\n", gridDim.x, g.thread_rank(), devSizes[0]);
-			printf("blockId:%d\t threadId: %d\t level = %d\n", gridDim.x, g.thread_rank(), level);
-			printf("blockId:%d\t threadId: %d\t IDStride = %d\n", gridDim.x, g.thread_rank(), IDStride);
+			printf("blockId:%d\t threadId: %d\t devSizes[0] = %d\n", blockIdx.x, g.thread_rank(), devSizes[0]);
+			printf("blockId:%d\t threadId: %d\t level = %d\n", blockIdx.x, g.thread_rank(), level);
+			printf("blockId:%d\t threadId: %d\t IDStride = %d\n", blockIdx.x, g.thread_rank(), IDStride);
 		}
+		printf("blockId:%d\t threadId: %d\t mymask = %x\n", blockIdx.x, g.thread_rank(), mymask);
 
 
 		//alloc node for warps
@@ -55,7 +56,6 @@ namespace KernelV1
 			int nodeS = devNodes[index];
 			int nodeE = devNodes[index + 1];
 			relaxEdges += (nodeE - nodeS);
-			printf("blockId:%d\t threadId: %d\t relaxEdges = %d\n", gridDim.x, g.thread_rank(), relaxEdges);
 
 			// alloc edges in a warp
 			for (int k = nodeS + tile.thread_rank(); k < nodeE + tile.thread_rank(); k += VW_SIZE)
@@ -74,15 +74,17 @@ namespace KernelV1
 					flag = ((oldNode2Weight.y > newWeight) && (level > oldNode2Weight.x));
 				}
 				unsigned mask = tile.ballot(flag);
+				if (tile.thread_rank() == 0)
+					printf("blockId:%d\t threadId: %d\t mask = %x\n", blockIdx.x, g.thread_rank(), mask);
+
 				// devPrintfX(32, mask, "mask");
 
 				int sum = __popc(mask);
-				printf("blockId:%d\t threadId: %d\t mask = %x\n", gridDim.x, g.thread_rank(), mask);
-				printf("blockId:%d\t threadId: %d\t sum = %d\n", gridDim.x, g.thread_rank(), sum);
 
 				if (sum + founds > tileSharedLimit)
 				{
-					printf("blockId:%d\t threadId: %d\t founds = %d\n", gridDim.x, g.thread_rank(), founds);
+					if(tile.thread_rank() == 0)
+						printf("blockId:%d\t threadId: %d\t founds = %d\n", blockIdx.x, g.thread_rank(), founds);
 					// write to global mem if larger than shared mem
 					if (tile.thread_rank() == 0)
 						globalBias = atomicAdd(devF2Size, founds);
