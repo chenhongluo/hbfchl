@@ -26,20 +26,24 @@ namespace KernelV1
 		const int tileID = realID / VW_SIZE;
 		const int IDStride = gridDim.x * (blockdim / VW_SIZE);
 		const int tileSharedLimit = (sharedLimit / 4) / blockdim * VW_SIZE;
-		printf("blockId:%d\t threadId: %d\t tileSharedLimit = %d", gridDim.x,g.thread_rank(), tileSharedLimit);
 
 		int* devF2Size = devSizes + 1;
 		int relaxEdges = 0;
 
 		// for write in shared mem
-		__shared__ int st[256 * 10];
+		extern __shared__ int st[];
 		int *queue = st + g.thread_rank() / VW_SIZE * tileSharedLimit;
 		int founds = 0;
 		unsigned mymask = (1 << tile.thread_rank()) - 1;
-		printf("blockId:%d\t threadId: %d\t tile.thread_rank() = %d\n", gridDim.x, g.thread_rank(), tile.thread_rank());
-		printf("blockId:%d\t threadId: %d\t queue = %x\n", gridDim.x, g.thread_rank(), queue);
 
 		int globalBias;
+
+		if (realID == 0) {
+			printf("blockId:%d\t threadId: %d\t devSizes[0] = %d\n", gridDim.x, g.thread_rank(), devSizes[0]);
+			printf("blockId:%d\t threadId: %d\t level = %d\n", gridDim.x, g.thread_rank(), level);
+			printf("blockId:%d\t threadId: %d\t IDStride = %d\n", gridDim.x, g.thread_rank(), IDStride);
+		}
+
 
 		//alloc node for warps
 		for (int i = tileID; i < devSizes[0]; i += IDStride)
@@ -51,6 +55,8 @@ namespace KernelV1
 			int nodeS = devNodes[index];
 			int nodeE = devNodes[index + 1];
 			relaxEdges += (nodeE - nodeS);
+			printf("blockId:%d\t threadId: %d\t relaxEdges = %d\n", gridDim.x, g.thread_rank(), relaxEdges);
+
 			// alloc edges in a warp
 			for (int k = nodeS + tile.thread_rank(); k < nodeE + tile.thread_rank(); k += VW_SIZE)
 			{
@@ -71,6 +77,9 @@ namespace KernelV1
 				// devPrintfX(32, mask, "mask");
 
 				int sum = __popc(mask);
+				printf("blockId:%d\t threadId: %d\t mask = %x\n", gridDim.x, g.thread_rank(), mask);
+				printf("blockId:%d\t threadId: %d\t sum = %d\n", gridDim.x, g.thread_rank(), sum);
+
 				if (sum + founds > tileSharedLimit)
 				{
 					printf("blockId:%d\t threadId: %d\t founds = %d\n", gridDim.x, g.thread_rank(), founds);
