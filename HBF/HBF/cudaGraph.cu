@@ -6,7 +6,7 @@
 #include <iostream>
 #include <chrono>
 #include <algorithm>
-
+#define DEBUG 1
 namespace cuda_graph {
 	CudaGraph::CudaGraph(GraphWeight & _gp, CudaConfigs _configs)
 		:gp(_gp), configs(_configs), v(_gp.v), e(_gp.e)
@@ -48,6 +48,14 @@ namespace cuda_graph {
 				vector<int> devF1Vec(hostSizes[0]);
 				cudaMemcpy(&(devF1Vec[0]), devF1, hostSizes[0] * sizeof(int), cudaMemcpyDeviceToHost);
 				profile.devF1Detail.push_back(devF1Vec);
+			}
+			if (DEBUG) {
+				vector<int> devF1Vec(hostSizes[0]);
+				cudaMemcpy(&(devF1Vec[0]), devF1, hostSizes[0] * sizeof(int), cudaMemcpyDeviceToHost);
+				for (auto &x : devF1Vec) {
+					cout << "%d " << x;
+				}
+				cout << endl;
 			}
 			// debugCudaArray<int>(devF1, hostSizes[0]);
 			auto time1 = chrono::high_resolution_clock::now();
