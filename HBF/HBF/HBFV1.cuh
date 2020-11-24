@@ -79,12 +79,6 @@ namespace KernelV1
 
 				int sum = __popc(mask);
 
-				if (realID < 64) {
-					printf("blockId:%d\t threadId: %d\t flag = %d\n", blockIdx.x, g.thread_rank(), flag);
-					printf("blockId:%d\t threadId: %d\t mask = %d\n", blockIdx.x, g.thread_rank(), mask);
-					printf("blockId:%d\t threadId: %d\t sum = %d\n", blockIdx.x, g.thread_rank(), sum);
-				}
-
 				if (sum + founds > tileSharedLimit)
 				{
 
