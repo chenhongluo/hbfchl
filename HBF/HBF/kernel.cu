@@ -190,6 +190,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 	tag_setting = m_pt.get_child("action");
 	string subaction = tag_setting.get<string>("subaction");
 	int testNodeSize = tag_setting.get<int>("testNodeSize", 0);
+	bool printDeatil = tag_setting.get<int>("printDeatil", false);
 
 	tag_setting = m_pt.get_child("cuda");
 	vector<node_t> testNodes = getTestNodes(testNodeSize, 0, graph.v);
@@ -213,8 +214,9 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 				<< "\trelaxNodes: " << pf.relaxNodes << "\trelaxNodesDivV: " << (double)pf.relaxNodes / graph.v
 				<< "\trelaxEdges: " << pf.relaxEdges << "\trelaxEdgesDivE: " << (double)pf.relaxEdges / graph.e
 				<< "\tdepth: " << pf.depth
+				<< "\tuseTime: " << t 
 				<< "\tkernelTime: " << pf.kernel_time << "\tsortTime: " << pf.sort_time << "\tcopyTime: " << pf.copy_time
-				<< "\tuseTime: " << t << endl;
+				<< endl;
 			if (pf.nodeDepthDetail.size() > 0 && cg->configs.profile) {
 				cout << "Relax Detail Profile:" << endl;
 				fUtil::analyseIntVec<true>(pf.nodeRelaxTap, "nodeRelaxTap:");
@@ -245,8 +247,9 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 	cout << "\trelaxNodes: " << allRN << "\trelaxNodesDivV: " << allRN / graph.v
 		<< "\trelaxEdges: " << allRE << "\trelaxEdgesDivE: " << allRE / graph.e
 		<< "\trelaxDepth: " << allDP
+		<< "\tuseTime: " << allt
 		<< "\tkernelTime: " << allkt << "\tsortTime: " << allst << "\tcopyTime: " << allct
-		<< "\tuseTime: " << allt << endl;
+		<< endl;
 }
 void predeal(GraphWeight &graph, boost::property_tree::ptree m_pt) 
 {
