@@ -43,7 +43,6 @@ namespace KernelV1
 			printf("blockId:%d\t threadId: %d\t level = %d\n", blockIdx.x, g.thread_rank(), level);
 			printf("blockId:%d\t threadId: %d\t IDStride = %d\n", blockIdx.x, g.thread_rank(), IDStride);
 		}
-		printf("blockId:%d\t threadId: %d\t mymask = %x\n", blockIdx.x, g.thread_rank(), mymask);
 
 
 		//alloc node for warps
@@ -74,8 +73,6 @@ namespace KernelV1
 					flag = ((oldNode2Weight.y > newWeight) && (level > oldNode2Weight.x));
 				}
 				unsigned mask = tile.ballot(flag);
-				if (tile.thread_rank() == 0)
-					printf("blockId:%d\t threadId: %d\t mask = %x\n", blockIdx.x, g.thread_rank(), mask);
 
 				// devPrintfX(32, mask, "mask");
 
@@ -83,11 +80,15 @@ namespace KernelV1
 
 				if (sum + founds > tileSharedLimit)
 				{
-					if(tile.thread_rank() == 0)
+					if (tile.thread_rank() == 0) {
 						printf("blockId:%d\t threadId: %d\t founds = %d\n", blockIdx.x, g.thread_rank(), founds);
+					}
 					// write to global mem if larger than shared mem
 					if (tile.thread_rank() == 0)
 						globalBias = atomicAdd(devF2Size, founds);
+					if (tile.thread_rank() == 0) {
+						printf("blockId:%d\t threadId: %d\t globalBias = %d\n", blockIdx.x, g.thread_rank(), globalBias);
+					}
 					globalBias = tile.shfl(globalBias, 0);
 					for (int j = tile.thread_rank(); j < founds; j += VW_SIZE)
 						devF2[globalBias + j] = queue[j];
