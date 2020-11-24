@@ -35,16 +35,8 @@ namespace KernelV1
 		int *queue = st + g.thread_rank() / VW_SIZE * tileSharedLimit;
 		int founds = 0;
 		unsigned mymask = (1 << tile.thread_rank()) - 1;
-		queue[161] = 0;
 
 		int globalBias;
-
-		if (realID == 0) {
-			printf("blockId:%d\t threadId: %d\t devSizes[0] = %d\n", blockIdx.x, g.thread_rank(), devSizes[0]);
-			printf("blockId:%d\t threadId: %d\t level = %d\n", blockIdx.x, g.thread_rank(), level);
-			printf("blockId:%d\t threadId: %d\t IDStride = %d\n", blockIdx.x, g.thread_rank(), IDStride);
-		}
-
 
 		//alloc node for warps
 		for (int i = tileID; i < devSizes[0]; i += IDStride)
@@ -107,7 +99,7 @@ namespace KernelV1
 		if (tile.thread_rank() == 0)
 			globalBias = atomicAdd(devF2Size, founds);
 		globalBias = tile.shfl(globalBias, 0);
-		for (int j = tile.thread_rank(); j < founds; j += 32)
+		for (int j = tile.thread_rank(); j < founds; j += VW_SIZE)
 			devF2[globalBias + j] = queue[j];
 
 		if (tile.thread_rank() == 0) {

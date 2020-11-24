@@ -98,7 +98,7 @@ namespace KernelV3
 		if (tile.thread_rank() == 0)
 			globalBias = atomicAdd(devSizes + 1, founds);
 		globalBias = tile.shfl(globalBias, 0);
-		for (int j = tile.thread_rank(); j < founds; j += 32)
+		for (int j = tile.thread_rank(); j < founds; j += VW_SIZE)
 			devF2[globalBias + j] = queue[j];
 
 		if (tile.thread_rank() == 0) {
