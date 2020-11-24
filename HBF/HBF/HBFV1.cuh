@@ -110,7 +110,7 @@ namespace KernelV1
 		}
 		// write to global mem
 		if (tile.thread_rank() == 0)
-			globalBias = atomicAdd(devSizes + 1, founds);
+			globalBias = atomicAdd(devF2Size, founds);
 		globalBias = tile.shfl(globalBias, 0);
 		for (int j = tile.thread_rank(); j < founds; j += 32)
 			devF2[globalBias + j] = queue[j];

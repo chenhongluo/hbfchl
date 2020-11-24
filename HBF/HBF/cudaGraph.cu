@@ -51,8 +51,9 @@ namespace cuda_graph {
 			}
 			if (DEBUG) {
 				vector<int> devF1Vec(hostSizes[0]);
-				sort(devF1Vec.begin(), devF1Vec.end());
 				cudaMemcpy(&(devF1Vec[0]), devF1, hostSizes[0] * sizeof(int), cudaMemcpyDeviceToHost);
+				sort(devF1Vec.begin(), devF1Vec.end());
+
 				for (auto &x : devF1Vec) {
 					cout << x << " ";
 				}
