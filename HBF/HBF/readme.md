@@ -59,3 +59,10 @@ git pull && cmake -DCMAKE_BUILD_TYPE=Release -DARCH=75 .. && make
 CUDA_VISIBLE_DEVICES=1 ./HBF /home/chl/data/flickr.mtx ../config.ini
 cuda-memcheck ./HBF /home/chl/data/circuit5M_dc.mtx ../config.ini
 bash /home/chl/hbfrun/run.sh
+docker run -it --gpus all -v /home/chl:/home/chl -p 10104:22 --network="host" --name chl_sssp_gpu --rm --privileged  chenhongluo_cuda_10_1:v1
+docker run --name=chlmysql -d mysql/mysql-server
+docker exec -it chlmysql mysql -uroot -p 
+@M3hUNz@dihf3zij3L3vaxFiSeq4 
+ALTER USER 'root'@'localhost' IDENTIFIED BY '1234';
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '1234';
+flush privileges;

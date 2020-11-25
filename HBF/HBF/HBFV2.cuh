@@ -120,11 +120,11 @@ namespace KernelV2
 using namespace KernelV2;
 
 #define HBFSearchV2Atomic64(vwSize,gridDim, blockDim, sharedLimit ,tileLimit) \
-HBFSearchV3Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
+HBFSearchV2Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
 (devUpOutNodes, devUpOutEdges, devInt2Distances, devF1, devF2, devSizes, sharedLimit,tileLimit, level)
 
 //user interface gridDim, blockDim, sharedLimit, devUpOutNodes, devUpOutEdges, devIntDistances, devInt2Distances, f1, f2, devSizes, sharedLimit,level
-//name = {HBFSearchV0Atomic64,HBFSearchV0Atomic32}
+//name = {HBFSearchV2Atomic64,HBFSearchV2Atomic32}
 //vwSize = 1,2,4,8,16,32
 #define switchKernelV2(atomic64,vwSize,gridDim, blockDim, sharedLimit,tileLimit ) \
 {\

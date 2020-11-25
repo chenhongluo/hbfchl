@@ -70,6 +70,9 @@
     <ClInclude Include="HBFV2.cuh">
       <Filter>include\kernels</Filter>
     </ClInclude>
+    <ClInclude Include="HBFV4.cuh">
+      <Filter>include\kernels</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt">
