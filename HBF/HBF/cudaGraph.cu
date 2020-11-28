@@ -47,6 +47,21 @@ namespace cuda_graph {
 			if (configs.profile) {
 				vector<int> devF1Vec(hostSizes[0]);
 				cudaMemcpy(&(devF1Vec[0]), devF1, hostSizes[0] * sizeof(int), cudaMemcpyDeviceToHost);
+				sort(devF1Vec.begin(), devF1Vec.end());
+				int k2 = 0;
+				cout << "devF\t" << "level(" << level << ")" << endl;
+				for (int k1 = 0; k1 < devF1Vec.size(); k1++) {
+					cout << devF1Vec[k1];
+					if (k2 < 10) {
+						cout << " ";
+						k2++;
+					}
+					else {
+						cout << endl;
+						k2 = 0;
+					}
+				}
+				cout << endl;
 				profile.devF1Detail.push_back(devF1Vec);
 			}
 			if (DEBUG) {
