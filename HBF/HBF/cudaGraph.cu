@@ -46,22 +46,26 @@ namespace cuda_graph {
 			depth = level;
 			if (configs.profile) {
 				vector<int> devF1Vec(hostSizes[0]);
+				vector<int> tempDistances;
 				cudaMemcpy(&(devF1Vec[0]), devF1, hostSizes[0] * sizeof(int), cudaMemcpyDeviceToHost);
+				cudaGetRes(tempDistances)
 				sort(devF1Vec.begin(), devF1Vec.end());
-				int k2 = 0;
-				cout << "devF\t" << "level(" << level << ")" << endl;
-				for (int k1 = 0; k1 < devF1Vec.size(); k1++) {
-					cout << devF1Vec[k1];
-					if (k2 < 10) {
-						cout << " ";
-						k2++;
+				if (level < 10) {
+					int k2 = 0;
+					cout << "devF\t" << "level(" << level << ")" << endl;
+					for (int k1 = 0; k1 < devF1Vec.size(); k1++) {
+						cout << devF1Vec[k1] << "(" << tempDistances[devF1Vec[k1]] << ")";
+						if (k2 < 10) {
+							cout << " ";
+							k2++;
+						}
+						else {
+							cout << endl;
+							k2 = 0;
+						}
 					}
-					else {
-						cout << endl;
-						k2 = 0;
-					}
+					cout << endl;
 				}
-				cout << endl;
 				profile.devF1Detail.push_back(devF1Vec);
 			}
 			if (DEBUG) {
