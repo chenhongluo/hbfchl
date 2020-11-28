@@ -141,7 +141,7 @@ HBFSearchV2Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
 		case 16: \
 			kernelV2Atmoic64(16,gridDim, blockDim, sharedLimit,tileLimit); break;\
 		case 32: \
-			HBFSearchV2Atomic64(32,gridDim, blockDim, sharedLimit,tileLimit); break;\
+			kernelV2Atmoic64(32,gridDim, blockDim, sharedLimit,tileLimit); break;\
 		default: \
 			__ERROR("no this vwsize")\
 		}\
