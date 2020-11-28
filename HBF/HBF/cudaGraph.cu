@@ -49,7 +49,7 @@ namespace cuda_graph {
 				vector<int> tempDistances;
 				cudaMemcpy(&(devF1Vec[0]), devF1, hostSizes[0] * sizeof(int), cudaMemcpyDeviceToHost);
 				cudaGetRes(tempDistances);
-				sort(devF1Vec.begin(), devF1Vec.end());
+				// sort(devF1Vec.begin(), devF1Vec.end());
 				if (level < 10) {
 					int k2 = 0;
 					cout << "devF\t" << "level(" << level << ")" << endl;
