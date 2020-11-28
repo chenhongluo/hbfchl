@@ -119,7 +119,7 @@ namespace KernelV2
 
 using namespace KernelV2;
 
-#define HBFSearchV2Atomic64(vwSize,gridDim, blockDim, sharedLimit ,tileLimit) \
+#define kernelV2Atmoic64(vwSize,gridDim, blockDim, sharedLimit ,tileLimit) \
 HBFSearchV2Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
 (devUpOutNodes, devUpOutEdges, devInt2Distances, devF1, devF2, devSizes, sharedLimit,tileLimit, level)
 
@@ -131,15 +131,15 @@ HBFSearchV2Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
 	if (atomic64) {  \
 		switch (vwSize) { \
 		case 1:\
-			HBFSearchV2Atomic64(1,gridDim, blockDim, sharedLimit,tileLimit); break;\
+			kernelV2Atmoic64(1,gridDim, blockDim, sharedLimit,tileLimit); break;\
 		case 2: \
-			HBFSearchV2Atomic64(2,gridDim, blockDim, sharedLimit,tileLimit); break;\
+			kernelV2Atmoic64(2,gridDim, blockDim, sharedLimit,tileLimit); break;\
 		case 4: \
-			HBFSearchV2Atomic64(4,gridDim, blockDim, sharedLimit,tileLimit); break;\
+			kernelV2Atmoic64(4,gridDim, blockDim, sharedLimit,tileLimit); break;\
 		case 8: \
-			HBFSearchV2Atomic64(8,gridDim, blockDim, sharedLimit,tileLimit); break;\
+			kernelV2Atmoic64(8,gridDim, blockDim, sharedLimit,tileLimit); break;\
 		case 16: \
-			HBFSearchV2Atomic64(16,gridDim, blockDim, sharedLimit,tileLimit); break;\
+			kernelV2Atmoic64(16,gridDim, blockDim, sharedLimit,tileLimit); break;\
 		case 32: \
 			HBFSearchV2Atomic64(32,gridDim, blockDim, sharedLimit,tileLimit); break;\
 		default: \
