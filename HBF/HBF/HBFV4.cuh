@@ -5,6 +5,42 @@
 using namespace cooperative_groups;
 
 namespace KernelV4 {
+	template <int VW_SIZE, typename T>
+	__device__ __forceinline__ void
+		VWInclusiveScanAdd(thread_block_tile<VW_SIZE> &tile, const T &value, T &sum)
+	{
+		sum = value;
+		for (int i = 1; i <= tile.size() / 2; i *= 2)
+		{
+			T n = tile.shfl_up(sum, i);
+			if (tile.thread_rank() >= i)
+			{
+				sum += n;
+			}
+		}
+	}
+
+	template<int VW_SIZE, typename T>
+	__device__ __forceinline__ void
+		VWWrite(thread_block_tile<VW_SIZE>& tile, int *pAllsize, T* writeStartAddr, const int& writeCount, T* data)
+	{
+		int sum = 0;
+		int bias = 0;
+		VWInclusiveScanAdd<VW_SIZE, int>(tile, writeCount, sum);
+		// devPrintfInt(32,sum,"sum");
+		if (tile.thread_rank() == tile.size() - 1)
+		{
+			bias = atomicAdd(pAllsize, sum);
+		}
+		bias = tile.shfl(bias, tile.size() - 1);
+		sum -= writeCount;
+
+		for (int it = 0; it < writeCount; it++)
+		{
+			writeStartAddr[bias + sum + it] = data[it];
+		}
+	}
+
 	template <int VW_SIZE>
 	__global__ void HBFSearchV4Atomic64(
 		int *__restrict__ devNodes,
@@ -44,7 +80,7 @@ namespace KernelV4 {
 					int sourceWeight = devDistances[index].y;
 					if (sourceWeight > distanceLimit) {
 						if (tile.thread_rank() == VW_SIZE - 1) {
-							queue[founds++] = dest.x;
+							queue[founds++] = index;
 						}
 						if (tile.any(founds >= threadLimit)) {
 							VWWrite<VW_SIZE, int>(tile, devF2Size, devF2, founds, queue);
