@@ -191,7 +191,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 	tag_setting = m_pt.get_child("action");
 	string subaction = tag_setting.get<string>("subaction");
 	int testNodeSize = tag_setting.get<int>("testNodeSize", 0);
-	bool printDeatil = tag_setting.get<int>("printDeatil", false);
+	bool printDeatil = tag_setting.get<int>("printDeatil", true);
 
 	tag_setting = m_pt.get_child("cuda");
 	vector<node_t> testNodes = getTestNodes(testNodeSize, 0, graph.v);
