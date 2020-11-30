@@ -3,6 +3,7 @@
 #include "HBFV1.cuh"
 #include "HBFV2.cuh"
 #include "HBFV3.cuh"
+#include "HBFV4.cuh"
 #include <iostream>
 #include <chrono>
 #include <algorithm>
@@ -44,6 +45,7 @@ namespace cuda_graph {
 		{
 			level++;
 			depth = level;
+			int distanceLimit = configs.distanceLimit * level;
 			if (configs.profile) {
 				vector<int> devF1Vec(hostSizes[0]);
 				vector<int> tempDistances;
@@ -92,6 +94,9 @@ namespace cuda_graph {
 			}
 			else if (kv == "v3") {
 				switchKernelV3Config(configs)
+			}
+			else if (kv == "v4") {
+				switchKernelV4Config(configs)
 			}
 			else {
 				cout << "not known kernel version" << endl;

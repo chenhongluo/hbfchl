@@ -114,6 +114,7 @@ CudaGraph* getCudaGraphFromConfig(GraphWeight &graph, boost::property_tree::ptre
 	configs.profile = tag_setting.get<bool>("profile", false);
 	configs.sort = tag_setting.get<bool>("sort", false);
 	configs.tileLimit = tag_setting.get<int>("tileLimit", 1);
+	configs.distanceLimit = tag_setting.get<int>("distanceLimit", 100);
 	
 	if(gpuIndex > 0)
 		cudaSetDevice(gpuIndex);
