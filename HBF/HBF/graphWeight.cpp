@@ -143,7 +143,7 @@ namespace graph {
 		for (int i = 0; i < e; i++) {
 			edges[i] = outEdgeWeights[i].y;
 		}
-		fUtil::analyseIntVec<true>(edges, 100000, "edge weight detail anaylse");
+		fUtil::analyseIntVec<true>(edges, 10000, "edge weight detail anaylse");
 
 		/*cout << " locality detail anaylse" << endl;
 		int k = 0;
