@@ -102,8 +102,12 @@ namespace fUtil {
 			}
 			cout << s << endl;
 			cout << "minv: " << minv << "\tmaxv: " << maxv << endl;
+			int stemp = 0;
 			for (int i = 0; i < vv.size(); i++) {
-				cout << i << " " << vv[i] << " " << fixed << setprecision(4) << (double)vv[i] / v.size() << endl;
+				stemp += vv[i];
+				cout << i << ":\t" << vv[i] << "\t" << fixed << setprecision(4) << (double)vv[i] / v.size() << "\t"
+					<< stemp << "\t" << fixed << setprecision(4) << (double)stemp / v.size() << "\t"
+					<< endl;
 			}
 		}
 	}

@@ -139,7 +139,7 @@ namespace graph {
 		}
 		fUtil::analyseIntVec<true>(ds, "degree detail anaylse");
 
-		cout << " locality detail anaylse" << endl;
+		/*cout << " locality detail anaylse" << endl;
 		int k = 0;
 		double dis = 0.0;
 		int yield = 8;
@@ -166,7 +166,7 @@ namespace graph {
 				cout << "now i = "<< i << " temp locality value: " << dis << endl;
 			}
 		}
-		cout << "locality yield: " << yield << "\tlocality value: " << dis << endl;
+		cout << "locality yield: " << yield << "\tlocality value: " << dis << endl;*/
 	}
 
 	void GraphWeight::analyseSimple()

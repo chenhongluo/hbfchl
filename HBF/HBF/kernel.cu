@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
 	else if (action == "predeal") {
 		predeal(graphWeight, m_pt);
 	}
-	else if (action == "anaylse") {
+	else if (action == "analyse") {
 		graphWeight.analyseDetail();
 	}
     return 0;
