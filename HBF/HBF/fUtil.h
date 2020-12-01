@@ -113,6 +113,32 @@ namespace fUtil {
 	}
 
 	template<bool PRINT>
+	void analyseIntVec(const std::vector<int> &v, int n, std::string s) {
+		if (PRINT) {
+			auto pair = std::minmax_element(v.begin(), v.end());
+			int minv = *pair.first;
+			int maxv = *pair.second;
+
+			int d = (maxv - minv) / n + 1;
+			vector<int> vv(n,0);
+			cout << s << endl;
+			cout << "minv: " << minv << "\tmaxv: " << maxv << endl;
+			int stemp = 0;
+			for (int i = 0; i < v.size(); i++) {
+				vv[(v[i] - minv) / d] ++;
+			}
+
+			int stemp;
+			for (int i = 0; i < vv.size(); i++) {
+				stemp += vv[i];
+				cout << minv + i * d << "-" << minv + i * d+ d << ":\t" << vv[i] << "\t" << fixed << setprecision(4) << (double)vv[i] / v.size() << "\t"
+					<< stemp << "\t" << fixed << setprecision(4) << (double)stemp / v.size() << "\t"
+					<< endl;
+			}
+		}
+	}
+
+	template<bool PRINT>
 	void print_info(const char* msg) {
 		if (PRINT)
 			std::cout << msg << std::endl;
