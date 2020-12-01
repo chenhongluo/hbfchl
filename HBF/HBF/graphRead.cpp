@@ -75,7 +75,8 @@ namespace graph {
 			graphDir.append("(UnDef)");
 			userDirection = EdgeType::DIRECTED;
 		}
-		std::cout << std::endl << "\tNodes: " << header._v << "\tEdges: " << header._e << "\tSymmetricFlag:" << symmeticFlag << '\t' << graphDir
+		std::cout << std::endl << "\tNodes: " << header._v << "\tEdges: " << header._e << "\tSymmetricFlag:" << symmeticFlag
+			<< "\tFileWeightFlag:" << fileWeightFlag << '\t' << graphDir
 			<< "\tDegree AVG: " << std::fixed << std::setprecision(1) << (float)header._e / header._v << std::endl;
 		StreamModifier::resetSep();
 		return header;
