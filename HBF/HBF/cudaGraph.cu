@@ -4,6 +4,7 @@
 #include "HBFV2.cuh"
 #include "HBFV3.cuh"
 #include "HBFV4.cuh"
+#include "HBFV5.cuh"
 #include <iostream>
 #include <chrono>
 #include <algorithm>
@@ -97,6 +98,9 @@ namespace cuda_graph {
 			}
 			else if (kv == "v4") {
 				switchKernelV4Config(configs)
+			}
+			else if (kv == "v5") {
+				switchKernelV5Config(configs)
 			}
 			else {
 				cout << "not known kernel version" << endl;
