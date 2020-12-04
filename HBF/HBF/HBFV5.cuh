@@ -118,6 +118,7 @@ namespace KernelV5
 		int* devF1, int* devF2,
 		int *__restrict__ devSizes,
 		const int sharedLimit,
+		const int distanceLimit,
 		int level)
 	{
 		//alloc node&edge
