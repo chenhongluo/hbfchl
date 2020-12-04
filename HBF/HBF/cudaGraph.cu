@@ -4,15 +4,14 @@
 #include "HBFV2.cuh"
 #include "HBFV3.cuh"
 #include "HBFV4.cuh"
-//#include "HBFV5.cuh"
+#include "HBFV5.cuh"
 #include <iostream>
 #include <chrono>
 #include <algorithm>
-#define DEBUG 0
 namespace cuda_graph {
 	CudaGraph::CudaGraph(GraphWeight & _gp, CudaConfigs _configs)
 		:gp(_gp), configs(_configs), v(_gp.v), e(_gp.e)
-	{
+	{ 
 		cudaMallocMem();
 		cudaCopyMem();
 	}
@@ -21,6 +20,7 @@ namespace cuda_graph {
 	void debugCudaArray(T* array, int size) {
 		vector<T> res(size);
 		cudaMemcpy(&(res[0]), array, size * sizeof(int), cudaMemcpyDeviceToHost);
+		sort(res.begin(), res.end());
 		cout << "frontier: ";
 		for (int i = 0; i < size;i++) {
 			cout << res[i] << " ";
@@ -30,57 +30,34 @@ namespace cuda_graph {
 
 	void CudaGraph::search(int source, CudaProfiles& profile)
 	{
-		vector<int> hostSizes(4, 0);
-		hostSizes[0] = 1;
+		// f1 relax to f2 ,devSizes 0->f1Size,1->f2Size,2->relaxEdges
+		// swap(f1,f2)
+		// f1Size = f2Size,f2Size = relaxEdges = 0
 		int* devF1 = f1;
 		int* devF2 = f2;
-		int level = 0;
 		long &relaxNodes = profile.relaxNodes;
 		long &relaxEdges = profile.relaxEdges;
-		
 		int &depth = profile.depth;
 
+		// init
+		vector<int> hostSizes(4, 0);
+		hostSizes[0] = 1;
 		cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
 		cudaMemcpy(devF1, &source, 1 * sizeof(int), cudaMemcpyHostToDevice);
+		int level = 0;
+
+		// config
+		int gridDim = configs.gridDim;
+		int blockDim = configs.blockDim;
+		int sharedLimit = configs.sharedLimit;
+		int distanceLimit;
+		int tileLimit = configs.tileLimit;
+
 		while (1)
 		{
 			level++;
 			depth = level;
-			int distanceLimit = configs.distanceLimit * level;
-			if (configs.profile) {
-				vector<int> devF1Vec(hostSizes[0]);
-				vector<int> tempDistances;
-				cudaMemcpy(&(devF1Vec[0]), devF1, hostSizes[0] * sizeof(int), cudaMemcpyDeviceToHost);
-				cudaGetRes(tempDistances);
-				// sort(devF1Vec.begin(), devF1Vec.end());
-				if (level < 10) {
-					int k2 = 0;
-					cout << "devF\t" << "level(" << level << ")" << endl;
-					for (int k1 = 0; k1 < devF1Vec.size(); k1++) {
-						cout << devF1Vec[k1] << "(" << tempDistances[devF1Vec[k1]] << ")";
-						if (k2 < 10) {
-							cout << " ";
-							k2++;
-						}
-						else {
-							cout << endl;
-							k2 = 0;
-						}
-					}
-					cout << endl;
-				}
-				profile.devF1Detail.push_back(devF1Vec);
-			}
-			if (DEBUG) {
-				vector<int> devF1Vec(hostSizes[0]);
-				cudaMemcpy(&(devF1Vec[0]), devF1, hostSizes[0] * sizeof(int), cudaMemcpyDeviceToHost);
-				sort(devF1Vec.begin(), devF1Vec.end());
-
-				for (auto &x : devF1Vec) {
-					cout << x << " ";
-				}
-				cout << endl;
-			}
+			distanceLimit = configs.distanceLimit * level;
 			// debugCudaArray<int>(devF1, hostSizes[0]);
 			auto time1 = chrono::high_resolution_clock::now();
 			string &kv = configs.kernelVersion;
@@ -99,9 +76,6 @@ namespace cuda_graph {
 			else if (kv == "v4") {
 				switchKernelV4Config(configs)
 			}
-	/*		else if (kv == "v5") {
-				switchKernelV5Config(configs)
-			}*/
 			else {
 				cout << "not known kernel version" << endl;
 				exit(-1);
@@ -117,24 +91,71 @@ namespace cuda_graph {
 			if (hostSizes[0] == 0) break;
 			cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
 			auto time3 = chrono::high_resolution_clock::now();
-			auto time4 = time3;
-			auto time5 = time3;
-			auto time6 = time3;
-			if (configs.sort) {
-				vector<int> devF1Vec(hostSizes[0]);
-				cudaMemcpy(&(devF1Vec[0]), devF1, hostSizes[0] * sizeof(int), cudaMemcpyDeviceToHost);
-				time4 = chrono::high_resolution_clock::now();
-				sort(devF1Vec.begin(), devF1Vec.end());
-				time5 = chrono::high_resolution_clock::now();
-				cudaMemcpy(devF1, &(devF1Vec[0]), hostSizes[0] * sizeof(int), cudaMemcpyHostToDevice);
-				time6 = chrono::high_resolution_clock::now();
-			}
 			profile.kernel_time += chrono::duration_cast<chrono::microseconds>(time2 - time1).count();
-			profile.sort_time += chrono::duration_cast<chrono::microseconds>(time5 - time4).count();
-			profile.copy_time += chrono::duration_cast<chrono::microseconds>(time4 - time2 + time6 - time5).count();
+			profile.copy_time += chrono::duration_cast<chrono::microseconds>(time3 - time2).count();
 		}
 		profile.kernel_time *= 0.001;
-		profile.sort_time *= 0.001;
+		profile.sort_time = 0;
+		profile.copy_time *= 0.001;
+	}
+
+	void CudaGraph::searchV5(int source, CudaProfiles & profiles)
+	{
+		// f1 select to f3,remain to f2 ,devSizes 0->f1Size,1->f2Size,2->f3Size,3->relaxEdges
+		// f3 relax to f2
+		// swap(f1,f2)
+		// f1Size = f2Size,f2Size = f3Size = relaxEdges = 0
+
+		int* devF1 = f1;
+		int* devF2 = f2;
+		int* devF3 = f3;
+		long &relaxNodes = profile.relaxNodes; //f3Size
+		long &relaxRemain = profile.relaxRemain; //f2Size
+		long &relaxEdges = profile.relaxEdges;
+		int &depth = profile.depth;
+
+		// init
+		vector<int> hostSizes(4, 0);
+		hostSizes[0] = 1;
+		cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(devF1, &source, 1 * sizeof(int), cudaMemcpyHostToDevice);
+		int level = 0;
+
+		// config
+		int gridDim = configs.gridDim;
+		int blockDim = configs.blockDim;
+		int sharedLimit = configs.sharedLimit;
+		int distanceLimit;
+		int tileLimit = configs.tileLimit;
+
+		while (1)
+		{
+			level++;
+			depth = level;
+			distanceLimit = configs.distanceLimit * level;
+			// debugCudaArray<int>(devF1, hostSizes[0]);
+			auto time1 = chrono::high_resolution_clock::now();
+			string &kv = configs.kernelVersion;
+			selectNodesV5();
+			switchKernelV5Config(configs);
+
+			__CUDA_ERROR("GNRSearchMain Kernel");
+			auto time2 = chrono::high_resolution_clock::now();
+			std::swap(devF1, devF2);
+			cudaMemcpy(&(hostSizes[0]), devSizes, 4 * sizeof(int), cudaMemcpyDeviceToHost);
+			relaxEdges += hostSizes[3];
+			relaxNodes += hostSizes[2];
+			relaxRemain += hostSizes[0] - hostSizes[2];
+			//cout << "level: " << level << "\tf1Size: " << hostSizes[0] << "\trelaxEdges: " << hostSizes[2] << endl;
+			hostSizes[0] = hostSizes[1], hostSizes[1] = hostSizes[2] = hostSizes[3] = 0;
+			if (hostSizes[0] == 0) break;
+			cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
+			auto time3 = chrono::high_resolution_clock::now();
+			profile.kernel_time += chrono::duration_cast<chrono::microseconds>(time2 - time1).count();
+			profile.copy_time += chrono::duration_cast<chrono::microseconds>(time3 - time2).count();
+		}
+		profile.kernel_time *= 0.001;
+		profile.sort_time = 0;
 		profile.copy_time *= 0.001;
 	}
 
@@ -148,14 +169,16 @@ namespace cuda_graph {
 		cudaMalloc((void**)&devUpOutNodes, (v + 1) * sizeof(int));
 		cudaMalloc((void**)&devUpOutEdges, e * sizeof(int2));
 
-		cudaMalloc((void**)&devSizes, 4 * sizeof(int));
+		cudaMalloc((void**)&devSizes, 128 * sizeof(int));
 		if (configs.atomic64 == true) {
 			cudaMalloc((void**)&f1, 1 * v * sizeof(int));
 			cudaMalloc((void**)&f2, 1 * v * sizeof(int));
+			cudaMalloc((void**)&f3, 1 * v * sizeof(int));
 		}
 		else {
 			cudaMalloc((void**)&f1, 10 * v * sizeof(int));
 			cudaMalloc((void**)&f2, 10 * v * sizeof(int));
+			cudaMalloc((void**)&f3, 1 * sizeof(int));
 		}
 
 		if (configs.atomic64 == true)
@@ -169,6 +192,7 @@ namespace cuda_graph {
 	{
 		cudaFree(f1);
 		cudaFree(f2);
+		cudaFree(f3);
 
 		cudaFree(devSizes);
 
@@ -228,7 +252,12 @@ namespace cuda_graph {
 		cudaProfiles.e = e;
 		auto start = chrono::high_resolution_clock::now();
 		cudaInitComputer(source);
-		search(source, cudaProfiles);
+		if (configs.kernelVersion == "v5") {
+			searchV5(source, cudaProfiles);
+		}
+		else {
+			search(source, cudaProfiles);
+		}
 		long long duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count();
 		t = duration * 0.001;
 		cudaGetRes(res);

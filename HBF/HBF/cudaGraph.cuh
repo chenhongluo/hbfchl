@@ -43,6 +43,7 @@ namespace cuda_graph {
 	public:
 		long relaxNodes;
 		long relaxEdges;
+		long relaxRemain;
 		double kernel_time, sort_time, copy_time;
 		vector<vector<int>> devF1Detail;
 		vector<vector<int>> nodeDepthDetail;
@@ -52,7 +53,7 @@ namespace cuda_graph {
 		int v, e;
 
 		CudaProfiles() {
-			relaxNodes = relaxEdges = 0;
+			relaxNodes = relaxEdges = relaxRemain = 0;
 			kernel_time = sort_time = copy_time = 0.0;
 			depth = 0;
 		}
@@ -85,7 +86,7 @@ namespace cuda_graph {
 		int v,e;
 		GraphWeight &gp;
 	public:
-		int* f1, *f2;
+		int* f1, *f2, *f3;
 		int *devSizes;
 
 		int *devUpOutNodes;
@@ -105,5 +106,6 @@ namespace cuda_graph {
 		void cudaCopyMem();
 		void cudaInitComputer(int initNode);
 		void search(int source, CudaProfiles& profiles);
+		void searchV5(int source, CudaProfiles& profiles);
 	};
 }
