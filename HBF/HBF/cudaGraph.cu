@@ -4,7 +4,7 @@
 #include "HBFV2.cuh"
 #include "HBFV3.cuh"
 #include "HBFV4.cuh"
-//#include "HBFV5.cuh"
+#include "HBFV5.cuh"
 #include <iostream>
 #include <chrono>
 #include <algorithm>
