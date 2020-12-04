@@ -10,9 +10,9 @@ namespace KernelV5
 	__device__ __forceinline__ void
 		SWrite(thread_block_tile<VW_SIZE>& tile,
 			T* writeQueueAddr, int * writeSizeAddr,
-			int flag, T* data,
-			int * queue, int &queueSize, int queueLimit,
-			int &mymask)
+			int flag, T data,
+			int * queue, int &queueSize,const int queueLimit,
+			unsigned &mymask)
 	{
 		unsigned mask = tile.ballot(flag);
 		// devPrintfX(32, mask, "mask");
@@ -25,7 +25,7 @@ namespace KernelV5
 			if (tile.thread_rank() == 0)
 				globalBias = atomicAdd(writeSizeAddr, queueSize);
 			globalBias = tile.shfl(globalBias, 0);
-			for (int j = tile.thread_rank(); j < founds; j += VW_SIZE)
+			for (int j = tile.thread_rank(); j < queueSize; j += VW_SIZE)
 				writeQueueAddr[globalBias + j] = queue[j];
 			tile.sync();
 			queueSize = 0;
@@ -103,7 +103,7 @@ namespace KernelV5
 				}
 			}
 		}
-		SWrite< VW_SIZE, int>(tile, devF2, devF2Size, 0, dest.x, queue, queueSize, 0, mymask);
+		SWrite< VW_SIZE, int>(tile, devF2, devF2Size, 0, 0, queue, queueSize, 0, mymask);
 		if (tile.thread_rank() == 0) {
 			atomicAdd(devSizes + 3, relaxEdges);
 		}
@@ -159,8 +159,8 @@ namespace KernelV5
 			SWrite< VW_SIZE, int>(tile, devF3, devF3Size, flag3, index, queue1, queueSize1, tileSharedLimit, mymask);
 			SWrite< VW_SIZE, int>(tile, devF2, devF2Size, flag2, index, queue2, queueSize2, tileSharedLimit, mymask);
 		}
-		SWrite< VW_SIZE, int>(tile, devF3, devF3Size, 0, index, queue1, queueSize1, 0, mymask);
-		SWrite< VW_SIZE, int>(tile, devF2, devF2Size, 0, index, queue2, queueSize2, 0, mymask);
+		SWrite< VW_SIZE, int>(tile, devF3, devF3Size, 0, 0, queue1, queueSize1, 0, mymask);
+		SWrite< VW_SIZE, int>(tile, devF2, devF2Size, 0, 0, queue2, queueSize2, 0, mymask);
 	}
 }
 
