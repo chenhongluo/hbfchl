@@ -174,7 +174,6 @@ HBFSearchV5Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
 SelectNodesV5<32> << <gdim, bdim, sharedLimit> >> \
 (devInt2Distances, devF1, devF2, devF3, devSizes, distanceLimit, sharedLimit, level)
 
-
 //user interface gridDim, blockDim, sharedLimit, devUpOutNodes, devUpOutEdges, devIntDistances, devInt2Distances, f1, f2, devSizes, sharedLimit,level
 //name = {HBFSearchV5Atomic64,HBFSearchV5Atomic32}
 //vwSize = 1,2,4,8,16,32
