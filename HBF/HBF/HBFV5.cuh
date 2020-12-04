@@ -12,8 +12,7 @@ namespace KernelV5
 			T* writeQueueAddr, int * writeSizeAddr,
 			int flag, T* data,
 			int * queue, int &queueSize, int queueLimit,
-			int &mymask
-		)
+			int &mymask)
 	{
 		unsigned mask = tile.ballot(flag);
 		// devPrintfX(32, mask, "mask");
@@ -111,7 +110,7 @@ namespace KernelV5
 	}
 
 	template <int VW_SIZE>
-	__global__ void selectNodesV5(
+	__global__ void SelectNodesV5(
 		int2 *__restrict__ devDistances,
 		int* devF1, int* devF2, int *devF3,
 		int *__restrict__ devSizes,
@@ -171,6 +170,11 @@ using namespace KernelV5;
 HBFSearchV5Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
 (devUpOutNodes, devUpOutEdges, devInt2Distances, devF3, devF2, devSizes, sharedLimit,tileLimit, level)
 
+#define selectNodesV5()
+SelectNodesV5<32> << <gdim, bdim, sharedLimit> >> \
+(devInt2Distances, devF1, devF2, devF3, devSizes, distanceLimit, sharedLimit, level)
+
+
 //user interface gridDim, blockDim, sharedLimit, devUpOutNodes, devUpOutEdges, devIntDistances, devInt2Distances, f1, f2, devSizes, sharedLimit,level
 //name = {HBFSearchV5Atomic64,HBFSearchV5Atomic32}
 //vwSize = 1,2,4,8,16,32
@@ -200,8 +204,5 @@ HBFSearchV5Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
 }
 
 #define switchKernelV5Config(configs) \
-	switchKernelV5(configs.atomic64,configs.vwSize,gridDim,blockDim,sharedLimit ,tileLimit)
+	switchKernelV5(configs.atomic64,configs.vwSize,gdim, bdim,sharedLimit ,tileLimit)
 
-#define selectNodesV5()
-selectNodesV5<vwSize> << <gridDim, blockDim, sharedLimit >> > \
-(devDistances, devF1, devF2, devF3, devSizes, distanceLimit, sharedLimit, level)

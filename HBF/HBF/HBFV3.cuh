@@ -142,4 +142,4 @@ HBFSearchV3Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
 }
 
 #define switchKernelV3Config(configs) \
-	switchKernelV3(configs.atomic64,configs.vwSize,gridDim, blockDim, sharedLimit ,tileLimit)
+	switchKernelV3(configs.atomic64,configs.vwSize,gdim, bdim, sharedLimit ,tileLimit)
