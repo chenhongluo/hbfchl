@@ -170,7 +170,7 @@ using namespace KernelV5;
 HBFSearchV5Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
 (devUpOutNodes, devUpOutEdges, devInt2Distances, devF3, devF2, devSizes, sharedLimit,tileLimit, level)
 
-#define selectNodesV5()
+#define selectNodesV5() \
 SelectNodesV5<32> << <gdim, bdim, sharedLimit> >> \
 (devInt2Distances, devF1, devF2, devF3, devSizes, distanceLimit, sharedLimit, level)
 
