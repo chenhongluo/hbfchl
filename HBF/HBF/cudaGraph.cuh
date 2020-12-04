@@ -105,7 +105,7 @@ namespace cuda_graph {
 		void cudaFreeMem();
 		void cudaCopyMem();
 		void cudaInitComputer(int initNode);
-		void search(int source, CudaProfiles& profiles);
-		void searchV5(int source, CudaProfiles& profiles);
+		void search(int source, CudaProfiles& profile);
+		void searchV5(int source, CudaProfiles& profile);
 	};
 }

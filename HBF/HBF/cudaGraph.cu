@@ -99,7 +99,7 @@ namespace cuda_graph {
 		profile.copy_time *= 0.001;
 	}
 
-	void CudaGraph::searchV5(int source, CudaProfiles & profiles)
+	void CudaGraph::searchV5(int source, CudaProfiles & profile)
 	{
 		// f1 select to f3,remain to f2 ,devSizes 0->f1Size,1->f2Size,2->f3Size,3->relaxEdges
 		// f3 relax to f2
