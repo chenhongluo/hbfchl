@@ -197,7 +197,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 	vector<node_t> testNodes = getTestNodes(testNodeSize, 0, graph.v);
 	vector<dist_t> dis(graph.v);
 	double t, allt = 0.0, allkt = 0.0, allst = 0.0, allct = 0.0;
-	double allRN = 0.0, allRE = 0.0, allDP = 0.0;
+	double allRN = 0.0, allRE = 0.0, allDP = 0.0 ,allRM = 0.0;
 
 	if (subaction == "host") {
 		CTHostGraph* ct = getHostGraphFromConfig(graph, m_pt);
@@ -218,6 +218,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 					<< "\tdepth: " << pf.depth
 					<< "\tuseTime: " << t
 					<< "\tkernelTime: " << pf.kernel_time << "\tsortTime: " << pf.sort_time << "\tcopyTime: " << pf.copy_time
+					<< "\trelaxRemain" << pf.relaxRemain
 					<< endl;
 			}
 			if (pf.nodeDepthDetail.size() > 0 && cg->configs.profile) {
@@ -232,6 +233,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 			allkt += pf.kernel_time;
 			allst += pf.sort_time;
 			allct += pf.copy_time;
+			allRM += pf.relaxRemain;
 		}
 	}
 	else {
@@ -245,6 +247,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 	allkt /= testNodes.size();
 	allst /= testNodes.size();
 	allct /= testNodes.size();
+	allRM /= testNodes.size();
 
 	cout << " Avg Profile: " << endl;
 	cout << "\trelaxNodes: " << allRN << "\trelaxNodesDivV: " << allRN / graph.v
@@ -252,6 +255,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 		<< "\trelaxDepth: " << allDP
 		<< "\tuseTime: " << allt
 		<< "\tkernelTime: " << allkt << "\tsortTime: " << allst << "\tcopyTime: " << allct
+		<< "\trelaxRemain" << allRM
 		<< endl;
 }
 void predeal(GraphWeight &graph, boost::property_tree::ptree m_pt) 
