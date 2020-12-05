@@ -218,7 +218,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 					<< "\tdepth: " << pf.depth
 					<< "\tuseTime: " << t
 					<< "\tkernelTime: " << pf.kernel_time << "\tsortTime: " << pf.sort_time << "\tcopyTime: " << pf.copy_time
-					<< "\trelaxRemain" << pf.relaxRemain
+					<< "\trelaxRemain: " << pf.relaxRemain
 					<< endl;
 			}
 			if (pf.nodeDepthDetail.size() > 0 && cg->configs.profile) {
@@ -255,7 +255,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 		<< "\trelaxDepth: " << allDP
 		<< "\tuseTime: " << allt
 		<< "\tkernelTime: " << allkt << "\tsortTime: " << allst << "\tcopyTime: " << allct
-		<< "\trelaxRemain" << allRM
+		<< "\trelaxRemain: " << allRM
 		<< endl;
 }
 void predeal(GraphWeight &graph, boost::property_tree::ptree m_pt) 
