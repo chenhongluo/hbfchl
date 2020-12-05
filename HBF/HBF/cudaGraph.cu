@@ -125,7 +125,7 @@ namespace cuda_graph {
 		int gdim = configs.gridDim;
 		int bdim = configs.blockDim;
 		int sharedLimit = configs.sharedLimit;
-		int distanceLimit;
+		int distanceLimit = 0;
 		int tileLimit = configs.tileLimit;
 
 		while (1)
@@ -135,7 +135,8 @@ namespace cuda_graph {
 			distanceLimit = configs.distanceLimit * level;
 			// debugCudaArray<int>(devF1, hostSizes[0]);
 			auto time1 = chrono::high_resolution_clock::now();
-			SelectNodesV5<32> << <gdim, bdim, sharedLimit> >>(devInt2Distances, devF1, devF2, devF3, devSizes, distanceLimit, sharedLimit, level);
+			//<< <gdim, bdim, sharedLimit> >>
+			selectNodesV5(configs)
 			switchKernelV5Config(configs)
 
 			__CUDA_ERROR("GNRSearchMain Kernel");

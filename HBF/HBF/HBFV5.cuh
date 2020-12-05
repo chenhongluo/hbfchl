@@ -112,7 +112,7 @@ namespace KernelV5
 	template <int VW_SIZE>
 	__global__ void SelectNodesV5(
 		int2 *__restrict__ devDistances,
-		int* devF1, int* devF2, int *devF3,
+		int* devF1, int* devF2, int* devF3,
 		int *__restrict__ devSizes,
 		const int distanceLimit,
 		const int sharedLimit,
@@ -146,8 +146,9 @@ namespace KernelV5
 			int j = i * VW_SIZE + tile.thread_rank();
 			int flag2 = 0;
 			int flag3 = 0;
+			int index = -1;
 			if (j < devSizes[0]) {
-				int index = devF1[j];
+				index = devF1[j];
 				if (devDistances[index].y <= distanceLimit) {
 					flag3 = 1;
 				}
@@ -166,13 +167,13 @@ namespace KernelV5
 
 using namespace KernelV5;
 
+#define selectNodesV5(configs) \
+SelectNodesV5<WARPSIZE> <<<gdim, bdim, sharedLimit>>> \
+(devInt2Distances,devF1, devF2, devF3, devSizes, distanceLimit, sharedLimit,level);
+
 #define kernelV5Atmoic64(vwSize,gridDim, blockDim, sharedLimit ,tileLimit) \
 HBFSearchV5Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
 (devUpOutNodes, devUpOutEdges, devInt2Distances, devF3, devF2, devSizes, sharedLimit,tileLimit, level)
-
-#define selectNodesV5() \
-SelectNodesV5<32> << <gdim, bdim, sharedLimit> >> \
-(devInt2Distances, devF1, devF2, devF3, devSizes, distanceLimit, sharedLimit, level)
 
 //user interface gridDim, blockDim, sharedLimit, devUpOutNodes, devUpOutEdges, devIntDistances, devInt2Distances, f1, f2, devSizes, sharedLimit,level
 //name = {HBFSearchV5Atomic64,HBFSearchV5Atomic32}
@@ -204,4 +205,3 @@ SelectNodesV5<32> << <gdim, bdim, sharedLimit> >> \
 
 #define switchKernelV5Config(configs) \
 	switchKernelV5(configs.atomic64,configs.vwSize,gdim, bdim,sharedLimit ,tileLimit)
-
