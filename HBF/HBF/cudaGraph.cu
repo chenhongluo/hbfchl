@@ -189,7 +189,6 @@ namespace cuda_graph {
 		int distanceLimit = 0;
 		int tileLimit = configs.tileLimit;
 		int vwSize = configs.vwSize;
-		int f3Select = 2;
 
 		while (1)
 		{
@@ -202,13 +201,12 @@ namespace cuda_graph {
 			int vwCount = gdim * bdim / vwSize;
 			tileLimit = (hostSizes[0] + vwCount - 1) / vwCount;
 			if (hostSizes[0] < configs.distanceSelectLimit) {
-				devF3 = f1;
-				f3Select = 0;
+				devF3 = devF1;
+				cudaMemcpy(devSizes + 2, devSizes, 1 * sizeof(int), cudaMemcpyDeviceToDevice);
 				switchKernelV6Config(configs)
 				devF3 = f3;
 			}
 			else {
-				f3Select = 2;
 				selectNodesV6(configs)
 				switchKernelV6Config(configs)
 			}

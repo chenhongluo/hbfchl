@@ -47,7 +47,6 @@ namespace KernelV6
 		int2 *__restrict__ devEdges,
 		int2 *__restrict__ devDistances,
 		int* devF3, int* devF2,
-		int f3Sizepos,//use F1 =0 , use F3 =2
 		int *__restrict__ devSizes,
 		const int sharedLimit,
 		const int tileLimit,
@@ -74,10 +73,10 @@ namespace KernelV6
 
 		//alloc node for warps tileID * tileLimit - tileID* tileLimit + tileLimit
 		// 
-		for (int i = tileID * tileLimit; i < devSizes[f3Sizepos]; i += IDStride * tileLimit)
+		for (int i = tileID * tileLimit; i < devSizes[2]; i += IDStride * tileLimit)
 		{
 			for (int j = 0; j < tileLimit; j++) {
-				if (i + j < devSizes[f3Sizepos]) {
+				if (i + j < devSizes[2]) {
 					int index = devF3[i + j];
 					int sourceWeight = devDistances[index].y;
 					int nodeS = devNodes[index];
@@ -172,26 +171,26 @@ using namespace KernelV6;
 SelectNodesV6<WARPSIZE> <<<gdim, bdim, sharedLimit>>> \
 (devInt2Distances,devF1, devF2, devF3, devSizes, distanceLimit, sharedLimit,level);
 
-#define kernelV6Atmoic64(vwSize,gridDim, blockDim, f3Select, sharedLimit ,tileLimit) \
+#define kernelV6Atmoic64(vwSize,gridDim, blockDim,  sharedLimit ,tileLimit) \
 HBFSearchV6Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
-(devUpOutNodes, devUpOutEdges, devInt2Distances, devF3, devF2,f3Select, devSizes, sharedLimit,tileLimit, level)
+(devUpOutNodes, devUpOutEdges, devInt2Distances, devF3, devF2, devSizes, sharedLimit,tileLimit, level)
 
-#define switchKernelV6(atomic64,vwSize,gridDim, blockDim, f3Select, sharedLimit,tileLimit ) \
+#define switchKernelV6(atomic64,vwSize,gridDim, blockDim,  sharedLimit,tileLimit ) \
 {\
 	if (atomic64) {  \
 		switch (vwSize) { \
 		case 1:\
-			kernelV6Atmoic64(1,gridDim, blockDim,f3Select, sharedLimit,tileLimit);break; \
+			kernelV6Atmoic64(1,gridDim, blockDim, sharedLimit,tileLimit);break; \
 		case 2: \
-			kernelV6Atmoic64(2,gridDim, blockDim,f3Select, sharedLimit,tileLimit); break;\
+			kernelV6Atmoic64(2,gridDim, blockDim, sharedLimit,tileLimit); break;\
 		case 4: \
-			kernelV6Atmoic64(4,gridDim, blockDim,f3Select, sharedLimit,tileLimit); break;\
+			kernelV6Atmoic64(4,gridDim, blockDim, sharedLimit,tileLimit); break;\
 		case 8: \
-			kernelV6Atmoic64(8,gridDim, blockDim, f3Select,sharedLimit,tileLimit); break;\
+			kernelV6Atmoic64(8,gridDim, blockDim, sharedLimit,tileLimit); break;\
 		case 16: \
-			kernelV6Atmoic64(16,gridDim, blockDim,f3Select, sharedLimit,tileLimit); break;\
+			kernelV6Atmoic64(16,gridDim, blockDim, sharedLimit,tileLimit); break;\
 		case 32: \
-			kernelV6Atmoic64(32,gridDim, blockDim,f3Select, sharedLimit,tileLimit); break;\
+			kernelV6Atmoic64(32,gridDim, blockDim, sharedLimit,tileLimit); break;\
 		default: \
 			__ERROR("no this vwsize")\
 		}\
@@ -202,4 +201,4 @@ HBFSearchV6Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
 }
 
 #define switchKernelV6Config(configs) \
-	switchKernelV6(configs.atomic64,vwSize,gdim, bdim,f3Select,sharedLimit ,tileLimit)
+	switchKernelV6(configs.atomic64,vwSize,gdim, bdim,sharedLimit ,tileLimit)
