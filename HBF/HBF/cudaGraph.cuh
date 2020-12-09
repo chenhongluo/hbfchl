@@ -37,6 +37,7 @@ namespace cuda_graph {
 		int sharedLimit;
 		int tileLimit;
 		int distanceLimit;
+		int distanceSelectLimit;
 		CudaConfigs() {}
 	};
 	class CudaProfiles {
@@ -107,5 +108,6 @@ namespace cuda_graph {
 		void cudaInitComputer(int initNode);
 		void search(int source, CudaProfiles& profile);
 		void searchV5(int source, CudaProfiles& profile);
+		void searchV6(int source, CudaProfiles& profile);
 	};
 }

@@ -114,6 +114,7 @@
     <ClInclude Include="HBFV3.cuh" />
     <ClInclude Include="HBFV4.cuh" />
     <ClInclude Include="HBFV5.cuh" />
+    <ClInclude Include="HBFV6.cuh" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
