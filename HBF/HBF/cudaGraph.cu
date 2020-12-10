@@ -207,7 +207,10 @@ namespace cuda_graph {
 				devF3 = f3;
 			}
 			else {
+				auto time_ss = chrono::high_resolution_clock::now();
 				selectNodesV6(configs)
+				auto time_se = chrono::high_resolution_clock::now();
+				profile.select_time += chrono::duration_cast<chrono::microseconds>(time_se - time_ss).count();
 				switchKernelV6Config(configs)
 			}
 
@@ -229,6 +232,7 @@ namespace cuda_graph {
 		profile.kernel_time *= 0.001;
 		profile.sort_time = 0;
 		profile.copy_time *= 0.001;
+		profile.select_time *= 0.001;
 	}
 
 	CudaGraph::~CudaGraph()

@@ -197,7 +197,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 	tag_setting = m_pt.get_child("cuda");
 	vector<node_t> testNodes = getTestNodes(testNodeSize, 0, graph.v);
 	vector<dist_t> dis(graph.v);
-	double t, allt = 0.0, allkt = 0.0, allst = 0.0, allct = 0.0;
+	double t, allt = 0.0, allkt = 0.0, allst = 0.0, allct = 0.0 ,allslt = 0.0;
 	double allRN = 0.0, allRE = 0.0, allDP = 0.0 ,allRM = 0.0;
 
 	if (subaction == "host") {
@@ -220,6 +220,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 					<< "\tuseTime: " << t
 					<< "\tkernelTime: " << pf.kernel_time << "\tsortTime: " << pf.sort_time << "\tcopyTime: " << pf.copy_time
 					<< "\trelaxRemain: " << pf.relaxRemain
+					<< "\tselectTime: " << pf.select_time
 					<< endl;
 			}
 			if (pf.nodeDepthDetail.size() > 0 && cg->configs.profile) {
@@ -234,6 +235,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 			allkt += pf.kernel_time;
 			allst += pf.sort_time;
 			allct += pf.copy_time;
+			allslt += pf.select_time;
 			allRM += pf.relaxRemain;
 		}
 	}
@@ -249,6 +251,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 	allst /= testNodes.size();
 	allct /= testNodes.size();
 	allRM /= testNodes.size();
+	allslt /= testNodes.size();
 
 	cout << " Avg Profile: " << endl;
 	cout << "\trelaxNodes: " << allRN << "\trelaxNodesDivV: " << allRN / graph.v
@@ -257,6 +260,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 		<< "\tuseTime: " << allt
 		<< "\tkernelTime: " << allkt << "\tsortTime: " << allst << "\tcopyTime: " << allct
 		<< "\trelaxRemain: " << allRM
+		<< "\tselectTime: " << allslt
 		<< endl;
 }
 void predeal(GraphWeight &graph, boost::property_tree::ptree m_pt) 

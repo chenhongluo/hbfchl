@@ -139,11 +139,11 @@ namespace graph {
 		}
 		fUtil::analyseIntVec<true>(ds, "degree detail anaylse");
 
-		vector<int> edges(e);
+		/*vector<int> edges(e);
 		for (int i = 0; i < e; i++) {
 			edges[i] = outEdgeWeights[i].y;
 		}
-		fUtil::analyseIntVec<true>(edges, 10000, "edge weight detail anaylse");
+		fUtil::analyseIntVec<true>(edges, 10000, "edge weight detail anaylse");*/
 
 		/*cout << " locality detail anaylse" << endl;
 		int k = 0;

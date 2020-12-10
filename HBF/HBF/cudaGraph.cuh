@@ -45,7 +45,7 @@ namespace cuda_graph {
 		long relaxNodes;
 		long relaxEdges;
 		long relaxRemain;
-		double kernel_time, sort_time, copy_time;
+		double kernel_time, sort_time, copy_time,select_time;
 		vector<vector<int>> devF1Detail;
 		vector<vector<int>> nodeDepthDetail;
 		vector<int> nodeRelaxTap;
@@ -55,7 +55,7 @@ namespace cuda_graph {
 
 		CudaProfiles() {
 			relaxNodes = relaxEdges = relaxRemain = 0;
-			kernel_time = sort_time = copy_time = 0.0;
+			kernel_time = sort_time = copy_time= select_time = 0.0;
 			depth = 0;
 		}
 
