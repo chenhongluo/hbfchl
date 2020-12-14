@@ -238,17 +238,7 @@ namespace cuda_graph {
 
 	int CudaGraph::cacDistanceLimit(int nodeLimit) {
 
-		vector<int> bb(12);
-		cudaMemcpy(&bb[0], devMM, 12 * sizeof(int), cudaMemcpyDeviceToHost);
-		int sum = 0;
-		int i;
-		for (i = 2; i < 12; i++) {
-			sum += bb[i];
-			if (sum > nodeLimit) {
-				break;
-			}
-		}
-		return bb[0] + ((bb[1] - bb[0]) / bulkSize + 1) * (i - 1);
+
 	}
 
 	void CudaGraph::searchV7(int source, CudaProfiles & profile)
@@ -298,9 +288,20 @@ namespace cuda_graph {
 			}
 			else {
 				auto time_ss = chrono::high_resolution_clock::now();
+				vector<int> bb(12,0);
+				cudaMemcpy(devMM, &bb[0], 12 * sizeof(int), cudaMemcpyHostToDevice);
 				getMinMax();
 				getBulk();
-				distanceLimit = cacDistanceLimit(configs.nodeSelectLimit);
+				cudaMemcpy(&bb[0], devMM, 12 * sizeof(int), cudaMemcpyDeviceToHost);
+				int sum = 0;
+				int i;
+				for (i = 2; i < 12; i++) {
+					sum += bb[i];
+					if (sum > nodeLimit) {
+						break;
+					}
+				}
+				distanceLimit = bb[0] + ((bb[1] - bb[0]) / bulkSize + 1) * (i - 1);
 				selectNodesV6(configs)
 				auto time_se = chrono::high_resolution_clock::now();
 				profile.select_time += chrono::duration_cast<chrono::microseconds>(time_se - time_ss).count();
