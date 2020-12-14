@@ -301,7 +301,6 @@ namespace cuda_graph {
 				getMinMax();
 				getBulk();
 				distanceLimit = cacDistanceLimit(configs.nodeSelectLimit);
-				printf("distanceLimit:%d\n", distanceLimit);
 				selectNodesV6(configs)
 				auto time_se = chrono::high_resolution_clock::now();
 				profile.select_time += chrono::duration_cast<chrono::microseconds>(time_se - time_ss).count();
