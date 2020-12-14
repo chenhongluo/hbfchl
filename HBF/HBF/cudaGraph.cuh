@@ -38,6 +38,7 @@ namespace cuda_graph {
 		int tileLimit;
 		int distanceLimit;
 		int distanceSelectLimit;
+		int nodeSelectLimit;
 		CudaConfigs() {}
 	};
 	class CudaProfiles {
@@ -89,6 +90,7 @@ namespace cuda_graph {
 	public:
 		int* f1, *f2, *f3;
 		int *devSizes;
+		int *devMM;
 
 		int *devUpOutNodes;
 		int2 *devUpOutEdges;
@@ -106,8 +108,10 @@ namespace cuda_graph {
 		void cudaFreeMem();
 		void cudaCopyMem();
 		void cudaInitComputer(int initNode);
+		int cacDistanceLimit(int nodeLimit);
 		void search(int source, CudaProfiles& profile);
 		void searchV5(int source, CudaProfiles& profile);
 		void searchV6(int source, CudaProfiles& profile);
+		void searchV7(int source, CudaProfiles & profile);
 	};
 }
