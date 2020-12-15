@@ -236,11 +236,6 @@ namespace cuda_graph {
 		profile.select_time *= 0.001;
 	}
 
-	int CudaGraph::cacDistanceLimit(int nodeLimit) {
-
-
-	}
-
 	void CudaGraph::searchV7(int source, CudaProfiles & profile)
 	{
 		// f1 select to f3,remain to f2 ,devSizes 0->f1Size,1->f2Size,2->f3Size,3->relaxEdges
@@ -297,7 +292,7 @@ namespace cuda_graph {
 				int i;
 				for (i = 2; i < 12; i++) {
 					sum += bb[i];
-					if (sum > nodeLimit) {
+					if (sum > configs.nodeSelectLimit) {
 						break;
 					}
 				}

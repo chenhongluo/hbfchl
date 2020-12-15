@@ -108,7 +108,6 @@ namespace cuda_graph {
 		void cudaFreeMem();
 		void cudaCopyMem();
 		void cudaInitComputer(int initNode);
-		int cacDistanceLimit(int nodeLimit);
 		void search(int source, CudaProfiles& profile);
 		void searchV5(int source, CudaProfiles& profile);
 		void searchV6(int source, CudaProfiles& profile);
