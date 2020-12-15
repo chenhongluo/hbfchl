@@ -284,6 +284,7 @@ namespace cuda_graph {
 			else {
 				auto time_ss = chrono::high_resolution_clock::now();
 				vector<int> bb(12,0);
+				bb[0] = INT_MAX;
 				cudaMemcpy(devMM, &bb[0], 12 * sizeof(int), cudaMemcpyHostToDevice);
 				getMinMax();
 				getBulk();
