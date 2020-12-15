@@ -44,6 +44,10 @@ namespace KernelV7
 		int level) 
 	{
 		int temp[bulkSize];
+#pragma unroll
+		for (int j = 0; j < bulkSize; j++) {
+			temp[j] = 0;
+		}
 		const int realID = threadIdx.x + blockIdx.x * gridDim.x;
 		const int count = blockDim.x * gridDim.x;
 		int d = (mm[1] - mm[0]) / bulkSize + 1;
