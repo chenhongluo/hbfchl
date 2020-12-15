@@ -297,12 +297,13 @@ namespace cuda_graph {
 						break;
 					}
 				}
+				distanceLimit = bb[0] + ((bb[1] - bb[0]) / bulkSize + 1) * (ii - 1);
+
 				/*printf("bb:");
 				for (auto x : bb) {
 					printf("%d\t", x);
 				}
 				printf("\n");
-				distanceLimit = bb[0] + ((bb[1] - bb[0]) / bulkSize + 1) * (ii - 1);
 				printf("distanceLimit:%d\n", distanceLimit);*/
 				selectNodesV6(configs)
 				auto time_se = chrono::high_resolution_clock::now();
