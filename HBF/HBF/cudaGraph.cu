@@ -289,14 +289,20 @@ namespace cuda_graph {
 				getBulk();
 				cudaMemcpy(&bb[0], devMM, 12 * sizeof(int), cudaMemcpyDeviceToHost);
 				int sum = 0;
-				int i;
-				for (i = 2; i < 12; i++) {
-					sum += bb[i];
+				int ii;
+				for (ii = 2; ii < 12; ii++) {
+					sum += bb[ii];
 					if (sum > configs.nodeSelectLimit) {
 						break;
 					}
 				}
+				printf("bb:");
+				for (auto x : bb) {
+					printf("%d\t", x);
+				}
+				printf("\n");
 				distanceLimit = bb[0] + ((bb[1] - bb[0]) / bulkSize + 1) * (i - 1);
+				printf("distanceLimit:%d\n", distanceLimit);
 				selectNodesV6(configs)
 				auto time_se = chrono::high_resolution_clock::now();
 				profile.select_time += chrono::duration_cast<chrono::microseconds>(time_se - time_ss).count();
