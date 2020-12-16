@@ -27,6 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <fstream>
 #include <locale>
+#include <string.h>
 #include "fUtil.h"
 
 namespace StreamModifier {
