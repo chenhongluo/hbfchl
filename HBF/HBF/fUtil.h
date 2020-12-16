@@ -221,6 +221,18 @@ namespace fileUtil {
 	void skipLines(std::istream& fin, const int nof_lines = 1);
 }
 
+namespace stringUtil {
+	std::vector<std::string> split(const std::string& str, const std::string& delim);
+	template<class T> T toT(std::string& str)
+	{
+		std::stringstream stream;
+		stream << str;
+		T result;
+		stream >> result;
+		return result;
+	}
+}
+
 namespace randomUtil {
 	class IntRandom {
 	public:

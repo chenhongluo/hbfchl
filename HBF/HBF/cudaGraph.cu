@@ -421,7 +421,7 @@ namespace cuda_graph {
 			cudaMemcpy(&(res[0]),devIntDistances , v * sizeof(int2), cudaMemcpyDeviceToHost);
 		}
 	}
-	CudaProfiles CudaGraph::computeAndTick(node_t source, vector<dist_t>& res, double & t)
+	void* CudaGraph::computeAndTick(node_t source, vector<dist_t>& res, double & t)
 	{
 		CudaProfiles cudaProfiles;
 		cudaProfiles.v = v;
@@ -444,6 +444,6 @@ namespace cuda_graph {
 		t = duration * 0.001;
 		cudaGetRes(res);
 		cudaProfiles.analyse();
-		return cudaProfiles;
+		return new CudaProfiles(cudaProfiles);
 	}
 }

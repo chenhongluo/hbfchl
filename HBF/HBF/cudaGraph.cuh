@@ -46,7 +46,7 @@ namespace cuda_graph {
 		long relaxNodes;
 		long relaxEdges;
 		long relaxRemain;
-		double kernel_time, sort_time, copy_time,select_time;
+		double kernel_time, sort_time, copy_time, select_time;
 		vector<vector<int>> devF1Detail;
 		vector<vector<int>> nodeDepthDetail;
 		vector<int> nodeRelaxTap;
@@ -56,7 +56,7 @@ namespace cuda_graph {
 
 		CudaProfiles() {
 			relaxNodes = relaxEdges = relaxRemain = 0;
-			kernel_time = sort_time = copy_time= select_time = 0.0;
+			kernel_time = sort_time = copy_time = select_time = 0.0;
 			depth = 0;
 		}
 
@@ -83,9 +83,9 @@ namespace cuda_graph {
 			}
 		}
 	};
-	class CudaGraph {
+	class CudaGraph : ComputeGraph {
 	private:
-		int v,e;
+		int v, e;
 		GraphWeight &gp;
 	public:
 		int* f1, *f2, *f3;
@@ -100,17 +100,25 @@ namespace cuda_graph {
 
 		CudaConfigs configs;
 		CudaGraph(GraphWeight & _gp, CudaConfigs  _configs);
-		void cudaGetRes(vector<int> &res);
-		CudaProfiles computeAndTick(node_t source, vector<dist_t>& res, double &t);
+		void* computeAndTick(node_t source, vector<dist_t>& res, double & t);
 		~CudaGraph();
 	private:
 		void cudaMallocMem();
 		void cudaFreeMem();
 		void cudaCopyMem();
 		void cudaInitComputer(int initNode);
+		void cudaGetRes(vector<int> &res);
 		void search(int source, CudaProfiles& profile);
 		void searchV5(int source, CudaProfiles& profile);
 		void searchV6(int source, CudaProfiles& profile);
 		void searchV7(int source, CudaProfiles & profile);
 	};
+
+	/*class CHCudaGraph : ComputeGraph {
+	private:
+		CudaGraph *upGraph;
+		CudaGraph *downGraph;
+	public:
+		void search(int source, CudaProfiles& profile);
+	};*/
 }

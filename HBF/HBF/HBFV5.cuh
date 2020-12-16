@@ -16,7 +16,6 @@ namespace KernelV5
 	{
 		unsigned mask = tile.ballot(flag);
 		// devPrintfX(32, mask, "mask");
-
 		int sum = __popc(mask);
 		if (sum + queueSize > queueLimit)
 		{
@@ -147,6 +146,7 @@ namespace KernelV5
 			int flag2 = 0;
 			int flag3 = 0;
 			int index = -1;
+
 			if (j < devSizes[0]) {
 				index = devF1[j];
 				if (devDistances[index].y <= distanceLimit) {

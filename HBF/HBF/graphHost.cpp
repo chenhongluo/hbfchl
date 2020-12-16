@@ -13,7 +13,7 @@ namespace graph {
 		std::fill(distances.begin(), distances.end(), std::numeric_limits<dist_t>::max());
 	}
 
-	void CTHostGraph::computeAndTick(node_t source, vector<dist_t>& res, double & t)
+	void* CTHostGraph::computeAndTick(node_t source, vector<dist_t>& res, double & t)
 	{
 		auto start = chrono::high_resolution_clock::now();
 		bellmanFord_Queue_reset();
@@ -24,6 +24,7 @@ namespace graph {
 		for (int i = 0; i < v; i++) {
 			res[i] = distances[i];
 		}
+		return NULL;
 		//cout << "Relax Source: " << source << "\trelaxNodes: " << 0 << "\trelaxEdges: " << 0 << "\tuseTime: " << t << endl;
 	}
 
@@ -99,7 +100,7 @@ namespace graph {
 		}
 	}
 	void BDJHostGraph::compute(node_t source) {}
-	void BDJHostGraph::computeAndTick(node_t source, vector<dist_t>& res, double &t)
+	void* BDJHostGraph::computeAndTick(node_t source, vector<dist_t>& res, double &t)
 	{
 		using namespace boost;
 		typedef adjacency_list < boost::listS, boost::vecS, boost::directedS, boost::no_property, property<edge_weight_t, node_t> > graph_t;
@@ -121,6 +122,7 @@ namespace graph {
 		for (boost::tie(vi, vend) = vertices(g); vi != vend; ++vi) {
 			res[i++] = d[*vi];
 		}
+		return NULL;
 	}
 
 	struct EdgeProperties {
@@ -128,7 +130,7 @@ namespace graph {
 	};
 
 	void BBLHostGraph::compute(node_t source) {}
-	void BBLHostGraph::computeAndTick(node_t source, vector<dist_t>& res, double &t)
+	void* BBLHostGraph::computeAndTick(node_t source, vector<dist_t>& res, double &t)
 	{
 		using namespace boost;
 		typedef std::pair < int, int > Edge;
@@ -155,5 +157,6 @@ namespace graph {
 		for (boost::tie(vi, vend) = vertices(g); vi != vend; ++vi) {
 			res[i++] = d[*vi];
 		}
+		return NULL;
 	}
 }

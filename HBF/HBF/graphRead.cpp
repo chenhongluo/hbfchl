@@ -15,6 +15,7 @@ namespace graph {
 		header = getHeader();
 		fin.seekg(std::ios::beg);
 		edges = getOriginalEdegs();
+		header._e = edges.size();
 	}
 	GraphRead::GraphRead(const char* filename, EdgeType direction, randomUtil::IntRandom& ir):weightRandom(ir) {
 		fileUtil::checkRegularFile(filename);
@@ -38,6 +39,11 @@ namespace graph {
 
 	GraphRead* getGraphReader(const char* filename, EdgeType direction, IntRandom& ir)
 	{
+		string fileExtension = fileUtil::extractFileExtension(string(filename));
+		if (fileExtension == ".ddsg") {
+			return new DDSGReader(filename, direction, ir);
+		}
+
 		ifstream f = ifstream(filename);
 		string s;
 		f >> s;
@@ -50,8 +56,6 @@ namespace graph {
 			return new SnapReader(filename, direction, ir);
 		else if (s.compare("%") == 0 || fUtil::isDigit(s.c_str()))
 			return new Dimacs10Reader(filename, direction, ir);
-		else if (s.compare("gc") == 0)
-			return new GcReader(filename, direction, ir);
 		else
 			__ERROR(" Error. Graph Type not recognized: " << filename << " " << s)
 	}
@@ -278,39 +282,49 @@ namespace graph {
 			progress.next(lines + 1);
 		}
 		return std::move(originEdges);
-
 	}
 
 
-	GcReader::GcReader(const char * filename, EdgeType direction, IntRandom & ir):GraphRead(filename, direction, ir)
+	DDSGReader::DDSGReader(const char * filename, EdgeType direction, IntRandom & ir):GraphRead(filename, direction, ir)
 	{
-		userDirection = EdgeType::DIRECTED;
-		fileDirection = EdgeType::DIRECTED;
+		userDirection = EdgeType::UNDEF_EDGE_TYPE;
+		fileDirection = EdgeType::UNDIRECTED;
 	}
 
-	GraphHeader GcReader::getHeader()
+	GraphHeader DDSGReader::getHeader()
 	{
-		while (fin.peek() == 'g')
+		while (fin.peek() == 'd')
 			fileUtil::skipLines(fin);
-
 		fin >> v >> nof_lines;
-		fileDirection = EdgeType::DIRECTED;
 		fileWeightFlag = true;
 		return makeSureDirection();
 	}
 
-	vector<TriTuple> GcReader::getOriginalEdegs()
+	vector<TriTuple> DDSGReader::getOriginalEdegs()
 	{
+		while (fin.peek() == 'd')
+			fileUtil::skipLines(fin);
+		fileUtil::skipLines(fin);
+
 		vector<TriTuple> originEdges;
 		originEdges.reserve(e);
 		fUtil::Progress progress(nof_lines);
 		for (int lines = 0; lines < nof_lines; lines++) {
 			node_t x,y;
 			weight_t w;
-			fin >> x >> y >> w;
-			originEdges.push_back(TriTuple(x, y, w));
+			int flag;
+			fin >> x >> y >> w >> flag;
+			if (flag == 0 || flag == 1) {
+				originEdges.push_back(TriTuple(x, y, w));
+			}
+			if (flag == 0 || flag == 2) {
+				originEdges.push_back(TriTuple(y, x, w));
+			}
 			progress.next(lines + 1);
 		}
+		originEdges.shrink_to_fit();
+		e = originEdges.size();
+		fileDirection = EdgeType::DIRECTED;
 		return originEdges;
 	}
 }

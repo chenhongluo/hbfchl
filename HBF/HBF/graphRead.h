@@ -65,9 +65,9 @@ namespace graph {
 		vector<TriTuple> getOriginalEdegs();
 	};
 
-	class GcReader :public GraphRead {
+	class DDSGReader :public GraphRead {
 	public:
-		GcReader(const char *filename, EdgeType direction, IntRandom& ir);
+		DDSGReader(const char *filename, EdgeType direction, IntRandom& ir);
 		GraphHeader getHeader();
 		vector<TriTuple> getOriginalEdegs();
 	};

@@ -1,6 +1,7 @@
 #include <boost/property_tree/ptree.hpp>  
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/filesystem/fstream.hpp>
 
 #include <stdio.h>
@@ -212,7 +213,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 	else if (subaction == "cuda") {
 		CudaGraph* cg = getCudaGraphFromConfig(graph, m_pt);
 		for (int i = 0; i < testNodes.size(); i++) {
-			CudaProfiles pf = cg->computeAndTick(testNodes[i], dis, t);
+			CudaProfiles pf = *(CudaProfiles*)cg->computeAndTick(testNodes[i], dis, t);
 			if (printDeatil) {
 				cout << "Relax Source: " << testNodes[i]
 					<< "\trelaxNodes: " << pf.relaxNodes << "\trelaxNodesDivV: " << (double)pf.relaxNodes / graph.v
@@ -271,20 +272,33 @@ void predeal(GraphWeight &graph, boost::property_tree::ptree m_pt)
 	tag_setting = m_pt.get_child("predeal");
 	string kernel = tag_setting.get<string>("kernel");
 	string dataDir = tag_setting.get<string>("dataDir");
-	int n = tag_setting.get<int>("n",16);
+	string parameter = tag_setting.get<string>("parameter","");
 	string filename;
 	if (kernel == "none") {
-		filename = dataDir + graph.name + ".gc";
+		filename = dataDir + graph.name + ".ddsg";
 	}
-	else if (kernel == "preCompute") {
-		filename = dataDir + graph.name + ".pc";
-		filename += n;
-		filename += ".gc";
-		graph.preCompute(n);
+	//else if (kernel == "preCompute") {
+	//	filename = dataDir + graph.name + ".pc";
+	//	filename += n;
+	//	filename += ".gc";
+	//	graph.preCompute(n);
+	//}
+	//else if (kernel == "CH") {
+	//	filename = dataDir + graph.name + ".ch.gc";
+	//	map<string, int> kvs;
+	//	vector<string> ps = stringUtil::split(parameter, ";");
+	//	for (auto kvstr : ps) {
+	//		vector<string> kv = stringUtil::split(kvstr, ":");
+	//		kvs[kv[0]] = stringUtil::toT<int>(kv[1]);
+	//	}
+	//	graph.CHCompute(kvs);
+	//}
+	//else if (kernel == "reOrder") {
+	//	filename = dataDir + graph.name + ".re.gc";
+	//}
+	else {
+		__ERROR("no this preconpute kernel")
 	}
-	else if (kernel == "reOrder") {
-		filename = dataDir + graph.name + ".re.gc";
-	}
-	graph.toGC(filename.c_str());
+	graph.toDDSG(filename.c_str());
 }
 

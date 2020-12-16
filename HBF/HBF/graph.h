@@ -59,7 +59,8 @@ namespace graph {
 		vector<int2> getOutEdgesOfNode(node_t v) const;
 		vector<int2> getInEdgesOfNode(node_t v) const;
 
-		void toGC(const char *filename);
+		void toDDSG(const char *filename);
+		void CHCompute(map<string, int> kvs);
 		void reCode(int n, int way);
 		void preCompute(int n);
 		void analyseSimple();
@@ -71,7 +72,12 @@ namespace graph {
 		void toCSR();
 	};
 
-	class CTHostGraph {
+	class ComputeGraph {
+	public:
+		virtual void* computeAndTick(node_t source, vector<dist_t>& res, double &t) = 0;
+	};
+
+	class CTHostGraph : ComputeGraph {
 	public:
 		vector<dist_t> distances;
 		const GraphWeight& graphWeight;
@@ -86,7 +92,7 @@ namespace graph {
 		~CTHostGraph() {
 		}
 		void bellmanFord_Queue_reset();
-		virtual void computeAndTick(node_t source, vector<dist_t>& res, double &t);
+		virtual void* computeAndTick(node_t source, vector<dist_t>& res, double &t);
 	};
 
 	class DJHostGraph : public CTHostGraph {
@@ -120,7 +126,7 @@ namespace graph {
 			}
 		}
 		void compute(node_t source);
-		void computeAndTick(node_t source, vector<dist_t>& res, double &t);
+		void* computeAndTick(node_t source, vector<dist_t>& res, double &t);
 	};
 
 	class BBLHostGraph : public CTHostGraph {
@@ -140,7 +146,7 @@ namespace graph {
 			}
 		}
 		void compute(node_t source);
-		void computeAndTick(node_t source, vector<dist_t>& res, double &t);
+		void* computeAndTick(node_t source, vector<dist_t>& res, double &t);
 	};
 
 }

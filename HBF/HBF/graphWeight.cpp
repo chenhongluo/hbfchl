@@ -1,5 +1,6 @@
 #include "graph.h"
 #include <set>
+#include <queue>
 #include <algorithm>
 namespace graph {
 	GraphWeight::~GraphWeight() {
@@ -21,13 +22,19 @@ namespace graph {
 		return vector<int2>(&(inEdgeWeights[s]), &(inEdgeWeights[t]));
 	}
 
-	void GraphWeight::toGC(const char * filename)
+	void GraphWeight::CHCompute(map<string,int> kvs)
+	{
+		// 计算order，打分
+		// 选点，干掉，重新打分，达到限制停止
+	}
+
+	void GraphWeight::toDDSG(const char * filename)
 	{
 		ofstream of(filename);
-		of << "gc" << endl;
-		of << v << e << endl;
-		for (int i = 0; i < v; i++) {
-			of << originEdges[i].s << originEdges[i].t << originEdges[i].w << endl;
+		of << "d" << endl;
+		of << v << " " << e << endl;
+		for (int i = 0; i < e; i++) {
+			of << originEdges[i].s <<" "<< originEdges[i].t << " " << originEdges[i].w << " " << 1 << endl;
 		}
 		of.close();
 	}
