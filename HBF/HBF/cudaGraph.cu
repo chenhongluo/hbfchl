@@ -15,7 +15,7 @@ namespace cuda_graph {
 		:gp(_gp), configs(_configs), v(_gp.v), e(_gp.e)
 	{ 
 		cudaMallocMem();
-		cudaCopyMem();
+		cudaCopyMem();           
 	}
 
 	template<class T>

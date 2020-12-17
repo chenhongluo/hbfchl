@@ -12,6 +12,7 @@ namespace graph {
 	enum class     GraphType;
 	enum class AttributeType;
 	struct TriTuple;
+	struct ShortCut;
 	class GraphHeader {
 	public:
 		int _v;
@@ -22,6 +23,8 @@ namespace graph {
 	class GraphRead {
 	public:
 		void readData(GraphHeader& header, vector<TriTuple>& edges);
+		virtual vector<unsigned> getOrders() { return {}; }
+		virtual vector<ShortCut> getAddEdges() { return {}; }
 		GraphRead(const char * filename, EdgeType direction, IntRandom& ir);
 		virtual ~GraphRead();
 	protected:
@@ -31,6 +34,7 @@ namespace graph {
 		int e;
 		int nof_lines;
 		ifstream fin;
+		string filename;
 		EdgeType userDirection;
 		EdgeType fileDirection;
 		IntRandom& weightRandom;
@@ -70,6 +74,15 @@ namespace graph {
 		DDSGReader(const char *filename, EdgeType direction, IntRandom& ir);
 		GraphHeader getHeader();
 		vector<TriTuple> getOriginalEdegs();
+	};
+
+	class CHReader :public GraphRead {
+	public:
+		CHReader(const char *filename, EdgeType direction, IntRandom& ir);
+		GraphHeader getHeader();
+		vector<TriTuple> getOriginalEdegs();
+		vector<unsigned> getOrders();
+		vector<ShortCut> getAddEdges();
 	};
 
 	GraphRead * getGraphReader(const char * filename, EdgeType direction, randomUtil::IntRandom& ir);

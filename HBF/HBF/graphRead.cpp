@@ -27,6 +27,7 @@ namespace graph {
 		std::cout << std::endl << "Read File:\t" << fileUtil::extractFileName(filename) << "\tSize: " << size / (1024 * 1024) << " MB" << std::endl;
 		//fin >> flag;
 		//fin.seekg(std::ios::beg);
+		this->filename = filename;
 		fin = ifstream(filename);
 		userDirection = direction;
 		fileDirection = EdgeType::UNDEF_EDGE_TYPE;
@@ -42,6 +43,9 @@ namespace graph {
 		string fileExtension = fileUtil::extractFileExtension(string(filename));
 		if (fileExtension == ".ddsg") {
 			return new DDSGReader(filename, direction, ir);
+		}
+		if (fileExtension == ".cn") {
+			return new CHReader(filename, direction, ir);
 		}
 
 		ifstream f = ifstream(filename);
@@ -288,7 +292,8 @@ namespace graph {
 	DDSGReader::DDSGReader(const char * filename, EdgeType direction, IntRandom & ir):GraphRead(filename, direction, ir)
 	{
 		userDirection = EdgeType::UNDEF_EDGE_TYPE;
-		fileDirection = EdgeType::UNDIRECTED;
+		fileDirection = EdgeType::DIRECTED;
+		fileWeightFlag = true;
 	}
 
 	GraphHeader DDSGReader::getHeader()
@@ -307,25 +312,128 @@ namespace graph {
 		fileUtil::skipLines(fin);
 
 		vector<TriTuple> originEdges;
-		originEdges.reserve(e);
+		originEdges.reserve(2 * e);
 		fUtil::Progress progress(nof_lines);
 		for (int lines = 0; lines < nof_lines; lines++) {
 			node_t x,y;
 			weight_t w;
 			int flag;
 			fin >> x >> y >> w >> flag;
-			if (flag == 0 || flag == 1) {
+			if (flag == 0 || flag == 1 || flag == 3) {
 				originEdges.push_back(TriTuple(x, y, w));
 			}
-			if (flag == 0 || flag == 2) {
+			if (flag == 0 || flag == 2 || flag == 3) {
 				originEdges.push_back(TriTuple(y, x, w));
 			}
 			progress.next(lines + 1);
 		}
 		originEdges.shrink_to_fit();
 		e = originEdges.size();
-		fileDirection = EdgeType::DIRECTED;
 		return originEdges;
+	}
+
+	CHReader::CHReader(const char * filename, EdgeType direction, IntRandom & ir) : GraphRead(filename, direction, ir)
+	{
+		userDirection = EdgeType::UNDEF_EDGE_TYPE;
+		fileDirection = EdgeType::DIRECTED;
+		fileWeightFlag = true;
+	}
+
+	GraphHeader CHReader::getHeader()
+	{
+		ifstream bfin(filename, ios::in | ios::binary);
+		unsigned value;
+		bfin.read((char*)&value, sizeof(value)); //CH\r\n
+		bfin.read((char*)&value, sizeof(value)); // 1
+		if (value != 1) {
+			__ERROR("uncorrect CH version")
+		}
+		bfin.read((char*)&v, sizeof(value)); // v
+		bfin.read((char*)&nof_lines, sizeof(value)); // m1
+		bfin.close();
+		return makeSureDirection();
+	}
+
+	vector<TriTuple> CHReader::getOriginalEdegs()
+	{
+		ifstream bfin(filename, ios::in | ios::binary);
+
+		vector<TriTuple> originEdges;
+		originEdges.reserve(e);
+		fUtil::Progress progress(nof_lines);
+		bfin.seekg((5 + v) * 4, ios::beg); // skip header and order
+		for (int lines = 0; lines < nof_lines; lines++) {
+			node_t x, y;
+			weight_t w;
+			int flag;
+			bfin.read((char*)&x, sizeof(node_t));
+			bfin.read((char*)&y, sizeof(node_t));
+			bfin.read((char*)&w, sizeof(node_t));
+			bfin.read((char*)&flag, sizeof(node_t));
+			if (flag != 1 && flag != 2 && flag != 3) {
+				__ERROR("flag uncorrect")
+			}
+			if (flag == 3 || flag == 1) { //001,011
+				originEdges.push_back(TriTuple(x, y, w));
+			}
+			if (flag == 3 || flag == 2) { //010,011
+				originEdges.push_back(TriTuple(y, x, w));
+			}
+			progress.next(lines + 1);
+		}
+		e = originEdges.size();
+		bfin.close();
+		return originEdges;
+	}
+	vector<unsigned> CHReader::getOrders()
+	{
+		ifstream bfin(filename, ios::in | ios::binary);
+
+		vector<unsigned> orders;
+		orders.resize(v);
+		bfin.seekg(4* 5,ios::beg); // skip header
+		for (int i = 0; i < v; i++) {
+			unsigned order;
+			bfin.read((char*)&order, sizeof(order));
+			orders[i] = order;
+		}
+		bfin.close();
+		return orders;
+	}
+	vector<ShortCut> CHReader::getAddEdges()
+	{
+		ifstream bfin(filename, ios::in | ios::binary);
+		bfin.seekg(4*3,ios::beg);
+		unsigned m1,m2;
+		bfin.read((char*)&m1, sizeof(m1));
+		bfin.read((char*)&m2, sizeof(m2));
+		bfin.seekg((5 + v + m1 * 4) * 4, ios::beg);
+
+		vector<ShortCut> addEdges;
+		addEdges.reserve(m2);
+		for (int lines = 0; lines < m2; lines++) {
+			node_t x, y,r;
+			weight_t w;
+			int flag;
+			bfin.read((char*)&x, sizeof(node_t));
+			bfin.read((char*)&y, sizeof(node_t));
+			bfin.read((char*)&w, sizeof(node_t));
+			bfin.read((char*)&flag, sizeof(node_t));
+			bfin.read((char*)&r, sizeof(node_t));
+			if (flag != 7 && flag != 6 && flag != 5) {
+				__ERROR("flag uncorrect")
+			}
+			if (flag == 7 || flag == 5) { //101,111
+				addEdges.push_back(ShortCut(x, y, w, r));
+			}
+			if (flag == 7 || flag == 6) { //110,111
+				addEdges.push_back(ShortCut(y, x, w, r));
+			}
+		}
+		int mask;
+		bfin.read((char*)&mask, sizeof(int));
+		bfin.close();
+		return addEdges;
 	}
 }
 

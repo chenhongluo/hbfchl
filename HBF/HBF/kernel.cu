@@ -65,6 +65,8 @@ int main(int argc, char* argv[])
 	int random_max = tag_setting.get<int>("random_max", 100);
 	int edgeType = tag_setting.get<int>("edgeType", 100);
 	bool compareFlag = tag_setting.get<bool>("compareFlag", false);
+	int addFlag = tag_setting.get<int>("addFlag", 0);
+	float addUsePercent = tag_setting.get<float>("addUsePercent", 0.0);
 
 	EdgeType userEdgeType = EdgeType::UNDEF_EDGE_TYPE;
 	if (edgeType == 1) {
@@ -83,8 +85,8 @@ int main(int argc, char* argv[])
 	GraphRead* reader = getGraphReader(graphPath.c_str(), userEdgeType, ir);
 	GraphWeight graphWeight(reader);
 	graphWeight.name = fileUtil::extractFileName(graphPath);
-	graphWeight.toCSR();
-	graphWeight.analyseSimple();
+	graphWeight.addUsePercent = addUsePercent;
+	graphWeight.addFlag = addFlag;
 	tag_setting = m_pt.get_child("action");
 	string action = tag_setting.get<string>("action");
 	if (action == "run") {
@@ -102,7 +104,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-CudaGraph* getCudaGraphFromConfig(GraphWeight &graph, boost::property_tree::ptree m_pt) {
+ComputeGraph* getCudaGraphFromConfig(GraphWeight &graph, boost::property_tree::ptree m_pt) {
 	CudaConfigs configs;
 	boost::property_tree::ptree tag_setting = m_pt.get_child("cuda");
 	int gpuIndex = tag_setting.get<int>("gpu", -1);
@@ -121,13 +123,37 @@ CudaGraph* getCudaGraphFromConfig(GraphWeight &graph, boost::property_tree::ptre
 	
 	if(gpuIndex > 0)
 		cudaSetDevice(gpuIndex);
-	return new CudaGraph (graph, configs);
+	if (graph.addFlag == 0) {
+		graph.toCSR();
+		graph.analyseSimple();
+		return (ComputeGraph*)new CudaGraph(graph, configs);
+	}
+	else if (graph.addFlag == 1) {
+		vector<TriTuple> newEdges;
+		int nodeAddLimit = graph.addUsePercent * graph.v;
+		newEdges.reserve(graph.originEdges.size() + graph.addEdges.size());
+		newEdges.assign(graph.originEdges.begin(), graph.originEdges.end());
+		for (auto shortcut : graph.addEdges) {
+			unsigned order = graph.orders[shortcut.r];
+			if (order < nodeAddLimit) {
+				newEdges.push_back(TriTuple(shortcut.s, shortcut.t, shortcut.w));
+			}
+		}
+		GraphWeight* newGraphWeight = new GraphWeight(graph.v, newEdges.size(), graph.edgeType,newEdges);
+		newGraphWeight->toCSR();
+		newGraphWeight->name = graph.name;
+		newGraphWeight->analyseSimple();
+		return (ComputeGraph*)new CudaGraph(*newGraphWeight, configs);
+	}
+	else if (graph.addFlag == 2) {
+
+	}
 }
 
-CTHostGraph* getHostGraphFromConfig(GraphWeight &graph, boost::property_tree::ptree m_pt) {
+ComputeGraph* getHostGraphFromConfig(GraphWeight &graph, boost::property_tree::ptree m_pt) {
 	boost::property_tree::ptree tag_setting = m_pt.get_child("host");
 	string kernel = tag_setting.get<string>("kernel");
-	return CTHostGraph::getHostGraph(graph,kernel);
+	return (ComputeGraph*)CTHostGraph::getHostGraph(graph,kernel);
 }
 
 int compareRes(vector<int>& res1, vector<int>& res2)
@@ -152,13 +178,13 @@ void test(GraphWeight &graph, boost::property_tree::ptree m_pt)
 	int testNodeSize = tag_setting.get<int>("testNodeSize", 0);
 
 	tag_setting = m_pt.get_child("cuda");
-	CTHostGraph* cmpCt = CTHostGraph::getHostGraph(graph, "Dijkstra");
+	ComputeGraph* cmpCt = (ComputeGraph*)CTHostGraph::getHostGraph(graph, "Dijkstra");
 	vector<node_t> testNodes = getTestNodes(testNodeSize, 0, graph.v);
 	vector<dist_t> dis1(graph.v), dis2(graph.v);
 	double t1, t2;
 
 	if (subaction == "host") {
-		CTHostGraph* ct = getHostGraphFromConfig(graph, m_pt);
+		ComputeGraph* ct = getHostGraphFromConfig(graph, m_pt);
 		for (int i = 0; i < testNodes.size(); i++) {
 			ct->computeAndTick(testNodes[i], dis1, t1);
 			cmpCt->computeAndTick(testNodes[i], dis2, t2);
@@ -171,7 +197,7 @@ void test(GraphWeight &graph, boost::property_tree::ptree m_pt)
 		}
 	}
 	else if (subaction == "cuda") {
-		CudaGraph* cg = getCudaGraphFromConfig(graph, m_pt);
+		ComputeGraph* cg = getCudaGraphFromConfig(graph, m_pt);
 		for (int i = 0; i < testNodes.size(); i++) {
 			cg->computeAndTick(testNodes[i], dis1, t1);
 			cmpCt->computeAndTick(testNodes[i], dis2, t2);
@@ -203,7 +229,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 	double allRN = 0.0, allRE = 0.0, allDP = 0.0 ,allRM = 0.0;
 
 	if (subaction == "host") {
-		CTHostGraph* ct = getHostGraphFromConfig(graph, m_pt);
+		ComputeGraph* ct = getHostGraphFromConfig(graph, m_pt);
 		for (int i = 0; i < testNodes.size(); i++) {
 			ct->computeAndTick(testNodes[i], dis, t);
 			cout << "Relax Source: " << testNodes[i] << "\trelaxNodes: " << 0 << "\trelaxEdges: " << 0 << "\tuseTime: " << t << endl;
@@ -211,7 +237,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 		}
 	}
 	else if (subaction == "cuda") {
-		CudaGraph* cg = getCudaGraphFromConfig(graph, m_pt);
+		ComputeGraph* cg = getCudaGraphFromConfig(graph, m_pt);
 		for (int i = 0; i < testNodes.size(); i++) {
 			CudaProfiles pf = *(CudaProfiles*)cg->computeAndTick(testNodes[i], dis, t);
 			if (printDeatil) {
@@ -225,7 +251,7 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 					<< "\tselectTime: " << pf.select_time
 					<< endl;
 			}
-			if (pf.nodeDepthDetail.size() > 0 && cg->configs.profile) {
+			if (pf.nodeDepthDetail.size() > 0) {
 				cout << "Relax Detail Profile:" << endl;
 				fUtil::analyseIntVec<true>(pf.nodeRelaxTap, "nodeRelaxTap:");
 				fUtil::analyseIntVec<true>(pf.nodeRelaxFrec, "nodeRelaxFrec:");

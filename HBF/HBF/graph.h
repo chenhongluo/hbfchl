@@ -20,7 +20,7 @@ namespace graph {
 	using weight_t = int;
 
 	struct TriTuple {
-		edge_t s, t;
+		node_t s, t;
 		weight_t w;
 		TriTuple() {
 			s = t = w = -1;
@@ -28,23 +28,37 @@ namespace graph {
 		TriTuple(int a,int b,int c) {
 			s = a, t = b, w = c;
 		}
-		TriTuple(const TriTuple& tu) {
-			s = tu.s;
-			t = tu.t;
-			w = tu.w;
+	};
+
+	struct ShortCut {
+		node_t s, t, r;
+		weight_t w;
+		
+		ShortCut() {
+			s = t = r = w = -1;
+		}
+		ShortCut(int a, int b, int c,int d) {
+			s = a, t = b, w = c, r = d;
 		}
 	};
 
 	class GraphWeight {
 	private:
-		EdgeType edgeType;
-		GraphType graphType;
-		AttributeType attributeType;
+
 
 		//vector<degree_t> inDegrees;
 		//vector<degree_t> outDegrees;
-		vector<TriTuple> originEdges;
 	public:
+		EdgeType edgeType;
+		GraphType graphType;
+		AttributeType attributeType;
+		vector<TriTuple> originEdges;
+
+		vector<unsigned> orders;
+		vector<ShortCut> addEdges;
+		int addFlag; // 0 不使用addEdges, 1 当成orign使用addEdges， 2 使用order构建UpGraph和DownGraph
+		float addUsePercent; // 使用addEdges的百分比，可以使用部分addEdges
+
 		int v, e;
 		string name;
 		GraphRead* reader;
@@ -60,9 +74,6 @@ namespace graph {
 		vector<int2> getInEdgesOfNode(node_t v) const;
 
 		void toDDSG(const char *filename);
-		void CHCompute(map<string, int> kvs);
-		void reCode(int n, int way);
-		void preCompute(int n);
 		void analyseSimple();
 		void analyseDetail();
 
