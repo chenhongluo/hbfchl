@@ -142,6 +142,7 @@ ComputeGraph* getCudaGraphFromConfig(GraphWeight &graph, boost::property_tree::p
 		GraphWeight* newGraphWeight = new GraphWeight(graph.v, newEdges.size(), graph.edgeType,newEdges);
 		newGraphWeight->toCSR();
 		newGraphWeight->name = graph.name;
+		newGraphWeight->addUsePercent = graph.addUsePercent;
 		newGraphWeight->analyseSimple();
 		return (ComputeGraph*)new CudaGraph(*newGraphWeight, configs);
 	}

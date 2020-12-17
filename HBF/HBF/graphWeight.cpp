@@ -163,7 +163,10 @@ namespace graph {
 
 	void GraphWeight::analyseSimple()
 	{
-		cout << "graphName: " << name << "\tV: " << v << "\tE: " << e << "\tavgDegree: " << (double)e / v << endl;
+		cout << "graphName: " << name;
+		if (addFlag != 0)
+			cout << addUsePercent;
+		cout << "\tV: " << v << "\tE: " << e << "\tavgDegree: " << (double)e / v << endl;
 	}
 
 	GraphWeight::GraphWeight(GraphRead* gr){
