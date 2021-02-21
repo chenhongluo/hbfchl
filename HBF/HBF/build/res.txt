@@ -1,0 +1,26 @@
+[ 12%] Building NVCC (Device) object CMakeFiles/HBF.dir/HBF_generated_test.cu.o
+ptxas info    : 0 bytes gmem
+ptxas info    : Function properties for cudaGetDevice
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaFuncGetAttributes
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaDeviceGetAttribute
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Compiling entry function '_Z29hbftest_groupread_cuda_kernelIiEvPT_S1_Piii' for 'sm_75'
+ptxas info    : Function properties for _Z29hbftest_groupread_cuda_kernelIiEvPT_S1_Piii
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 12 registers, 384 bytes cmem[0]
+ptxas info    : Function properties for cudaMalloc
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Function properties for cudaOccupancyMaxActiveBlocksPerMultiprocessor
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+[ 25%] Building NVCC intermediate link file CMakeFiles/HBF.dir/HBF_intermediate_link.o
+Scanning dependencies of target HBF
+[ 37%] Building CXX object CMakeFiles/HBF.dir/fUtil.cpp.o
+[ 50%] Building CXX object CMakeFiles/HBF.dir/graphHost.cpp.o
+[ 62%] Building CXX object CMakeFiles/HBF.dir/graphRead.cpp.o
+[ 75%] Building CXX object CMakeFiles/HBF.dir/graphWeight.cpp.o
+[ 87%] Linking CXX executable HBF
+[100%] Built target HBF
