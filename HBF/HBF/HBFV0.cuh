@@ -1,8 +1,6 @@
-
 #include <cuda_runtime.h>
 #include <cuda_runtime_api.h>
 #include <cooperative_groups.h>
-#include <cstdio>
 using namespace cooperative_groups;
 
 namespace KernelV0
@@ -62,7 +60,7 @@ namespace KernelV0
 		const int realID = g.group_index().x * blockdim + g.thread_rank();
 		const int tileID = realID / VW_SIZE;
 		const int IDStride = gridDim.x * (blockdim / VW_SIZE);
-		const int threadLimit = (sharedLimit/4) / blockdim;
+		const int threadLimit = (sharedLimit / 4) / blockdim;
 		int* devF2Size = devSizes + 1;
 		int relaxEdges = 0;
 
@@ -71,6 +69,7 @@ namespace KernelV0
 		int *queue = st + threadLimit * g.thread_rank();
 		int founds = 0;
 
+		//alloc node for warps
 		//alloc node for warps
 		for (int i = tileID; i < devSizes[0]; i += IDStride)
 		{
@@ -109,131 +108,44 @@ namespace KernelV0
 		// write to global mem
 		VWWrite<VW_SIZE, int>(tile, devF2Size, devF2, founds, queue);
 		if (tile.thread_rank() == 0) {
-			atomicAdd(devSizes + 2, relaxEdges);
-		}
-	}
-
-	template <int VW_SIZE>
-	__global__ void HBFSearchV0Atomic32(
-		int *__restrict__ devNodes,
-		int2 *__restrict__ devEdges,
-		int *__restrict__ devDistances,
-		int* devF1, int* devF2,
-		int *__restrict__ devSizes,
-		const int sharedLimit)
-	{
-		//alloc node&edge
-		thread_block g = this_thread_block();
-		thread_block_tile<VW_SIZE> tile = tiled_partition<VW_SIZE>(g);
-		// dim3 group_index();
-		// dim3 thread_index();
-		const int blockdim = g.group_dim().x;
-		const int realID = g.group_index().x * blockdim + g.thread_rank();
-		const int tileID = realID / VW_SIZE;
-		const int IDStride = gridDim.x * (blockdim / VW_SIZE);
-		const int threadLimit = (sharedLimit / 4) / blockdim;
-		int* devF2Size = devSizes + 1;
-		int relaxEdges = 0;
-
-		// for write in shared mem
-		extern __shared__ int st[];
-		int *queue = st + threadLimit * g.thread_rank();
-		int founds = 0;
-
-		//alloc node for warps
-		for (int i = tileID; i < devSizes[0]; i += IDStride)
-		{
-			int index = devF1[i];
-			int sourceWeight = devDistances[index];
-			// devPrintf(1, sourceWeight, "sourceWeight");
-			// devPrintf(128, tile.thread_rank(), "tile.thread_rank()");
-			int nodeS = devNodes[index];
-			int nodeE = devNodes[index + 1];
-			relaxEdges += (nodeE - nodeS);
-			// alloc edges in a warp
-			for (int k = nodeS + tile.thread_rank(); k < nodeE + tile.thread_rank(); k += VW_SIZE)
-			{
-				//relax edge  if flag=1 write to devF2
-				int flag = 0;
-				int2 dest;
-				if (k < nodeE)
-				{
-					dest = devEdges[k];
-					int newWeight = sourceWeight + dest.y;
-					int oldWeight = atomicMin(&devDistances[dest.x], newWeight);
-					flag = oldWeight > newWeight;
-					if (flag) {
-						queue[founds++] = dest.x;
-					}
-				}
-				if (tile.any(founds >= threadLimit)) {
-					VWWrite<VW_SIZE, int>(tile, devF2Size, devF2, founds, queue);
-					founds = 0;
-				}
-			}
-		}
-		// write to global mem
-		VWWrite<VW_SIZE, int>(tile, devF2Size, devF2, founds, queue);
-		if (tile.thread_rank() == 0) {
-			atomicAdd(devSizes + 2, relaxEdges);
+			atomicAdd(devSizes + 3, relaxEdges);
 		}
 	}
 }
 
 using namespace KernelV0;
 
-#define kernelV0Atomic64(vwSize,gridDim, blockDim, sharedLimit) \
+#define kernelV0Atmoic64(vwSize,gridDim, blockDim, sharedLimit) \
 HBFSearchV0Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
 (devUpOutNodes, devUpOutEdges, devInt2Distances, devF1, devF2, devSizes, sharedLimit, level)
 
-#define kernelV0Atomic32(vwSize,gridDim, blockDim, sharedLimit) \
-HBFSearchV0Atomic32<vwSize> << <gridDim, blockDim, sharedLimit >> > \
-(devUpOutNodes, devUpOutEdges, devIntDistances, devF1, devF2, devSizes, sharedLimit)
-
-
-// user interface gridDim, blockDim, sharedLimit, devUpOutNodes, devUpOutEdges, devIntDistances, devInt2Distances, f1, f2, devSizes, sharedLimit,level
-// name = {HBFSearchV0Atomic64,HBFSearchV0Atomic32}
-// vwSize = 1,2,4,8,16,32
-
+//user interface gridDim, blockDim, sharedLimit, devUpOutNodes, devUpOutEdges, devIntDistances, devInt2Distances, f1, f2, devSizes, sharedLimit,level
+//name = {HBFSearchV0Atomic64,HBFSearchV0Atomic32}
+//vwSize = 1,2,4,8,16,32
 #define switchKernelV0(atomic64,vwSize,gridDim, blockDim, sharedLimit) \
 {\
 	if (atomic64) {  \
 		switch (vwSize) { \
 		case 1:\
-			kernelV0Atomic64(1,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atmoic64(1,gridDim, blockDim, sharedLimit); break;\
 		case 2: \
-			kernelV0Atomic64(2,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atmoic64(2,gridDim, blockDim, sharedLimit); break;\
 		case 4: \
-			kernelV0Atomic64(4,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atmoic64(4,gridDim, blockDim, sharedLimit); break;\
 		case 8: \
-			kernelV0Atomic64(8,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atmoic64(8,gridDim, blockDim, sharedLimit); break;\
 		case 16: \
-			kernelV0Atomic64(16,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atmoic64(16,gridDim, blockDim, sharedLimit); break;\
 		case 32: \
-			kernelV0Atomic64(32,gridDim, blockDim, sharedLimit); break;\
+			kernelV0Atmoic64(32,gridDim, blockDim, sharedLimit); break;\
 		default: \
 			__ERROR("no this vwsize")\
 		}\
 	} \
 	else { \
-		switch (vwSize) { \
-		case 1:\
-			kernelV0Atomic32(1,gridDim, blockDim, sharedLimit); break;\
-		case 2: \
-			kernelV0Atomic32(2,gridDim, blockDim, sharedLimit); break;\
-		case 4: \
-			kernelV0Atomic32(4,gridDim, blockDim, sharedLimit); break;\
-		case 8: \
-			kernelV0Atomic32(8,gridDim, blockDim, sharedLimit); break;\
-		case 16: \
-			kernelV0Atomic32(16,gridDim, blockDim, sharedLimit); break;\
-		case 32: \
-			kernelV0Atomic32(32,gridDim, blockDim, sharedLimit); break;\
-		default: \
-			__ERROR("no this vwsize")\
-		} \
+		__ERROR("no atomic32") \
 	}\
 }
 
 #define switchKernelV0Config(configs) \
-	switchKernelV0(configs.atomic64,configs.vwSize,gdim, bdim, sharedLimit)
+	switchKernelV0(configs.atomic64,configs.vwSize,gdim, bdim, sharedLimit )

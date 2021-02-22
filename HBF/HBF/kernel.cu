@@ -4,6 +4,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/fstream.hpp>
 
+#include <climits>
 #include <cstdlib>
 #include <stdio.h>
 #include "graph.h"
@@ -20,31 +21,37 @@ if(!(expression))\
 }while(0)
 
 vector<int> getTestNodes(int size,int seed,int v) {
-	//���ɲ��Եĵ�
-	vector<int> testNodes(size, 0);
-	IntRandomUniform iru(seed, 0, v);
-	for (int i = 0; i < size; i++) {
-		testNodes[i] = iru.getNextValue();
-	}
-	return testNodes;
+	IntRandomUniform ir2 = IntRandomUniform(seed, 0, v);
+	std::vector<int> vs = ir2.getValues(size);
 }
 
+void run(GraphWeight &graph, CudaConfigs configs,int testNodeSize);
+void test(GraphWeight &graph, CudaConfigs configs,int testNodeSize);
 int compareRes(vector<int>& res1, vector<int>& res2);
-void test(GraphWeight &graph,boost::property_tree::ptree m_pt);
-void run(GraphWeight &graph, boost::property_tree::ptree m_pt);
-void predeal(GraphWeight &graph, boost::property_tree::ptree m_pt);
+
+bool isCudaKv(string kv){
+	if(kv == "V0" || kv == "V1"){
+		return true;
+	}else {
+		return false;
+	}
+}
 
 int main(int argc, char* argv[])
 {
-	// ��ȡ��������data��*.config
-	make_sure(argc==3,"argc!=2,input graph path and *.ini");
+	make_sure(argc==9,"argc<4,input graph path and *.ini");
 	string graphPath = argv[1];
-	string ii = argv[2];
+	string action = argv[2];
+	string kv = argv[3];
+	int vwSize = atoi(argv[4]);
+	string dsl = argv[5];
+	float ds = atof(argv[6]);
+	int testNodeSize = atoi(argv[7]);
 	if (!boost::filesystem::exists(graphPath)) {
 		std::cerr << "graph not exists." << std::endl;
 		return -1;
 	}
-	int testSize = atoi(ii.c_str());
+	int testSize = atoi(argv[8]);
 
 	int seed = 0;
 	IntRandomUniform ir = IntRandomUniform(seed, 1, 100);
@@ -54,65 +61,26 @@ int main(int argc, char* argv[])
 	GraphWeight graphWeight(reader);
 	graphWeight.name = fileUtil::extractFileName(graphPath);
 	graphWeight.toCSR();
-	IntRandomUniform ir2 = IntRandomUniform(seed, 0, graphWeight.v);
-	std::vector<int> vs = ir2.getValues(testSize);
 	graphWeight.analyseSimple();
-	graphWeight.analyseMiddle(vs);
-	graphWeight.analyseDetail();
+	CudaConfigs configs = CudaConfigs(kv,vwSize,68*4,256,1024*8,dsl,ds);
+	if(action == "run"){
+		run(graphWeight,configs,testNodeSize);
+	}
+	else if(action == "test"){
+		test(graphWeight,configs,testNodeSize);
+	}else {
+		__ERROR("no this action")
+	}
     return 0;
 }
 
-ComputeGraph* getCudaGraphFromConfig(GraphWeight &graph, boost::property_tree::ptree m_pt) {
-	CudaConfigs configs;
-	boost::property_tree::ptree tag_setting = m_pt.get_child("cuda");
-	int gpuIndex = tag_setting.get<int>("gpu", -1);
-	configs.gridDim = tag_setting.get<int>("gridDim", 278);
-	configs.blockDim = tag_setting.get<int>("blockDim", 128);
-	configs.sharedLimit = tag_setting.get<int>("sharedLimit", 1024);
-	configs.kernelVersion = tag_setting.get<string>("kernel", "v0");
-	configs.atomic64 = tag_setting.get<bool>("atomic64", true);
-	configs.vwSize = tag_setting.get<int>("vwSize", true);
-	configs.profile = tag_setting.get<bool>("profile", false);
-	configs.sort = tag_setting.get<bool>("sort", false);
-	configs.tileLimit = tag_setting.get<int>("tileLimit", 1);
-	configs.distanceLimit = tag_setting.get<int>("distanceLimit", 100);
-	configs.distanceSelectLimit = tag_setting.get<int>("distanceSelectLimit", INT_MAX);
-	configs.nodeSelectLimit = tag_setting.get<int>("nodeSelectLimit", INT_MAX);
-	
-	if(gpuIndex > 0)
-		cudaSetDevice(gpuIndex);
-	if (graph.addFlag == 0) {
-		graph.toCSR();
-		graph.analyseSimple();
+
+ComputeGraph* getCtGraphFromConfig(GraphWeight &graph, CudaConfigs configs) {
+	if(isCudaKv(configs.kernelVersion)){
 		return (ComputeGraph*)new CudaGraph(graph, configs);
+	}else {
+		return (ComputeGraph*)CTHostGraph::getHostGraph(graph,configs.kernelVersion);
 	}
-	else if (graph.addFlag == 1) {
-		vector<TriTuple> newEdges;
-		int nodeAddLimit = graph.addUsePercent * graph.v;
-		newEdges.reserve(graph.originEdges.size() + graph.addEdges.size());
-		newEdges.assign(graph.originEdges.begin(), graph.originEdges.end());
-		for (auto shortcut : graph.addEdges) {
-			unsigned order = graph.orders[shortcut.r];
-			if (order < nodeAddLimit) {
-				newEdges.push_back(TriTuple(shortcut.s, shortcut.t, shortcut.w));
-			}
-		}
-		GraphWeight* newGraphWeight = new GraphWeight(graph.v, newEdges.size(), graph.edgeType,newEdges);
-		newGraphWeight->toCSR();
-		newGraphWeight->name = graph.name;
-		newGraphWeight->addUsePercent = graph.addUsePercent;
-		newGraphWeight->analyseSimple();
-		return (ComputeGraph*)new CudaGraph(*newGraphWeight, configs);
-	}
-	else if (graph.addFlag == 2) {
-
-	}
-}
-
-ComputeGraph* getHostGraphFromConfig(GraphWeight &graph, boost::property_tree::ptree m_pt) {
-	boost::property_tree::ptree tag_setting = m_pt.get_child("host");
-	string kernel = tag_setting.get<string>("kernel");
-	return (ComputeGraph*)CTHostGraph::getHostGraph(graph,kernel);
 }
 
 int compareRes(vector<int>& res1, vector<int>& res2)
@@ -128,75 +96,44 @@ int compareRes(vector<int>& res1, vector<int>& res2)
 	return 0;
 }
 
-void test(GraphWeight &graph, boost::property_tree::ptree m_pt)
+void test(GraphWeight &graph,CudaConfigs configs,int testNodeSize)
 {
-	boost::property_tree::ptree tag_setting;
-
-	tag_setting = m_pt.get_child("action");
-	string subaction = tag_setting.get<string>("subaction");
-	int testNodeSize = tag_setting.get<int>("testNodeSize", 0);
-
-	tag_setting = m_pt.get_child("cuda");
 	ComputeGraph* cmpCt = (ComputeGraph*)CTHostGraph::getHostGraph(graph, "Dijkstra");
 	vector<node_t> testNodes = getTestNodes(testNodeSize, 0, graph.v);
 	vector<dist_t> dis1(graph.v), dis2(graph.v);
 	double t1, t2;
+	ComputeGraph* ct = getCtGraphFromConfig(graph, configs);
 
-	if (subaction == "host") {
-		ComputeGraph* ct = getHostGraphFromConfig(graph, m_pt);
-		for (int i = 0; i < testNodes.size(); i++) {
-			ct->computeAndTick(testNodes[i], dis1, t1);
-			cmpCt->computeAndTick(testNodes[i], dis2, t2);
-			if (compareRes(dis1, dis2) == 0) {
-				cout << "the "<< i << " source node: " << testNodes[i] << " is correct" << endl;
-			}
-			else {
-				cout << "the " << i << " source node: " << testNodes[i] << " is wrong" << endl;
-			}
+	for (int i = 0; i < testNodes.size(); i++) {
+		ct->computeAndTick(testNodes[i], dis1, t1);
+		cmpCt->computeAndTick(testNodes[i], dis2, t2);
+		if (compareRes(dis1, dis2) == 0) {
+			cout << "the "<< i << " source node: " << testNodes[i] << " is correct" << endl;
 		}
-	}
-	else if (subaction == "cuda") {
-		ComputeGraph* cg = getCudaGraphFromConfig(graph, m_pt);
-		for (int i = 0; i < testNodes.size(); i++) {
-			cg->computeAndTick(testNodes[i], dis1, t1);
-			cmpCt->computeAndTick(testNodes[i], dis2, t2);
-			if (compareRes(dis1, dis2) == 0) {
-				cout << "the " << i << " source node: " << testNodes[i] << " is correct" << endl;
-			}
-			else {
-				cout << "the " << i << " source node: " << testNodes[i] << " is wrong" << endl;
-			}
+		else {
+			cout << "the " << i << " source node: " << testNodes[i] << " is wrong" << endl;
 		}
-	}
-	else {
-		__ERROR("no this subaction")
 	}
 }
-void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
+void run(GraphWeight &graph, CudaConfigs configs,int testNodeSize)
 {
-	boost::property_tree::ptree tag_setting;
+	bool printDeatil = false;
 
-	tag_setting = m_pt.get_child("action");
-	string subaction = tag_setting.get<string>("subaction");
-	int testNodeSize = tag_setting.get<int>("testNodeSize", 0);
-	bool printDeatil = tag_setting.get<int>("printDeatil", true);
-
-	tag_setting = m_pt.get_child("cuda");
 	vector<node_t> testNodes = getTestNodes(testNodeSize, 0, graph.v);
 	vector<dist_t> dis(graph.v);
 	double t, allt = 0.0, allkt = 0.0, allst = 0.0, allct = 0.0 ,allslt = 0.0;
 	double allRN = 0.0, allRE = 0.0, allDP = 0.0 ,allRM = 0.0;
 
-	if (subaction == "host") {
-		ComputeGraph* ct = getHostGraphFromConfig(graph, m_pt);
+	if(!isCudaKv(configs.kernelVersion)){
+		ComputeGraph* ct = getCtGraphFromConfig(graph, configs);
 		for (int i = 0; i < testNodes.size(); i++) {
 			ct->computeAndTick(testNodes[i], dis, t);
 			cout << "Relax Source: " << testNodes[i] << "\trelaxNodes: " << 0 << "\trelaxEdges: " << 0 << "\tuseTime: " << t << endl;
 			allt += t;
 		}
 	}
-	else if (subaction == "cuda") {
-		ComputeGraph* cg = getCudaGraphFromConfig(graph, m_pt);
+	else{
+		ComputeGraph* cg = getCtGraphFromConfig(graph, configs);
 		for (int i = 0; i < testNodes.size(); i++) {
 			CudaProfiles pf = *(CudaProfiles*)cg->computeAndTick(testNodes[i], dis, t);
 			if (printDeatil) {
@@ -205,29 +142,21 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 					<< "\trelaxEdges: " << pf.relaxEdges << "\trelaxEdgesDivE: " << (double)pf.relaxEdges / graph.e
 					<< "\tdepth: " << pf.depth
 					<< "\tuseTime: " << t
-					<< "\tkernelTime: " << pf.kernel_time << "\tsortTime: " << pf.sort_time << "\tcopyTime: " << pf.copy_time
-					<< "\trelaxRemain: " << pf.relaxRemain
+					<< "\tkernelTime: " << pf.kernel_time << "\tcacTime: " << pf.cac_time << "\tcopyTime: " << pf.copy_time 
 					<< "\tselectTime: " << pf.select_time
+					<< "\trelaxRemain: " << pf.relaxRemain
 					<< endl;
-			}
-			if (pf.nodeDepthDetail.size() > 0) {
-				cout << "Relax Detail Profile:" << endl;
-				fUtil::analyseIntVec<true>(pf.nodeRelaxTap, "nodeRelaxTap:");
-				fUtil::analyseIntVec<true>(pf.nodeRelaxFrec, "nodeRelaxFrec:");
 			}
 			allt += t;
 			allRN += pf.relaxNodes;
 			allRE += pf.relaxEdges;
 			allDP += pf.depth;
 			allkt += pf.kernel_time;
-			allst += pf.sort_time;
+			allst += pf.cac_time;
 			allct += pf.copy_time;
 			allslt += pf.select_time;
 			allRM += pf.relaxRemain;
 		}
-	}
-	else {
-		__ERROR("no this subaction")
 	}
 
 	allRN /= testNodes.size();
@@ -245,45 +174,8 @@ void run(GraphWeight &graph, boost::property_tree::ptree m_pt)
 		<< "\trelaxEdges: " << allRE << "\trelaxEdgesDivE: " << allRE / graph.e
 		<< "\trelaxDepth: " << allDP
 		<< "\tuseTime: " << allt
-		<< "\tkernelTime: " << allkt << "\tsortTime: " << allst << "\tcopyTime: " << allct
-		<< "\trelaxRemain: " << allRM
+		<< "\tkernelTime: " << allkt << "\tcacTime: " << allst << "\tcopyTime: " << allct
 		<< "\tselectTime: " << allslt
+		<< "\trelaxRemain: " << allRM
 		<< endl;
 }
-void predeal(GraphWeight &graph, boost::property_tree::ptree m_pt) 
-{
-	boost::property_tree::ptree tag_setting;
-
-	tag_setting = m_pt.get_child("predeal");
-	string kernel = tag_setting.get<string>("kernel");
-	string dataDir = tag_setting.get<string>("dataDir");
-	string parameter = tag_setting.get<string>("parameter","");
-	string filename;
-	if (kernel == "none") {
-		filename = dataDir + graph.name + ".ddsg";
-	}
-	//else if (kernel == "preCompute") {
-	//	filename = dataDir + graph.name + ".pc";
-	//	filename += n;
-	//	filename += ".gc";
-	//	graph.preCompute(n);
-	//}
-	//else if (kernel == "CH") {
-	//	filename = dataDir + graph.name + ".ch.gc";
-	//	map<string, int> kvs;
-	//	vector<string> ps = stringUtil::split(parameter, ";");
-	//	for (auto kvstr : ps) {
-	//		vector<string> kv = stringUtil::split(kvstr, ":");
-	//		kvs[kv[0]] = stringUtil::toT<int>(kv[1]);
-	//	}
-	//	graph.CHCompute(kvs);
-	//}
-	//else if (kernel == "reOrder") {
-	//	filename = dataDir + graph.name + ".re.gc";
-	//}
-	else {
-		__ERROR("no this preconpute kernel")
-	}
-	graph.toDDSG(filename.c_str());
-}
-

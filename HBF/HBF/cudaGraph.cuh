@@ -6,7 +6,7 @@
 inline void __getLastCudaError(const char *errorMessage, const char *file, const int line) {
 	cudaError_t err = cudaGetLastError();
 	if (cudaSuccess != err) {
-		std::cerr << std::endl << " CUDA error   "
+		std::cerr << std::endl << " CUDA error "
 			<< StreamModifier::Emph::SET_UNDERLINE << file
 			<< "(" << line << ")"
 			<< StreamModifier::Emph::SET_RESET << " : " << errorMessage
@@ -35,52 +35,36 @@ namespace cuda_graph {
 		int gridDim;
 		int blockDim;
 		int sharedLimit;
-		int tileLimit;
-		int distanceLimit;
-		int distanceSelectLimit;
-		int nodeSelectLimit;
+		string distanceLimitStrategy;
+		float distanceLimit;
 		CudaConfigs() {}
+		CudaConfigs(string kv,int vs,int gd,int bd,int sl,string dls,float dl){
+			kernelVersion = kv;
+			vwSize = vs;
+			gridDim = gd;
+			blockDim = bd;
+			sharedLimit = sl;
+			distanceLimitStrategy = dls;
+			distanceLimit = dl;
+		}
 	};
 	class CudaProfiles {
 	public:
 		long relaxNodes;
 		long relaxEdges;
 		long relaxRemain;
-		double kernel_time, sort_time, copy_time, select_time;
-		vector<vector<int>> devF1Detail;
-		vector<vector<int>> nodeDepthDetail;
-		vector<int> nodeRelaxTap;
-		vector<int> nodeRelaxFrec;
+		double kernel_time, copy_time, select_time, cac_time;
 		int depth;
 		int v, e;
 
 		CudaProfiles() {
 			relaxNodes = relaxEdges = relaxRemain = 0;
-			kernel_time = sort_time = copy_time = select_time = 0.0;
+			kernel_time = cac_time = copy_time = select_time = 0.0;
 			depth = 0;
 		}
 
-		void analyse() {
-			if (devF1Detail.size() > 0) {
-				nodeDepthDetail.resize(v);
-				int level = 0;
-				for (auto & x : devF1Detail) {
-					for (auto & y : x) {
-						nodeDepthDetail[y].push_back(level);
-					}
-					level++;
-				}
-				nodeRelaxTap.resize(v);
-				nodeRelaxFrec.resize(v);
-				for (int i = 0; i < v; i++) {
-					vector<int> &nodeRelaxVec = nodeDepthDetail[i];
-					nodeRelaxFrec[i] = nodeRelaxVec.size();
-					if (nodeRelaxVec.size() > 0)
-						nodeRelaxTap[i] = *nodeRelaxVec.rbegin() - *nodeRelaxVec.begin();
-					else
-						nodeRelaxTap[i] = 0;
-				}
-			}
+		void cac(){
+			cac_time = kernel_time - select_time;
 		}
 	};
 	class CudaGraph : ComputeGraph {
@@ -108,10 +92,8 @@ namespace cuda_graph {
 		void cudaCopyMem();
 		void cudaInitComputer(int initNode);
 		void cudaGetRes(vector<int> &res);
-		void search(int source, CudaProfiles& profile);
-		void searchV5(int source, CudaProfiles& profile);
-		void searchV6(int source, CudaProfiles& profile);
-		void searchV7(int source, CudaProfiles & profile);
+		void searchV0(int source, CudaProfiles& profile);
+		void searchV1(int source, CudaProfiles& profile);
 	};
 
 	/*class CHCudaGraph : ComputeGraph {
