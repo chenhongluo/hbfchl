@@ -100,14 +100,13 @@ namespace fUtil {
 			for (auto &x : v) {
 				vv[x]++;
 			}
-			cout << s << endl;
+			cout << s << "\t";
 			cout << "minv: " << minv << "\tmaxv: " << maxv << endl;
 			int stemp = 0;
 			for (int i = 0; i < vv.size(); i++) {
 				stemp += vv[i];
-				cout << i << ":\t" << vv[i] << "\t" << fixed << setprecision(4) << (double)vv[i] / v.size() << "\t"
-					<< stemp << "\t" << fixed << setprecision(4) << (double)stemp / v.size() << "\t"
-					<< endl;
+				cout << i << " " << vv[i] << " " << fixed << setprecision(4) << (double)vv[i] / v.size() << " "
+					<< stemp << " " << fixed << setprecision(4) << (double)stemp / v.size() << endl;
 			}
 		}
 	}
@@ -237,6 +236,7 @@ namespace randomUtil {
 	class IntRandom {
 	public:
 		virtual int getNextValue() = 0;
+		virtual std::vector<int> getValues(int n) = 0;
 	};
 
 	class IntRandomUniform : public IntRandom{
@@ -252,6 +252,13 @@ namespace randomUtil {
 
 		int getNextValue() {
 			return distribution(generator);
+		}
+		std::vector<int> getValues(int n){
+			std::vector<int> vs(n);
+			for(int i=0;i<n;i++){
+				vs[i] = getNextValue();
+			}
+			return vs;
 		}
 	};
 }

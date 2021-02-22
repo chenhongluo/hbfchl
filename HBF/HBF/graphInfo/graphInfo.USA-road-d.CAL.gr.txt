@@ -1,0 +1,19 @@
+
+Read File:	USA-road-d.CAL	Size: 95 MB
+start reading graph
+
+	Nodes: 1,890,815	Edges: 4,657,742	SymmetricFlag:0	FileWeightFlag:1	GraphType: Directed (UnDef)	Degree AVG: 2.5
+the graph start transfering to CSR format
+graphName: USA-road-d.CAL	V: 1890815	E: 4657742	avgDegree: 2.5
+graphName: USA-road-d.CAL	V: 1890815	E: 4657742	avgDegree: 2.5	 deep: 2172
+graphName: USA-road-d.CAL
+degree detail anaylse	minv: 1	maxv: 8
+0 0 0.0000 0 0.0000
+1 373057 0.1973 373057 0.1973
+2 501694 0.2653 874751 0.4626
+3 787697 0.4166 1662448 0.8792
+4 224302 0.1186 1886750 0.9979
+5 3423 0.0018 1890173 0.9997
+6 613 0.0003 1890786 1.0000
+7 27 0.0000 1890813 1.0000
+8 2 0.0000 1890815 1.0000

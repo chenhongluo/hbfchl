@@ -1,0 +1,20 @@
+
+Read File:	asia.osm	Size: 195 MB
+start reading graph
+
+	Nodes: 11,950,757	Edges: 25,423,206	SymmetricFlag:1	FileWeightFlag:0	GraphType: Directed (File Def)	Degree AVG: 2.1
+the graph start transfering to CSR format
+graphName: asia.osm	V: 11950757	E: 25423206	avgDegree: 2.1
+graphName: asia.osm	V: 11950757	E: 25423206	avgDegree: 2.1	 deep: 43933
+graphName: asia.osm
+degree detail anaylse	minv: 1	maxv: 9
+0 0 0.0000 0 0.0000
+1 417257 0.0349 417257 0.0349
+2 9912659 0.8295 10329916 0.8644
+3 1307462 0.1094 11637378 0.9738
+4 309091 0.0259 11946469 0.9996
+5 3902 0.0003 11950371 1.0000
+6 350 0.0000 11950721 1.0000
+7 23 0.0000 11950744 1.0000
+8 7 0.0000 11950751 1.0000
+9 6 0.0000 11950757 1.0000

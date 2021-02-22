@@ -56,8 +56,8 @@ namespace graph {
 
 		vector<unsigned> orders;
 		vector<ShortCut> addEdges;
-		int addFlag; // 0 不使用addEdges, 1 当成orign使用addEdges， 2 使用order构建UpGraph和DownGraph
-		float addUsePercent; // 使用addEdges的百分比，可以使用部分addEdges
+		int addFlag; // 0 锟斤拷使锟斤拷addEdges, 1 锟斤拷锟斤拷orign使锟斤拷addEdges锟斤拷 2 使锟斤拷order锟斤拷锟斤拷UpGraph锟斤拷DownGraph
+		float addUsePercent; // 使锟斤拷addEdges锟侥百分比ｏ拷锟斤拷锟斤拷使锟矫诧拷锟斤拷addEdges
 
 		int v, e;
 		string name;
@@ -75,7 +75,9 @@ namespace graph {
 
 		void toDDSG(const char *filename);
 		void analyseSimple();
+		void analyseMiddle(vector<int> vs);
 		void analyseDetail();
+		int getDeepOfNode(int vi);
 
 		GraphWeight(GraphRead* reader);
 		GraphWeight(const int _V, const int _E, const EdgeType _edgeType, vector<TriTuple>& edges);

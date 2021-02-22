@@ -1,0 +1,20 @@
+
+Read File:	USA-road-d.USA	Size: 1,322 MB
+start reading graph
+
+	Nodes: 23,947,347	Edges: 58,333,344	SymmetricFlag:0	FileWeightFlag:1	GraphType: Directed (UnDef)	Degree AVG: 2.4
+the graph start transfering to CSR format
+graphName: USA-road-d.USA	V: 23947347	E: 58333344	avgDegree: 2.4
+graphName: USA-road-d.USA	V: 23947347	E: 58333344	avgDegree: 2.4	 deep: 8295
+graphName: USA-road-d.USA
+degree detail anaylse	minv: 1	maxv: 9
+0 0 0.0000 0 0.0000
+1 4744422 0.1981 4744422 0.1981
+2 6912883 0.2887 11657305 0.4868
+3 9521467 0.3976 21178772 0.8844
+4 2668493 0.1114 23847265 0.9958
+5 76526 0.0032 23923791 0.9990
+6 22836 0.0010 23946627 1.0000
+7 626 0.0000 23947253 1.0000
+8 91 0.0000 23947344 1.0000
+9 3 0.0000 23947347 1.0000

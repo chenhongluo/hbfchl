@@ -140,7 +140,7 @@ namespace KernelV6
 		int queueSize1 = 0;
 		int queueSize2 = 0;
 		unsigned mymask = (1 << tile.thread_rank()) - 1;
-		// °´warp·Ö
+		// ï¿½ï¿½warpï¿½ï¿½
 		for (int i = tileID; i < (devSizes[0] + VW_SIZE - 1) / VW_SIZE; i += IDStride)
 		{
 			int j = i * VW_SIZE + tile.thread_rank();

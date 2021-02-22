@@ -4,6 +4,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/fstream.hpp>
 
+#include <cstdlib>
 #include <stdio.h>
 #include "graph.h"
 #include "cudaGraph.cuh"
@@ -19,7 +20,7 @@ if(!(expression))\
 }while(0)
 
 vector<int> getTestNodes(int size,int seed,int v) {
-	//Éú³É²âÊÔµÄµã
+	//ï¿½ï¿½ï¿½É²ï¿½ï¿½ÔµÄµï¿½
 	vector<int> testNodes(size, 0);
 	IntRandomUniform iru(seed, 0, v);
 	for (int i = 0; i < size; i++) {
@@ -35,72 +36,29 @@ void predeal(GraphWeight &graph, boost::property_tree::ptree m_pt);
 
 int main(int argc, char* argv[])
 {
-	// ¶ÁÈ¡²ÎÊýÅäÖÃdataºÍ*.config
+	// ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½dataï¿½ï¿½*.config
 	make_sure(argc==3,"argc!=2,input graph path and *.ini");
 	string graphPath = argv[1];
-	string ini = argv[2];
+	string ii = argv[2];
 	if (!boost::filesystem::exists(graphPath)) {
 		std::cerr << "graph not exists." << std::endl;
 		return -1;
 	}
-	if (!boost::filesystem::exists(ini)) {
-		std::cerr << "config.ini not exists." << std::endl;
-		return -1;
-	}
-	boost::property_tree::ptree m_pt, tag_setting;
-	try
-	{
-		read_ini(ini, m_pt);
-	}
-	catch (std::exception e)
-	{
-		__ERROR("config open error")
-	}
-	// ¶ÁÈ¡Í¼Ïà¹ØµÄÅäÖÃ£¬Éú³ÉÏàÓ¦µÄGraphWeight
-	tag_setting = m_pt.get_child("graph");
-	//Behind Camera Config ini
-	string randomOpt = tag_setting.get<string>("random", "uniform");
-	int seed = tag_setting.get<int>("seed", time(0));
-	int random_min = tag_setting.get<int>("random_min", 1);
-	int random_max = tag_setting.get<int>("random_max", 100);
-	int edgeType = tag_setting.get<int>("edgeType", 100);
-	bool compareFlag = tag_setting.get<bool>("compareFlag", false);
-	int addFlag = tag_setting.get<int>("addFlag", 0);
-	float addUsePercent = tag_setting.get<float>("addUsePercent", 0.0);
+	int testSize = atoi(ii.c_str());
 
+	int seed = 0;
+	IntRandomUniform ir = IntRandomUniform(seed, 1, 100);
+	seed = 1000;
 	EdgeType userEdgeType = EdgeType::UNDEF_EDGE_TYPE;
-	if (edgeType == 1) {
-		userEdgeType = EdgeType::DIRECTED;
-	}
-	else if (edgeType == 2) {
-		userEdgeType = EdgeType::UNDIRECTED;
-	}
-	IntRandomUniform ir = IntRandomUniform();
-	if (randomOpt == "uniform") {
-		ir = IntRandomUniform(seed, random_min, random_max);
-	}
-	else {
-		__ERROR("not exists random option")
-	}
 	GraphRead* reader = getGraphReader(graphPath.c_str(), userEdgeType, ir);
 	GraphWeight graphWeight(reader);
 	graphWeight.name = fileUtil::extractFileName(graphPath);
-	graphWeight.addUsePercent = addUsePercent;
-	graphWeight.addFlag = addFlag;
-	tag_setting = m_pt.get_child("action");
-	string action = tag_setting.get<string>("action");
-	if (action == "run") {
-		run(graphWeight, m_pt);
-	}
-	else if (action == "test") {
-		test(graphWeight, m_pt);
-	}
-	else if (action == "predeal") {
-		predeal(graphWeight, m_pt);
-	}
-	else if (action == "analyse") {
-		graphWeight.analyseDetail();
-	}
+	graphWeight.toCSR();
+	IntRandomUniform ir2 = IntRandomUniform(seed, 0, graphWeight.v);
+	std::vector<int> vs = ir2.getValues(testSize);
+	graphWeight.analyseSimple();
+	graphWeight.analyseMiddle(vs);
+	graphWeight.analyseDetail();
     return 0;
 }
 

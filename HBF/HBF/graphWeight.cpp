@@ -104,14 +104,14 @@ namespace graph {
 	double getDis(vector<int> array) {
 		double sum = 0.0;
 		for (auto &x : array) { sum += x; }
-		double mean = sum / array.size(); //¾ùÖµ
+		double mean = sum / array.size(); //ï¿½ï¿½Öµ
 
 		double accum = 0.0;
 		std::for_each(std::begin(array), std::end(array), [&](const double d) {
 			accum += (d - mean)*(d - mean);
 		});
 
-		double stdev = sqrt(accum / array.size() ); //·½²î
+		double stdev = sqrt(accum / array.size() ); //ï¿½ï¿½ï¿½ï¿½
 		return stdev;
 	}
 
@@ -164,9 +164,43 @@ namespace graph {
 	void GraphWeight::analyseSimple()
 	{
 		cout << "graphName: " << name;
-		if (addFlag != 0)
-			cout << addUsePercent;
 		cout << "\tV: " << v << "\tE: " << e << "\tavgDegree: " << (double)e / v << endl;
+	}
+
+	void GraphWeight::analyseMiddle(vector<int> vs)
+	{
+		cout << "graphName: " << name;
+		cout << "\tV: " << v << "\tE: " << e << "\tavgDegree: " << (double)e / v;
+		int deep = 0;
+		for(int i=0;i<vs.size();i++){
+			int vi = vs[i];
+			int t = getDeepOfNode(vi);
+			deep = deep>t?deep:t;
+		}
+		cout << "\t deep: "<< deep << endl;
+	}
+
+	int GraphWeight::getDeepOfNode(int source){
+		vector<int> label(v,0);
+		vector<int> queue1,queue2;
+		queue1.push_back(source);
+		int level = 0;
+		while (!queue1.empty()) {
+			level ++;
+			for(int i=0;i<queue1.size();i++){
+				int next = queue1[i];
+				for (int j = outNodes[next]; j < outNodes[next + 1]; j++) {
+					const node_t dest = outEdgeWeights[j].x;
+					if (label[dest] == 0) {
+						label[dest] = level;
+						queue2.push_back(dest);
+					}
+				}
+			}
+			swap(queue1,queue2);
+			queue2.clear();
+		}
+		return level;
 	}
 
 	GraphWeight::GraphWeight(GraphRead* gr){
