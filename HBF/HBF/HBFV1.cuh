@@ -70,8 +70,6 @@ namespace KernelV1
 		int queueSize = 0;
 		unsigned mymask = (1 << tile.thread_rank()) - 1;
 
-		//alloc node for warps tileID * tileLimit - tileID* tileLimit + tileLimit
-		// 
 		for (int i = tileID; i < devSizes[2]; i += IDStride)
 		{
 			int index = devF3[i];
@@ -94,8 +92,8 @@ namespace KernelV1
 						reinterpret_cast<unsigned long long &>(toWrite));
 					int2 &oldNode2Weight = reinterpret_cast<int2 &>(aa);
 					flag = ((oldNode2Weight.y > newWeight) && (level > oldNode2Weight.x));
-					SWrite< VW_SIZE, int>(tile, devF2, devF2Size, flag, dest.x, queue, queueSize, tileSharedLimit, mymask);
 				}
+				SWrite< VW_SIZE, int>(tile, devF2, devF2Size, flag, dest.x, queue, queueSize, tileSharedLimit, mymask);
 			}
 		}
 		SWrite< VW_SIZE, int>(tile, devF2, devF2Size, 0, 0, queue, queueSize, 0, mymask);
