@@ -23,6 +23,7 @@ if(!(expression))\
 vector<int> getTestNodes(int size,int seed,int v) {
 	IntRandomUniform ir2 = IntRandomUniform(seed, 0, v);
 	std::vector<int> vs = ir2.getValues(size);
+	return vs;
 }
 
 void run(GraphWeight &graph, CudaConfigs configs,int testNodeSize);
@@ -39,7 +40,7 @@ bool isCudaKv(string kv){
 
 int main(int argc, char* argv[])
 {
-	make_sure(argc==9,"argc<4,input graph path and *.ini");
+	make_sure(argc==8,"argc<4,input graph path and *.ini");
 	string graphPath = argv[1];
 	string action = argv[2];
 	string kv = argv[3];
@@ -51,7 +52,6 @@ int main(int argc, char* argv[])
 		std::cerr << "graph not exists." << std::endl;
 		return -1;
 	}
-	int testSize = atoi(argv[8]);
 
 	int seed = 0;
 	IntRandomUniform ir = IntRandomUniform(seed, 1, 100);
@@ -117,7 +117,7 @@ void test(GraphWeight &graph,CudaConfigs configs,int testNodeSize)
 }
 void run(GraphWeight &graph, CudaConfigs configs,int testNodeSize)
 {
-	bool printDeatil = false;
+	bool printDeatil = true;
 
 	vector<node_t> testNodes = getTestNodes(testNodeSize, 0, graph.v);
 	vector<dist_t> dis(graph.v);

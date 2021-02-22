@@ -28,18 +28,19 @@ namespace cuda_graph {
 	class CudaConfigs {
 	public:
 		string kernelVersion;
-		bool sort;
 		bool atomic64;
-		bool profile;
 		int vwSize;
 		int gridDim;
 		int blockDim;
 		int sharedLimit;
 		string distanceLimitStrategy;
 		float distanceLimit;
-		CudaConfigs() {}
+		CudaConfigs() {
+			atomic64 = true;
+		}
 		CudaConfigs(string kv,int vs,int gd,int bd,int sl,string dls,float dl){
 			kernelVersion = kv;
+			atomic64 = true;
 			vwSize = vs;
 			gridDim = gd;
 			blockDim = bd;
