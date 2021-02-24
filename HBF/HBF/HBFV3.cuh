@@ -101,27 +101,35 @@ namespace KernelV3
 		int queueSize = 0;
 		unsigned mymask = (1 << tile.thread_rank()) - 1;
 
-		int hhh[3];
-		int ns[3];
-		hhh[0] = 0;
-		for (int i = tileID; i < devSizes[2]; i += IDStride)
+		for (int i = tileID * 2; i < devSizes[2]; i += IDStride * 2)
 		{
-			int	index = devF3[i];
-			int	sourceWeight = devDistances[index].y;
-			int	nodeS = devNodes[index];
-			int	nodeE = devNodes[index + 1];
-			int	relaxSize = nodeE - nodeS;
-			int	relaxEdges += relaxSize;
+			int	index0 = devF3[i];
+			int	index1 = devF3[i + 1];
+			int relaxSize0 = devNodes[index0 + 1] - devNodes[index0];
+			int relaxSize1 = devNodes[index1 + 1] - devNodes[index1];
+			int	sourceWeight0 = devDistances[index0].y;
+			int	sourceWeight1 = devDistances[index1].y;
+			int all = relaxSize0 + relaxSize1;
 			// alloc edges in a warp
-			for (int k = nodeS + tile.thread_rank(); k < nodeE + tile.thread_rank();
-			 k += VW_SIZE)
+			for (int k = tile.thread_rank(); k < all + tile.thread_rank();
+			 k += WARPSIZE)
 			{
 				//relax edge  if flag=1 write to devF2
 				int flag = 0;
 				int2 dest;
-				if (k < nodeE)
+				if (k<relaxSize0)
 				{
-					dest = devEdges[k];
+					int kk = devNodes[index0] + k;
+					dest = devEdges[kk];
+					int newWeight = sourceWeight + dest.y;
+					int2 toWrite = make_int2(level, newWeight);
+					unsigned long long aa = atomicMin(reinterpret_cast<unsigned long long *>(&devDistances[dest.x]),
+						reinterpret_cast<unsigned long long &>(toWrite));
+					int2 &oldNode2Weight = reinterpret_cast<int2 &>(aa);
+					flag = ((oldNode2Weight.y > newWeight) && (level > oldNode2Weight.x));
+				} else if(k<all){
+					int kk = devNodes[index1] + k - relaxSize0;
+					dest = devEdges[kk];
 					int newWeight = sourceWeight + dest.y;
 					int2 toWrite = make_int2(level, newWeight);
 					unsigned long long aa = atomicMin(reinterpret_cast<unsigned long long *>(&devDistances[dest.x]),

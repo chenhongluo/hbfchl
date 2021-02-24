@@ -2,6 +2,7 @@
 #include "HBFV0.cuh"
 #include "HBFV1.cuh"
 #include "HBFV2.cuh"
+#include "HBFV3.cuh"
 #include "HBFV7.cuh"
 #include "fUtil.h"
 #include <iostream>
@@ -183,6 +184,9 @@ namespace cuda_graph {
 			switchKernelV1Config(configs)
 		}else if (configs.kernelVersion == "V2") {
 			switchKernelV2Config(configs)
+		}
+		else if (configs.kernelVersion == "V3") {
+			switchKernelV3Config(configs)
 		}
 		else{
 			__ERROR("no this cuda kernelversion")
