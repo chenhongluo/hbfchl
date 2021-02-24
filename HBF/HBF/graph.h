@@ -72,6 +72,7 @@ namespace graph {
 		}
 		vector<int2> getOutEdgesOfNode(node_t v) const;
 		vector<int2> getInEdgesOfNode(node_t v) const;
+		int getOutDegreeOfNode(node_t v) const;
 
 		void toDDSG(const char *filename);
 		void analyseSimple();

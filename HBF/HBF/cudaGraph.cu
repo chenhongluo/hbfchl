@@ -1,6 +1,7 @@
 #include "cudaGraph.cuh"
 #include "HBFV0.cuh"
 #include "HBFV1.cuh"
+#include "HBFV2.cuh"
 #include "HBFV7.cuh"
 #include "fUtil.h"
 #include <iostream>
@@ -145,6 +146,51 @@ namespace cuda_graph {
 		profile.cac_time = 0;
 		profile.copy_time *= 0.001;
 		profile.select_time *= 0.001;
+	}
+
+	float CudaGraph::nodeAllocTest(vector<int> sources,int n, CudaProfiles & profile)
+	{
+		// init
+		int* devF1 = f1;
+		int* devF2 = f2;
+		int* devF3 = f3;
+		vector<int> hostSizes(4, 0);
+		hostSizes[0] = n;
+		cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(devF1, &(sources[0]), n * sizeof(int), cudaMemcpyHostToDevice);
+		int2 INF2 = make_int2(0, INT_MAX);
+		vector<int2> temp(v, INF2);
+		for(auto x:sources){
+			temp[x] = make_int2(0, 0);
+		}
+		cudaMemcpy(devInt2Distances, &temp[0], v * sizeof(int2), cudaMemcpyHostToDevice);
+		int level = 0;
+		devF3 = devF1;
+		cudaMemcpy(devSizes + 2, devSizes, 1 * sizeof(int), cudaMemcpyDeviceToDevice);
+
+		// config
+		int gdim = configs.gridDim;
+		int bdim = configs.blockDim;
+		int sharedLimit = configs.sharedLimit;
+		int distanceLimit = 0;
+		int vwSize = configs.vwSize;
+
+		auto time1 = chrono::high_resolution_clock::now();
+		if (configs.kernelVersion == "V0") {
+			switchKernelV0Config(configs)
+		}
+		else if (configs.kernelVersion == "V1") {
+			switchKernelV1Config(configs)
+		}else if (configs.kernelVersion == "V2") {
+			switchKernelV2Config(configs)
+		}
+		else{
+			__ERROR("no this cuda kernelversion")
+		}
+		__CUDA_ERROR("GNRSearchMain Kernel");
+		auto time2 = chrono::high_resolution_clock::now();
+		float t =  chrono::duration_cast<chrono::microseconds>(time2 - time1).count() * 0.001;
+		return t;
 	}
 
 

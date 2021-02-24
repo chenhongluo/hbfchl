@@ -66,3 +66,14 @@ docker exec -it chlmysql mysql -uroot -p
 ALTER USER 'root'@'localhost' IDENTIFIED BY '1234';
 ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '1234';
 flush privileges;
+
+确认是release版本
+cmake -DCMAKE_BUILD_TYPE=Release -DARCH=75 .. && make
+脚本测:
+run.sh 执行
+用pycharm拉到本地，然后执行plot.py
+
+单独测：
+CUDA_VISIBLE_DEVICES=1 ./HBF /home/chl/data/asia_osm.mtx nodeAllocTest V1 4 none 0 100
+
+CUDA_VISIBLE_DEVICES=1 ./HBF /home/chl/data/asia_osm.mtx test V1 4 none 0 100

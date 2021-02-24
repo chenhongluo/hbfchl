@@ -68,7 +68,36 @@ int main(int argc, char* argv[])
 	}
 	else if(action == "test"){
 		test(graphWeight,configs,testNodeSize);
-	}else {
+	}else if(action == "nodeAllocTest"){
+		cout.precision(4); 
+		vector<int> testNodeQueue = getTestNodes(graphWeight.v,0,graphWeight.v - 1);
+		vector<int> testQueueEdges(testNodeQueue.size(),0);
+		int maxmax = 1000000;
+		vector<int> testSizes;
+		for(int i=1;i<maxmax;i*=10){
+			for(int j=1;j<10;j++){
+				testSizes.push_back(i * j);
+			}
+		}
+		// vector<int> testSizes = {200000};
+		for(int i=1;i<testQueueEdges.size();i++){
+			testQueueEdges[i] = graphWeight.getOutDegreeOfNode(testNodeQueue[i]) + testQueueEdges[i-1];
+		}
+		CudaGraph* cg = new CudaGraph(graphWeight, configs);
+		CudaProfiles profile;
+		for(int i=0;i<testSizes.size();i++){
+			int n = testSizes[i];
+			if(n < testNodeQueue.size()){
+				float t = 0.0;
+				int k = 10;
+				for(int j=0;j<k;j++){
+					t += cg->nodeAllocTest(testNodeQueue, n, profile);
+				}
+				cout << n<<" "<<testQueueEdges[n] << " "<< t/k <<endl;
+			}
+		}
+	}
+	else {
 		__ERROR("no this action")
 	}
     return 0;

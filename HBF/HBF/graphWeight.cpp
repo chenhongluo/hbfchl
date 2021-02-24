@@ -15,6 +15,13 @@ namespace graph {
 		return vector<int2>(p + s, p + t);
 	}
 
+	int GraphWeight::getOutDegreeOfNode(node_t v) const
+	{
+		int s = outNodes[v];
+		int t = outNodes[v + 1];
+		return t - s;
+	}
+
 	vector<int2> GraphWeight::getInEdgesOfNode(node_t v) const
 	{
 		int s = inNodes[v];
