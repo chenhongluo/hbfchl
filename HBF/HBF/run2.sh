@@ -14,4 +14,7 @@ do
 	CUDA_VISIBLE_DEVICES=1 ./HBF ${datadir}/${d} nodeAllocTest V2 8 none 0 0 > ${logdir}/nodeAlloc..${gpu}..${d}..VW8
 	CUDA_VISIBLE_DEVICES=1 ./HBF ${datadir}/${d} nodeAllocTest V2 16 none 0 0 > ${logdir}/nodeAlloc..${gpu}..${d}..VW16
 	CUDA_VISIBLE_DEVICES=1 ./HBF ${datadir}/${d} nodeAllocTest V2 32 none 0 0 > ${logdir}/nodeAlloc..${gpu}..${d}..VW32
+	CUDA_VISIBLE_DEVICES=1 ./HBF ${datadir}/${d} nodeAllocTest V2 64 none 0 0 > ${logdir}/nodeAlloc..${gpu}..${d}..VW64
+	CUDA_VISIBLE_DEVICES=1 ./HBF ${datadir}/${d} nodeAllocTest V2 128 none 0 0 > ${logdir}/nodeAlloc..${gpu}..${d}..VW128
+	CUDA_VISIBLE_DEVICES=1 ./HBF ${datadir}/${d} nodeAllocTest V3 32 none 0 0 > ${logdir}/nodeAlloc..${gpu}..${d}..DW
 done

@@ -76,4 +76,6 @@ run.sh 执行
 单独测：
 CUDA_VISIBLE_DEVICES=1 ./HBF /home/chl/data/asia_osm.mtx nodeAllocTest V1 4 none 0 100
 
+CUDA_VISIBLE_DEVICES=1 ./HBF /home/chl/data/asia_osm.mtx nodeAllocTest V3 4 none 0 100
+
 CUDA_VISIBLE_DEVICES=1 ./HBF /home/chl/data/asia_osm.mtx test V1 4 none 0 100

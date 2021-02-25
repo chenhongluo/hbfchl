@@ -101,15 +101,21 @@ namespace KernelV3
 		int queueSize = 0;
 		unsigned mymask = (1 << tile.thread_rank()) - 1;
 
-		for (int i = tileID * 2; i < devSizes[2]; i += IDStride * 2)
+		for (int i = tileID * 4; i+4 < devSizes[2]; i += IDStride * 4)
 		{
 			int	index0 = devF3[i];
 			int	index1 = devF3[i + 1];
+			int	index2 = devF3[i + 2];
+			int	index3 = devF3[i + 3];
 			int relaxSize0 = devNodes[index0 + 1] - devNodes[index0];
 			int relaxSize1 = devNodes[index1 + 1] - devNodes[index1];
+			int relaxSize2 = devNodes[index2 + 1] - devNodes[index2];
+			int relaxSize3 = devNodes[index3 + 1] - devNodes[index3];
 			int	sourceWeight0 = devDistances[index0].y;
 			int	sourceWeight1 = devDistances[index1].y;
-			int all = relaxSize0 + relaxSize1;
+			int	sourceWeight2 = devDistances[index2].y;
+			int	sourceWeight3 = devDistances[index3].y;
+			int all = relaxSize0 + relaxSize1 + relaxSize2 + relaxSize3;
 			// alloc edges in a warp
 			for (int k = tile.thread_rank(); k < all + tile.thread_rank();
 			 k += WARPSIZE)
@@ -117,26 +123,25 @@ namespace KernelV3
 				//relax edge  if flag=1 write to devF2
 				int flag = 0;
 				int2 dest;
-				if (k<relaxSize0)
-				{
-					int kk = devNodes[index0] + k;
-					dest = devEdges[kk];
-					int newWeight = sourceWeight + dest.y;
-					int2 toWrite = make_int2(level, newWeight);
-					unsigned long long aa = atomicMin(reinterpret_cast<unsigned long long *>(&devDistances[dest.x]),
-						reinterpret_cast<unsigned long long &>(toWrite));
-					int2 &oldNode2Weight = reinterpret_cast<int2 &>(aa);
-					flag = ((oldNode2Weight.y > newWeight) && (level > oldNode2Weight.x));
-				} else if(k<all){
-					int kk = devNodes[index1] + k - relaxSize0;
-					dest = devEdges[kk];
-					int newWeight = sourceWeight + dest.y;
-					int2 toWrite = make_int2(level, newWeight);
-					unsigned long long aa = atomicMin(reinterpret_cast<unsigned long long *>(&devDistances[dest.x]),
-						reinterpret_cast<unsigned long long &>(toWrite));
-					int2 &oldNode2Weight = reinterpret_cast<int2 &>(aa);
-					flag = ((oldNode2Weight.y > newWeight) && (level > oldNode2Weight.x));
+				int kk = 0;
+				if (k<relaxSize0){
+					kk = devNodes[index0] + k;
 				}
+				else if( k < relaxSize0 + relaxSize1){
+					kk = devNodes[index1] + k - relaxSize0;
+				}else if(k < relaxSize0 + relaxSize1 + relaxSize3){
+					kk = devNodes[index1] + k - relaxSize0 - relaxSize1;
+				}else if(k < all){
+					kk = devNodes[index1] + k - relaxSize0 - relaxSize1 -relaxSize2;
+				}
+				tile.sync();
+				dest = devEdges[kk];
+				int newWeight = sourceWeight0 + dest.y;
+				int2 toWrite = make_int2(level, newWeight);
+				unsigned long long aa = atomicMin(reinterpret_cast<unsigned long long *>(&devDistances[dest.x]),
+					reinterpret_cast<unsigned long long &>(toWrite));
+				int2 &oldNode2Weight = reinterpret_cast<int2 &>(aa);
+				flag = ((oldNode2Weight.y > newWeight) && (level > oldNode2Weight.x));
 				SWrite<WARPSIZE, int>(tile, devF2, devF2Size, flag, dest.x, queue, queueSize, warpSharedLimit, mymask);
 			}
 		}

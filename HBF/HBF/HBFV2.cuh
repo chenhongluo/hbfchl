@@ -84,13 +84,13 @@ namespace KernelV2
 	{
 		//alloc node&edge
 		thread_block g = this_thread_block();
-		thread_block_tile<VW_SIZE> tile = tiled_partition<VW_SIZE>(g);
-		thread_block_tile<WARPSIZE> tile2 = tiled_partition<WARPSIZE>(g);
+		thread_block_tile<WARPSIZE> tile = tiled_partition<WARPSIZE>(g);
 		// dim3 group_index();
 		// dim3 thread_index();
 		const int blockdim = g.group_dim().x;
 		const int realID = g.group_index().x * blockdim + g.thread_rank();
 		const int tileID = realID / VW_SIZE;
+		const int tileThreadId = realID % VW_SIZE;
 		const int IDStride = gridDim.x * (blockdim / VW_SIZE);
 		const int warpSharedLimit = (sharedLimit / 4) / blockdim * WARPSIZE;
 		int* devF2Size = devSizes + 1;
@@ -100,7 +100,7 @@ namespace KernelV2
 		extern __shared__ int st[];
 		int *queue = st + g.thread_rank() / WARPSIZE * warpSharedLimit;
 		int queueSize = 0;
-		unsigned mymask = (1 << tile2.thread_rank()) - 1;
+		unsigned mymask = (1 << tile.thread_rank()) - 1;
 
 		int vwn = WARPSIZE/VW_SIZE;
 		int kkk = devSizes[2];
@@ -118,9 +118,9 @@ namespace KernelV2
 				maxRelaxSize = 0;
 				relaxEdges += relaxSize;
 			}
-			VWInclusiveScanMax<WARPSIZE,int>(tile2,relaxSize,maxRelaxSize);
+			VWInclusiveScanMax<WARPSIZE,int>(tile,relaxSize,maxRelaxSize);
 			// alloc edges in a warp
-			for (int k = nodeS + tile.thread_rank(); k < nodeS + maxRelaxSize + tile.thread_rank();
+			for (int k = nodeS + tileThreadId; k < nodeS + maxRelaxSize + tileThreadId;
 			 k += VW_SIZE)
 			{
 				//relax edge  if flag=1 write to devF2
@@ -136,10 +136,10 @@ namespace KernelV2
 					int2 &oldNode2Weight = reinterpret_cast<int2 &>(aa);
 					flag = ((oldNode2Weight.y > newWeight) && (level > oldNode2Weight.x));
 				}
-				SWrite<WARPSIZE, int>(tile2, devF2, devF2Size, flag, dest.x, queue, queueSize, warpSharedLimit, mymask);
+				SWrite<WARPSIZE, int>(tile, devF2, devF2Size, flag, dest.x, queue, queueSize, warpSharedLimit, mymask);
 			}
 		}
-		SWrite< WARPSIZE, int>(tile2, devF2, devF2Size, 0, 0, queue, queueSize, 0, mymask);
+		SWrite< WARPSIZE, int>(tile, devF2, devF2Size, 0, 0, queue, queueSize, 0, mymask);
 		// if (tile.thread_rank() == 0) {
 		// 	atomicAdd(devSizes + 3, relaxEdges);
 		// }
@@ -226,6 +226,10 @@ HBFSearchV2Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
 			kernelV2Atmoic64(16,gridDim, blockDim, sharedLimit); break;\
 		case 32: \
 			kernelV2Atmoic64(32,gridDim, blockDim, sharedLimit); break;\
+		case 64: \
+			kernelV2Atmoic64(64,gridDim, blockDim, sharedLimit); break;\
+		case 128: \
+			kernelV2Atmoic64(128,gridDim, blockDim, sharedLimit); break;\
 		default: \
 			__ERROR("no this vwsize")\
 		}\

@@ -116,7 +116,7 @@ namespace cuda_graph {
 			if (configs.distanceLimitStrategy == "none") {
 				devF3 = devF1;
 				cudaMemcpy(devSizes + 2, devSizes, 1 * sizeof(int), cudaMemcpyDeviceToDevice);
-				switchKernelV1Config(configs)
+				switchKernelV2Config(configs)
 				devF3 = f3;
 			}
 			else if (configs.distanceLimitStrategy == "normal"){
@@ -125,7 +125,7 @@ namespace cuda_graph {
 				__CUDA_ERROR("GNRSearchMain Kernel");
 				auto time_se = chrono::high_resolution_clock::now();
 				profile.select_time += chrono::duration_cast<chrono::microseconds>(time_se - time_ss).count();
-				switchKernelV1Config(configs)
+				switchKernelV2Config(configs)
 			}
 
 			__CUDA_ERROR("GNRSearchMain Kernel");
