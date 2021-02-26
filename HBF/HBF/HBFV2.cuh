@@ -140,9 +140,9 @@ namespace KernelV2
 			}
 		}
 		SWrite< WARPSIZE, int>(tile, devF2, devF2Size, 0, 0, queue, queueSize, 0, mymask);
-		// if (tile.thread_rank() == 0) {
-		// 	atomicAdd(devSizes + 3, relaxEdges);
-		// }
+		if (tile.thread_rank() == 0) {
+			atomicAdd(devSizes + 3, relaxEdges);
+		}
 	}
 
 	template <int VW_SIZE>

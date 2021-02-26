@@ -1,7 +1,7 @@
 #！/bin/bash
-datas=(circuit5M_dc.mtx delaunay_n20.graph flickr.mtx ldoor.mtx msdoor.mtx rmat.3Mv.20Me USA-road-d.CAL.gr USA-road-d.USA.gr asia.osm.graph)
+datas=(circuit5M_dc.mtx delaunay_n20.graph flickr.mtx ldoor.mtx msdoor.mtx rmat.3Mv.20Me USA-road-d.CAL.gr)
 cd /home/chl/hbftest/HBF/HBF/build
-logdir=/home/chl/hbftest/HBF/HBF/nodeAlloc2
+logdir=/home/chl/hbftest/HBF/HBF/nodeAlloc
 datadir=/home/chl/data
 gpu=GTX2080Ti
 

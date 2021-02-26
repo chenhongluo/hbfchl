@@ -4,6 +4,7 @@
 #include "HBFV2.cuh"
 #include "HBFV3.cuh"
 #include "HBFV7.cuh"
+#include "WK.cuh"
 #include "fUtil.h"
 #include <iostream>
 #include <chrono>
@@ -176,6 +177,11 @@ namespace cuda_graph {
 		int distanceLimit = 0;
 		int vwSize = configs.vwSize;
 
+		cudaStream_t stream1,stream2,stream3;
+		cudaStreamCreate(&stream1);
+		cudaStreamCreate(&stream2);
+		cudaStreamCreate(&stream3);
+
 		auto time1 = chrono::high_resolution_clock::now();
 		if (configs.kernelVersion == "V0") {
 			switchKernelV0Config(configs)
@@ -191,9 +197,62 @@ namespace cuda_graph {
 		else{
 			__ERROR("no this cuda kernelversion")
 		}
+		cudaStreamDestroy(stream1);
+		cudaStreamDestroy(stream2);
+		cudaStreamDestroy(stream3);
 		__CUDA_ERROR("GNRSearchMain Kernel");
 		auto time2 = chrono::high_resolution_clock::now();
 		float t =  chrono::duration_cast<chrono::microseconds>(time2 - time1).count() * 0.001;
+		return t;
+	}
+
+	float CudaGraph::nodeWriteTest(vector<int> sources,int n,int nl, CudaProfiles & profile)
+	{
+		// init
+		int* devF1 = f1;
+		int* devF2 = f2;
+		int* devF3 = f3;
+		vector<int> hostSizes(4, 0);
+		int gggg = 0;
+		for(int kkk =0;kkk<n;kkk++){
+			if(sources[kkk] < nl){
+				gggg++;
+			}
+		}
+		hostSizes[0] = n;
+		cudaMemcpy(devSizes, &(hostSizes[0]), 4 * sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(devF1, &(sources[0]), n * sizeof(int), cudaMemcpyHostToDevice);
+		int level = 0;
+		devF3 = devF1;
+		cudaMemcpy(devSizes + 2, devSizes, 1 * sizeof(int), cudaMemcpyDeviceToDevice);
+
+		// config
+		int gdim = configs.gridDim;
+		int bdim = configs.blockDim;
+		int sharedLimit = configs.sharedLimit;
+		int distanceLimit = 0;
+		int vwSize = configs.vwSize;
+
+		auto time1 = chrono::high_resolution_clock::now();
+		if (configs.kernelVersion == "V0") {
+			switchWriteKernel(WriteKernel1)
+		}
+		else if (configs.kernelVersion == "V1") {
+			switchWriteKernel(WriteKernel2)
+		}else if (configs.kernelVersion == "V2") {
+			switchWriteKernel(WriteKernel3)
+		}
+		else if (configs.kernelVersion == "V3") {
+			switchWriteKernel(WriteKernel4)
+		}
+		else{
+			__ERROR("no this cuda kernelversion")
+		}
+		__CUDA_ERROR("GNRSearchMain Kernel");
+		auto time2 = chrono::high_resolution_clock::now();
+		float t =  chrono::duration_cast<chrono::microseconds>(time2 - time1).count() * 0.001;
+		cudaMemcpy(&(hostSizes[0]), devSizes, 4 * sizeof(int), cudaMemcpyDeviceToHost);
+		cout << n << " "<<nl << " "<< hostSizes[1] << " "<< gggg << " "<<hostSizes[3] << " " << t <<endl;
 		return t;
 	}
 

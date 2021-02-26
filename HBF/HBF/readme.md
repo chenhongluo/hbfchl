@@ -79,3 +79,14 @@ CUDA_VISIBLE_DEVICES=1 ./HBF /home/chl/data/asia_osm.mtx nodeAllocTest V1 4 none
 CUDA_VISIBLE_DEVICES=1 ./HBF /home/chl/data/asia_osm.mtx nodeAllocTest V3 4 none 0 100
 
 CUDA_VISIBLE_DEVICES=1 ./HBF /home/chl/data/asia_osm.mtx test V1 4 none 0 100
+
+else if(action == "nodeWriteTest") {
+		cout.precision(4); 
+		vector<int> testNodeQueue = getTestNodes(testNodeSize,0,10);
+		CudaGraph* cg = new CudaGraph(graphWeight, configs);
+		CudaProfiles profile;
+		int n = testNodeSize;
+		for (int nl =0;nl < 10;nl++){
+			t += cg->nodeWriteTest(testNodeQueue, n,nl, profile);
+		}
+	}

@@ -86,6 +86,7 @@ namespace cuda_graph {
 		CudaConfigs configs;
 		CudaGraph(GraphWeight & _gp, CudaConfigs  _configs);
 		float nodeAllocTest(vector<int> sources,int n, CudaProfiles & profile);
+		float nodeWriteTest(vector<int> sources,int n,int nl, CudaProfiles & profile);
 		void* computeAndTick(node_t source, vector<dist_t>& res, double & t);
 		~CudaGraph();
 	private:

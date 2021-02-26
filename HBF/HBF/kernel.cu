@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
 	graphWeight.name = fileUtil::extractFileName(graphPath);
 	graphWeight.toCSR();
 	graphWeight.analyseSimple();
-	CudaConfigs configs = CudaConfigs(kv,vwSize,68*4,256,1024*8,dsl,ds);
+	CudaConfigs configs = CudaConfigs(kv,vwSize,68*8,256,1024*8,dsl,ds);
 	if(action == "run"){
 		run(graphWeight,configs,testNodeSize);
 	}
@@ -95,6 +95,15 @@ int main(int argc, char* argv[])
 				}
 				cout << n<<" "<<testQueueEdges[n] << " "<< t/k <<endl;
 			}
+		}
+	} else if(action == "nodeWriteTest") {
+		cout.precision(4); 
+		vector<int> testNodeQueue = getTestNodes(testNodeSize,0,9);
+		CudaGraph* cg = new CudaGraph(graphWeight, configs);
+		CudaProfiles profile;
+		int n = testNodeSize;
+		for (int nl =1;nl <= 11;nl++){
+			cg->nodeWriteTest(testNodeQueue, n,nl, profile);
 		}
 	}
 	else {
