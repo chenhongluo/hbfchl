@@ -1,0 +1,19 @@
+
+Read File:	delaunay_n20	Size: 42 MB
+start reading graph
+
+	Nodes: 1,048,576	Edges: 6,291,372	SymmetricFlag:1	FileWeightFlag:0	GraphType: Directed (File Def)	Degree AVG: 6.0
+the graph start transfering to CSR format
+graphName: delaunay_n20	V: 1048576	E: 6291372	avgDegree: 6.0	avgWeight: 50.5	stdDegree: 0.0 269.4
+Relax Source: 8	relaxNodes: 1048576	relaxNodesDivV: 1.0	relaxEdges: 3146073	relaxEdgesDivE: 0.5	depth: 643	useTime: 24.9	kernelTime: 16.0	cacTime: 9.5	copyTime: 6.6	selectTime: 6.5	relaxRemain: 1459632	dl: 16.1
+Relax Source: 137994	relaxNodes: 1048576	relaxNodesDivV: 1.0	relaxEdges: 3147922	relaxEdgesDivE: 0.5	depth: 679	useTime: 23.2	kernelTime: 14.2	cacTime: 8.3	copyTime: 6.8	selectTime: 5.9	relaxRemain: 1456896	dl: 16.1
+Relax Source: 792696	relaxNodes: 1048576	relaxNodesDivV: 1.0	relaxEdges: 3147457	relaxEdgesDivE: 0.5	depth: 658	useTime: 22.4	kernelTime: 13.6	cacTime: 8.1	copyTime: 6.6	selectTime: 5.6	relaxRemain: 1485033	dl: 15.8
+Relax Source: 481164	relaxNodes: 1048576	relaxNodesDivV: 1.0	relaxEdges: 3146811	relaxEdgesDivE: 0.5	depth: 631	useTime: 21.5	kernelTime: 13.1	cacTime: 7.8	copyTime: 6.3	selectTime: 5.4	relaxRemain: 1465387	dl: 16.0
+Relax Source: 558919	relaxNodes: 1048576	relaxNodesDivV: 1.0	relaxEdges: 3146417	relaxEdgesDivE: 0.5	depth: 657	useTime: 22.4	kernelTime: 13.7	cacTime: 8.1	copyTime: 6.6	selectTime: 5.6	relaxRemain: 1464805	dl: 16.2
+Relax Source: 229707	relaxNodes: 1048576	relaxNodesDivV: 1.0	relaxEdges: 3146358	relaxEdgesDivE: 0.5	depth: 684	useTime: 21.8	kernelTime: 13.5	cacTime: 8.0	copyTime: 6.2	selectTime: 5.5	relaxRemain: 1561609	dl: 16.1
+Relax Source: 49353	relaxNodes: 1048576	relaxNodesDivV: 1.0	relaxEdges: 3145638	relaxEdgesDivE: 0.5	depth: 647	useTime: 20.8	kernelTime: 12.8	cacTime: 7.6	copyTime: 5.9	selectTime: 5.2	relaxRemain: 1458226	dl: 16.2
+Relax Source: 712188	relaxNodes: 1048576	relaxNodesDivV: 1.0	relaxEdges: 3146254	relaxEdgesDivE: 0.5	depth: 621	useTime: 20.5	kernelTime: 12.3	cacTime: 7.3	copyTime: 5.6	selectTime: 5.0	relaxRemain: 1465034	dl: 16.5
+Relax Source: 712641	relaxNodes: 1048576	relaxNodesDivV: 1.0	relaxEdges: 3147048	relaxEdgesDivE: 0.5	depth: 614	useTime: 20.4	kernelTime: 12.1	cacTime: 7.2	copyTime: 5.6	selectTime: 4.9	relaxRemain: 1480276	dl: 16.7
+Relax Source: 980575	relaxNodes: 1048576	relaxNodesDivV: 1.0	relaxEdges: 3147179	relaxEdgesDivE: 0.5	depth: 598	useTime: 20.1	kernelTime: 11.9	cacTime: 7.1	copyTime: 5.6	selectTime: 4.8	relaxRemain: 1463250	dl: 16.5
+ Avg Profile: 
+	relaxNodes: 1048576.0	relaxNodesDivV: 1.0	relaxNodesPerKernel: 1630.2	relaxEdges: 3146715.7	relaxEdgesDivE: 0.5	relaxDepth: 643.2	relaxEdgesPerKernel: 4892.3	useTime: 21.8 19.5	kernelTime: 13.3	cacTime: 7.9	copyTime: 6.2	selectTime: 5.4	relaxRemain: 1476014.8	DL: 16.2

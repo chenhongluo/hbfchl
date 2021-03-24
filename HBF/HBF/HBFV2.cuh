@@ -135,12 +135,16 @@ namespace KernelV2
 						reinterpret_cast<unsigned long long &>(toWrite));
 					int2 &oldNode2Weight = reinterpret_cast<int2 &>(aa);
 					flag = ((oldNode2Weight.y > newWeight) && (level > oldNode2Weight.x));
+					// if(flag){
+					// 	int pos = atomicAdd(devF2Size,1);
+					// 	devF2[pos] = dest.x;
+					// }
 				}
 				SWrite<WARPSIZE, int>(tile, devF2, devF2Size, flag, dest.x, queue, queueSize, warpSharedLimit, mymask);
 			}
 		}
 		SWrite< WARPSIZE, int>(tile, devF2, devF2Size, 0, 0, queue, queueSize, 0, mymask);
-		if (tile.thread_rank() == 0) {
+		if (tileID == 0) {
 			atomicAdd(devSizes + 3, relaxEdges);
 		}
 	}
@@ -230,6 +234,12 @@ HBFSearchV2Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \
 			kernelV2Atmoic64(64,gridDim, blockDim, sharedLimit); break;\
 		case 128: \
 			kernelV2Atmoic64(128,gridDim, blockDim, sharedLimit); break;\
+		case 256: \
+			kernelV2Atmoic64(256,gridDim, blockDim, sharedLimit); break;\
+		case 512: \
+			kernelV2Atmoic64(512,gridDim, blockDim, sharedLimit); break;\
+		case 1024: \
+			kernelV2Atmoic64(1024,gridDim, blockDim, sharedLimit); break;\
 		default: \
 			__ERROR("no this vwsize")\
 		}\

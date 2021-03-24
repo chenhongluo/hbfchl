@@ -31,6 +31,8 @@ if(CUDA_VERSION_MAJOR LESS 7)
 endif()
 
 # ------------------------------------------------------------------------------
+include_directories(${PROJECT_SOURCE_DIR}/cub-1.8.0/
+)
 
 set(HOST_SRC        ${PROJECT_SOURCE_DIR}/fUtil.cpp
                     ${PROJECT_SOURCE_DIR}/graphHost.cpp

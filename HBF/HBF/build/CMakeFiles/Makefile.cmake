@@ -13,8 +13,8 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeFiles/3.10.2/CMakeSystem.cmake"
   "CMakeFiles/HBF.dir/HBF_generated_cudaGraph.cu.o.cmake.pre-gen"
   "CMakeFiles/HBF.dir/HBF_generated_cudaGraph.cu.o.depend"
-  "CMakeFiles/HBF.dir/HBF_generated_test.cu.o.cmake.pre-gen"
-  "CMakeFiles/HBF.dir/HBF_generated_test.cu.o.depend"
+  "CMakeFiles/HBF.dir/HBF_generated_kernel.cu.o.cmake.pre-gen"
+  "CMakeFiles/HBF.dir/HBF_generated_kernel.cu.o.depend"
   "/usr/share/cmake-3.10/Modules/CMakeCInformation.cmake"
   "/usr/share/cmake-3.10/Modules/CMakeCXXInformation.cmake"
   "/usr/share/cmake-3.10/Modules/CMakeCheckCompilerFlagCommonPatterns.cmake"
@@ -54,9 +54,9 @@ set(CMAKE_MAKEFILE_OUTPUTS
 
 # Byproducts of CMake generate step:
 set(CMAKE_MAKEFILE_PRODUCTS
-  "CMakeFiles/HBF.dir/HBF_generated_test.cu.o.cmake.pre-gen"
+  "CMakeFiles/HBF.dir/HBF_generated_kernel.cu.o.cmake.pre-gen"
   "CMakeFiles/HBF.dir/HBF_generated_cudaGraph.cu.o.cmake.pre-gen"
-  "CMakeFiles/HBF.dir/HBF_generated_test.cu.o.Release.cmake"
+  "CMakeFiles/HBF.dir/HBF_generated_kernel.cu.o.Release.cmake"
   "CMakeFiles/HBF.dir/HBF_generated_cudaGraph.cu.o.Release.cmake"
   "CMakeFiles/CMakeDirectoryInformation.cmake"
   )

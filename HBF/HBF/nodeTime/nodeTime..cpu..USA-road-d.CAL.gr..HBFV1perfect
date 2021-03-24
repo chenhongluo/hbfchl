@@ -1,0 +1,19 @@
+
+Read File:	USA-road-d.CAL	Size: 95 MB
+start reading graph
+
+	Nodes: 1,890,815	Edges: 4,657,742	SymmetricFlag:0	FileWeightFlag:1	GraphType: Directed (UnDef)	Degree AVG: 2.5
+the graph start transfering to CSR format
+graphName: USA-road-d.CAL	V: 1890815	E: 4657742	avgDegree: 2.5	avgWeight: 2695.0	stdDegree: 0.0 35009.4
+Relax Source: 14	relaxNodes: 1890815	relaxNodesDivV: 1.0	relaxEdges: 1168537	relaxEdgesDivE: 0.3	depth: 4144	useTime: 121.5	kernelTime: 75.8	cacTime: 43.1	copyTime: 38.0	selectTime: 32.7	relaxRemain: 1761207	dl: 3756.5
+Relax Source: 248876	relaxNodes: 1890815	relaxNodesDivV: 1.0	relaxEdges: 1167035	relaxEdgesDivE: 0.3	depth: 3008	useTime: 90.9	kernelTime: 55.4	cacTime: 31.6	copyTime: 27.3	selectTime: 23.8	relaxRemain: 1509932	dl: 4015.7
+Relax Source: 1429647	relaxNodes: 1890815	relaxNodesDivV: 1.0	relaxEdges: 1167320	relaxEdgesDivE: 0.3	depth: 2917	useTime: 86.4	kernelTime: 53.8	cacTime: 30.7	copyTime: 26.4	selectTime: 23.1	relaxRemain: 1612230	dl: 3783.2
+Relax Source: 867791	relaxNodes: 1890815	relaxNodesDivV: 1.0	relaxEdges: 1166200	relaxEdgesDivE: 0.3	depth: 2669	useTime: 79.4	kernelTime: 49.1	cacTime: 28.0	copyTime: 24.2	selectTime: 21.1	relaxRemain: 1420918	dl: 3904.3
+Relax Source: 1008025	relaxNodes: 1890815	relaxNodesDivV: 1.0	relaxEdges: 1165777	relaxEdgesDivE: 0.3	depth: 2455	useTime: 73.7	kernelTime: 45.4	cacTime: 26.3	copyTime: 22.3	selectTime: 19.1	relaxRemain: 1450751	dl: 4908.9
+Relax Source: 414283	relaxNodes: 1890815	relaxNodesDivV: 1.0	relaxEdges: 1167291	relaxEdgesDivE: 0.3	depth: 2939	useTime: 94.2	kernelTime: 57.7	cacTime: 32.5	copyTime: 29.9	selectTime: 25.2	relaxRemain: 1567297	dl: 3956.8
+Relax Source: 89011	relaxNodes: 1890815	relaxNodesDivV: 1.0	relaxEdges: 1166572	relaxEdgesDivE: 0.3	depth: 2163	useTime: 66.1	kernelTime: 40.9	cacTime: 23.6	copyTime: 19.8	selectTime: 17.3	relaxRemain: 1623156	dl: 4772.8
+Relax Source: 1284450	relaxNodes: 1890815	relaxNodesDivV: 1.0	relaxEdges: 1166811	relaxEdgesDivE: 0.3	depth: 3131	useTime: 92.5	kernelTime: 57.9	cacTime: 33.1	copyTime: 28.5	selectTime: 24.8	relaxRemain: 1516996	dl: 3884.2
+Relax Source: 1285266	relaxNodes: 1890815	relaxNodesDivV: 1.0	relaxEdges: 1167018	relaxEdgesDivE: 0.3	depth: 3058	useTime: 91.3	kernelTime: 56.9	cacTime: 32.5	copyTime: 28.1	selectTime: 24.4	relaxRemain: 1521372	dl: 3994.5
+Relax Source: 1768491	relaxNodes: 1890815	relaxNodesDivV: 1.0	relaxEdges: 1165456	relaxEdgesDivE: 0.3	depth: 2705	useTime: 83.7	kernelTime: 50.9	cacTime: 29.0	copyTime: 25.1	selectTime: 21.9	relaxRemain: 1639898	dl: 4387.1
+ Avg Profile: 
+	relaxNodes: 1890815.0	relaxNodesDivV: 1.0	relaxNodesPerKernel: 647.8	relaxEdges: 1166801.7	relaxEdgesDivE: 0.3	relaxDepth: 2918.9	relaxEdgesPerKernel: 399.7	useTime: 88.0 81.3	kernelTime: 54.4	cacTime: 31.0	copyTime: 26.9	selectTime: 23.3	relaxRemain: 1562375.7	DL: 4136.4

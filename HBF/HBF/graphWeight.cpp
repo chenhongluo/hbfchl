@@ -40,6 +40,38 @@ namespace graph {
 		of.close();
 	}
 
+	void GraphWeight::toGr(const char * filename)
+	{
+		ofstream ouF;
+		ouF.open(filename, std::ofstream::binary);
+		unsigned long long value = 1;
+		ouF.write(reinterpret_cast<const char*>(&value), sizeof(value));
+		value = 4;
+		ouF.write(reinterpret_cast<const char*>(&value), sizeof(value));
+		value = v;
+		ouF.write(reinterpret_cast<const char*>(&value), sizeof(value));
+		value = e;
+		ouF.write(reinterpret_cast<const char*>(&value), sizeof(value));
+		for(int i = 0;i<v;i++){
+			value = outNodes[i+1];
+			ouF.write(reinterpret_cast<const char*>(&value), sizeof(value));
+		}
+		for(int i = 0;i<e;i++){
+			// value = getOutDegreeOfNode(i);
+			unsigned dest = outEdgeWeights[i].x;
+			ouF.write(reinterpret_cast<const char*>(&dest), sizeof(dest));
+		}
+		if(e%2){
+			unsigned dest = 0;
+			ouF.write(reinterpret_cast<const char*>(&dest), sizeof(dest));
+		}
+		for(int i = 0;i<e;i++){
+			int dest = outEdgeWeights[i].y;
+			ouF.write(reinterpret_cast<const char*>(&dest), sizeof(dest));
+		}
+		ouF.close();
+	}
+
 	//weight_t getDistance(map<node_t, weight_t> m, node_t v) {
 	//	if (m.find(v) == m.end()) {
 	//		return INT_MAX;
@@ -170,8 +202,20 @@ namespace graph {
 
 	void GraphWeight::analyseSimple()
 	{
+		double allWeight  = 0.0;
+		double avgDegree = (double)e / v;
+		double stdDegree = 0.0;
+		for (auto &x:outEdgeWeights){
+			allWeight += x.y;
+		}
+		for (int i = 0;i<v;i++){
+			stdDegree += (getOutDegreeOfNode(i) - avgDegree)*(getOutDegreeOfNode(i) - avgDegree);
+		}
+		double avgWeight = allWeight/e;
+		stdDegree = sqrt(stdDegree)/v;
 		cout << "graphName: " << name;
-		cout << "\tV: " << v << "\tE: " << e << "\tavgDegree: " << (double)e / v << endl;
+		cout << "\tV: " << v << "\tE: " << e << "\tavgDegree: " << avgDegree << "\tavgWeight: " << avgWeight << 
+		"\tstdDegree: "<< stdDegree << " "<< avgWeight * 32 / avgDegree << endl;
 	}
 
 	void GraphWeight::analyseMiddle(vector<int> vs)

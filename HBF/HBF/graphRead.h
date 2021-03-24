@@ -43,6 +43,13 @@ namespace graph {
 		virtual vector<TriTuple> getOriginalEdegs() = 0;
 	};
 
+	class grReader: public GraphRead {
+	public:
+		grReader(const char * filename, EdgeType direction, IntRandom& ir);
+		GraphHeader getHeader();
+		vector<TriTuple> getOriginalEdegs();
+	};
+
 	class MatrixMarketReader :public GraphRead {
 	public:
 		MatrixMarketReader(const char * filename, EdgeType direction, IntRandom& ir);

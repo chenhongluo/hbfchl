@@ -75,6 +75,7 @@ namespace graph {
 		int getOutDegreeOfNode(node_t v) const;
 
 		void toDDSG(const char *filename);
+		void toGr(const char * filename);
 		void analyseSimple();
 		void analyseMiddle(vector<int> vs);
 		void analyseDetail();

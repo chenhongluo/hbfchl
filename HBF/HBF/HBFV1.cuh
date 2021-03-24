@@ -155,6 +155,61 @@ namespace KernelV1
 		SWrite< VW_SIZE, int>(tile, devF3, devF3Size, 0, 0, queue1, queueSize1, 0, mymask);
 		SWrite< VW_SIZE, int>(tile, devF2, devF2Size, 0, 0, queue2, queueSize2, 0, mymask);
 	}
+
+	template <int VW_SIZE>
+	__global__ void SelectNodesPerfectV1(
+		int2 *__restrict__ devDistances,
+		int2 *__restrict__ devTrueDistances,
+		int* devF1, int* devF2, int* devF3,
+		int *__restrict__ devSizes,
+		const float distanceLimit,
+		const int sharedLimit,
+		int level)
+	{
+		//alloc node&edge
+		thread_block g = this_thread_block();
+		thread_block_tile<VW_SIZE> tile = tiled_partition<VW_SIZE>(g);
+		// dim3 group_index();
+		// dim3 thread_index();
+		const int blockdim = g.group_dim().x;
+		const int realID = g.group_index().x * blockdim + g.thread_rank();
+		const int tileID = realID / VW_SIZE;
+		const int IDStride = gridDim.x * (blockdim / VW_SIZE);
+		const int tileSharedLimit = (sharedLimit / 8) / blockdim * VW_SIZE;
+		int* devF3Size = devSizes + 2;
+		int* devF2Size = devSizes + 1;
+
+		// for write in shared mem
+		extern __shared__ int st[];
+		int * st1 = st;
+		int* st2 = st + (sharedLimit / 8);
+		int *queue1 = st1 + g.thread_rank() / VW_SIZE * tileSharedLimit;
+		int *queue2 = st2 + g.thread_rank() / VW_SIZE * tileSharedLimit; // bank conflict
+		int queueSize1 = 0;
+		int queueSize2 = 0;
+		unsigned mymask = (1 << tile.thread_rank()) - 1;
+		for (int i = tileID; i < (devSizes[0] + VW_SIZE - 1) / VW_SIZE; i += IDStride)
+		{
+			int j = i * VW_SIZE + tile.thread_rank();
+			int flag2 = 0;
+			int flag3 = 0;
+			int index = -1;
+			if (j < devSizes[0]) {
+				index = devF1[j];
+				if (devDistances[index].y == devTrueDistances[index].y) {
+					flag3 = 1;
+				}
+				else {
+					flag2 = 1;
+					devDistances[index].x = level;
+				}
+			}
+			SWrite< VW_SIZE, int>(tile, devF3, devF3Size, flag3, index, queue1, queueSize1, tileSharedLimit, mymask);
+			SWrite< VW_SIZE, int>(tile, devF2, devF2Size, flag2, index, queue2, queueSize2, tileSharedLimit, mymask);
+		}
+		SWrite< VW_SIZE, int>(tile, devF3, devF3Size, 0, 0, queue1, queueSize1, 0, mymask);
+		SWrite< VW_SIZE, int>(tile, devF2, devF2Size, 0, 0, queue2, queueSize2, 0, mymask);
+	}
 }
 
 using namespace KernelV1;
@@ -162,6 +217,14 @@ using namespace KernelV1;
 #define selectNodesV1(configs) \
 SelectNodesV1<WARPSIZE> <<<gdim, bdim, sharedLimit>>> \
 (devInt2Distances,devF1, devF2, devF3, devSizes, distanceLimit, sharedLimit,level);
+
+#define selectNodesDeltaV1(configs) \
+SelectNodesV1<WARPSIZE> <<<gdim, bdim, sharedLimit>>> \
+(devInt2Distances,devF1, devF2, devF3, devSizes, delta, sharedLimit,level);
+
+#define selectNodestPerfectV1(configs) \
+SelectNodesPerfectV1<WARPSIZE> <<<gdim, bdim, sharedLimit>>> \
+(devInt2Distances,devTrueInt2Distances ,devF1, devF2, devF3, devSizes, distanceLimit, sharedLimit,level);
 
 #define kernelV1Atmoic64(vwSize,gridDim, blockDim,sharedLimit) \
 HBFSearchV1Atomic64<vwSize> << <gridDim, blockDim, sharedLimit >> > \

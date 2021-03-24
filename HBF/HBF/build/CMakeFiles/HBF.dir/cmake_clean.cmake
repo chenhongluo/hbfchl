@@ -1,5 +1,5 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/HBF.dir/HBF_generated_test.cu.o"
+  "CMakeFiles/HBF.dir/HBF_generated_kernel.cu.o"
   "CMakeFiles/HBF.dir/HBF_generated_cudaGraph.cu.o"
   "CMakeFiles/HBF.dir/HBF_intermediate_link.o"
   "CMakeFiles/HBF.dir/fUtil.cpp.o"

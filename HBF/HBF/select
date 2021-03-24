@@ -1,0 +1,16 @@
+select
+a.namespace,a.region,a.topic_name,a.partition_cnt,a.new_partition_cnt,a.time,a.status
+from
+(
+  select namespace,region,topic_name,partition_cnt,new_partition_cnt,time,status from KafkaAdmin_topic_expand 
+  where status=0 and topic_name not like 'binlog.%' 
+  and namespace not in ('rt_data_stage_2','rt_kafka_cgroup1','rt_kafka_cgroup2')
+) as a
+join
+(
+select namespace,region,topic_name,max(time) as max_time from KafkaAdmin_topic_expand 
+where status=0 and topic_name not like 'binlog.%' 
+and namespace not in ('rt_data_stage_2','rt_kafka_cgroup1','rt_kafka_cgroup2') 
+group by namespace,region,topic_name
+) as b
+on a.namespace=b.namespace and a.region=b.region and a.topic_name=b.topic_name and a.time=b.max_time;

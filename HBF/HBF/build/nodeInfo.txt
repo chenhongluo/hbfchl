@@ -1,0 +1,63 @@
+
+Read File:	circuit5M_dc	Size: 593 MB
+start reading graph
+
+	Nodes: 3,523,317	Edges: 19,194,193	SymmetricFlag:0	FileWeightFlag:0	GraphType: Directed (File Def)	Degree AVG: 5.4
+the graph start transfering to CSR format
+graphName: circuit5M_dc	V: 3523317	E: 19194193	avgDegree: 5.4	avgWeight: 50.5	stdDegree: 0.0 296.6
+
+Read File:	delaunay_n20	Size: 42 MB
+start reading graph
+
+	Nodes: 1,048,576	Edges: 6,291,372	SymmetricFlag:1	FileWeightFlag:0	GraphType: Directed (File Def)	Degree AVG: 6.0
+the graph start transfering to CSR format
+graphName: delaunay_n20	V: 1048576	E: 6291372	avgDegree: 6.0	avgWeight: 50.5	stdDegree: 0.0 269.4
+
+Read File:	flickr	Size: 116 MB
+start reading graph
+
+	Nodes: 820,878	Edges: 9,837,214	SymmetricFlag:0	FileWeightFlag:0	GraphType: Directed (File Def)	Degree AVG: 12.0
+the graph start transfering to CSR format
+graphName: flickr	V: 820878	E: 9837214	avgDegree: 12.0	avgWeight: 50.5	stdDegree: -nan 134.9
+
+Read File:	ldoor	Size: 633 MB
+start reading graph
+
+	Nodes: 952,203	Edges: 47,474,678	SymmetricFlag:1	FileWeightFlag:0	GraphType: Undirected (File Def)	Degree AVG: 49.9
+the graph start transfering to CSR format
+graphName: ldoor	V: 952203	E: 47474678	avgDegree: 49.9	avgWeight: 50.5	stdDegree: 0.0 32.4
+
+Read File:	msdoor	Size: 277 MB
+start reading graph
+
+	Nodes: 415,863	Edges: 20,656,798	SymmetricFlag:1	FileWeightFlag:0	GraphType: Undirected (File Def)	Degree AVG: 49.7
+the graph start transfering to CSR format
+graphName: msdoor	V: 415863	E: 20656798	avgDegree: 49.7	avgWeight: 50.5	stdDegree: 0.0 32.5
+
+Read File:	rmat.3Mv	Size: 376 MB
+start reading graph
+
+	Nodes: 3,000,000	Edges: 20,000,000	SymmetricFlag:0	FileWeightFlag:1	GraphType: Directed (UnDef)	Degree AVG: 6.7
+the graph start transfering to CSR format
+graphName: rmat.3Mv	V: 3000000	E: 20000000	avgDegree: 6.7	avgWeight: 49.5	stdDegree: -nan 237.6
+
+Read File:	USA-road-d.CAL	Size: 95 MB
+start reading graph
+
+	Nodes: 1,890,815	Edges: 4,657,742	SymmetricFlag:0	FileWeightFlag:1	GraphType: Directed (UnDef)	Degree AVG: 2.5
+the graph start transfering to CSR format
+graphName: USA-road-d.CAL	V: 1890815	E: 4657742	avgDegree: 2.5	avgWeight: 2695.0	stdDegree: 0.0 35009.4
+
+Read File:	USA-road-d.USA	Size: 1,322 MB
+start reading graph
+
+	Nodes: 23,947,347	Edges: 58,333,344	SymmetricFlag:0	FileWeightFlag:1	GraphType: Directed (UnDef)	Degree AVG: 2.4
+the graph start transfering to CSR format
+graphName: USA-road-d.USA	V: 23947347	E: 58333344	avgDegree: 2.4	avgWeight: 2950.3	stdDegree: 0.0 38757.9
+
+Read File:	asia_osm	Size: 195 MB
+start reading graph
+
+	Nodes: 11,950,757	Edges: 25,423,206	SymmetricFlag:1	FileWeightFlag:0	GraphType: Undirected (File Def)	Degree AVG: 2.1
+the graph start transfering to CSR format
+graphName: asia_osm	V: 11950757	E: 25423206	avgDegree: 2.1	avgWeight: 50.5	stdDegree: 0.0 759.7

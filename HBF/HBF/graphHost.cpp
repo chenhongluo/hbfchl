@@ -133,27 +133,37 @@ namespace graph {
 	void* BBLHostGraph::computeAndTick(node_t source, vector<dist_t>& res, double &t)
 	{
 		using namespace boost;
+
 		typedef std::pair < int, int > Edge;
-		typedef adjacency_list < vecS, vecS, directedS, no_property, EdgeProperties> graph_t;
+		typedef adjacency_list < vecS, vecS, directedS, no_property, EdgeProperties> Graph;
 
-		graph_t g(edge_array, edge_array + e, v);
+		Edge* edgesB = new Edge[e];
+		int k = 0;
+		for (int i = 0; i < v; i++) {
+			for (int j = graphWeight.outNodes[i]; j < graphWeight.outNodes[i+1]; j++)
+				edgesB[k++] = Edge(i, graphWeight.outEdgeWeights[j].x);
+		}
+		Graph g(edgesB, edgesB + e, v);
 
-		graph_traits < graph_t >::edge_iterator ei, ei_end;
-		property_map<graph_t, int EdgeProperties::*>::type weight_pmap = get(&EdgeProperties::weight, g);
+		graph_traits < Graph >::edge_iterator ei, ei_end;
+		property_map<Graph, int EdgeProperties::*>::type weight_pmap = get(&EdgeProperties::weight, g);
 		int i = 0;
 		for (boost::tie(ei, ei_end) = edges(g); ei != ei_end; ++ei, ++i)
-			weight_pmap[*ei] = weights[i];
+			weight_pmap[*ei] = graphWeight.outEdgeWeights[i].x;
+
 		std::vector<int> d(v, (std::numeric_limits < int >::max)());
 		std::vector<std::size_t> parent(v);
-		auto start = chrono::high_resolution_clock::now();
 		for (i = 0; i < v; ++i)
 			parent[i] = i;
 		d[source] = 0;
-		bellman_ford_shortest_paths(g, int(v), weight_map(weight_pmap).distance_map(&d[0]).predecessor_map(&parent[0]));
+
+		auto start = chrono::high_resolution_clock::now();
+		bellman_ford_shortest_paths(g, int (v), weight_map(weight_pmap).distance_map(&d[0]).predecessor_map(&parent[0]));
 		long long duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count();
 		t = duration * 0.001;
-		res.resize(v);
-		graph_traits < graph_t >::vertex_iterator vi, vend;
+
+		graph_traits < Graph >::vertex_iterator vi, vend;
+		i = 0;
 		for (boost::tie(vi, vend) = vertices(g); vi != vend; ++vi) {
 			res[i++] = d[*vi];
 		}

@@ -1,0 +1,19 @@
+
+Read File:	asia_osm	Size: 195 MB
+start reading graph
+
+	Nodes: 11,950,757	Edges: 25,423,206	SymmetricFlag:1	FileWeightFlag:0	GraphType: Undirected (File Def)	Degree AVG: 2.1
+the graph start transfering to CSR format
+graphName: asia_osm	V: 11950757	E: 25423206	avgDegree: 2.1	avgWeight: 50.5	stdDegree: 0.0 759.7
+Relax Source: 93	relaxNodes: 11950757	relaxNodesDivV: 1.0	relaxEdges: 6387110	relaxEdgesDivE: 0.3	depth: 37730	useTime: 1226.8	kernelTime: 731.1	cacTime: 418.0	copyTime: 387.0	selectTime: 313.1	relaxRemain: 1127032	dl: 50.3
+Relax Source: 1578074	relaxNodes: 11950757	relaxNodesDivV: 1.0	relaxEdges: 6383495	relaxEdgesDivE: 0.3	depth: 35097	useTime: 1144.6	kernelTime: 682.8	cacTime: 386.9	copyTime: 359.6	selectTime: 295.9	relaxRemain: 1146119	dl: 50.4
+Relax Source: 9065084	relaxNodes: 11950757	relaxNodesDivV: 1.0	relaxEdges: 6387113	relaxEdgesDivE: 0.3	depth: 37713	useTime: 1222.9	kernelTime: 729.1	cacTime: 414.8	copyTime: 388.5	selectTime: 314.3	relaxRemain: 1130785	dl: 50.3
+Relax Source: 5502478	relaxNodes: 11950757	relaxNodesDivV: 1.0	relaxEdges: 6383806	relaxEdgesDivE: 0.3	depth: 32478	useTime: 1060.0	kernelTime: 627.5	cacTime: 356.9	copyTime: 331.8	selectTime: 270.6	relaxRemain: 1136082	dl: 50.3
+Relax Source: 6391669	relaxNodes: 11950757	relaxNodesDivV: 1.0	relaxEdges: 6383050	relaxEdgesDivE: 0.3	depth: 32763	useTime: 1100.8	kernelTime: 651.5	cacTime: 368.7	copyTime: 349.1	selectTime: 282.8	relaxRemain: 1132735	dl: 50.4
+Relax Source: 2626878	relaxNodes: 11950757	relaxNodesDivV: 1.0	relaxEdges: 6382960	relaxEdgesDivE: 0.3	depth: 33519	useTime: 1092.4	kernelTime: 648.3	cacTime: 368.4	copyTime: 342.5	selectTime: 279.9	relaxRemain: 1136510	dl: 50.2
+Relax Source: 564399	relaxNodes: 11950757	relaxNodesDivV: 1.0	relaxEdges: 6382869	relaxEdgesDivE: 0.3	depth: 32585	useTime: 1066.7	kernelTime: 632.9	cacTime: 360.1	copyTime: 334.1	selectTime: 272.8	relaxRemain: 1131228	dl: 50.3
+Relax Source: 8144418	relaxNodes: 11950757	relaxNodesDivV: 1.0	relaxEdges: 6389212	relaxEdgesDivE: 0.3	depth: 38922	useTime: 1274.1	kernelTime: 758.4	cacTime: 431.4	copyTime: 406.6	selectTime: 327.0	relaxRemain: 1138473	dl: 50.3
+Relax Source: 8149597	relaxNodes: 11950757	relaxNodesDivV: 1.0	relaxEdges: 6388884	relaxEdgesDivE: 0.3	depth: 38651	useTime: 1256.1	kernelTime: 751.1	cacTime: 428.0	copyTime: 397.9	selectTime: 323.1	relaxRemain: 1139372	dl: 50.3
+Relax Source: 11213618	relaxNodes: 11950757	relaxNodesDivV: 1.0	relaxEdges: 6388976	relaxEdgesDivE: 0.3	depth: 38944	useTime: 1262.6	kernelTime: 754.5	cacTime: 430.1	copyTime: 398.3	selectTime: 324.4	relaxRemain: 1139086	dl: 50.3
+ Avg Profile: 
+	relaxNodes: 11950757.0	relaxNodesDivV: 1.0	relaxNodesPerKernel: 333.4	relaxEdges: 6385747.5	relaxEdgesDivE: 0.3	relaxDepth: 35840.2	relaxEdgesPerKernel: 178.2	useTime: 1170.7 1066.2	kernelTime: 696.7	cacTime: 396.3	copyTime: 369.5	selectTime: 300.4	relaxRemain: 1135742.2	DL: 50.3

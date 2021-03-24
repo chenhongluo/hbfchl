@@ -1,9 +1,18 @@
+#include <cstddef>
+#include <cstdlib>
 #include<map>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
 #include <iterator>
 #include<sstream>
+#include <stdint.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <cassert>
 
 #include"graphRead.h"
 
@@ -13,7 +22,9 @@ namespace graph {
 	{
 		fin.seekg(std::ios::beg);
 		header = getHeader();
-		fin.seekg(std::ios::beg);
+		// fin.close();
+		// fin = ifstream(filename);
+		// fin.seekg(std::ios::beg);
 		edges = getOriginalEdegs();
 		header._e = edges.size();
 	}
@@ -46,6 +57,9 @@ namespace graph {
 		}
 		if (fileExtension == ".cn") {
 			return new CHReader(filename, direction, ir);
+		}
+		if (fileExtension == ".gr") {
+			return new grReader(filename, direction, ir);
 		}
 
 		ifstream f = ifstream(filename);
@@ -117,6 +131,7 @@ namespace graph {
 
 	vector<TriTuple> MatrixMarketReader::getOriginalEdegs() {
 		fUtil::Progress progress(nof_lines);
+		fin.seekg(std::ios::beg);
 
 		while (fin.peek() == '%')
 			fileUtil::skipLines(fin);
@@ -161,6 +176,7 @@ namespace graph {
 
 	vector<TriTuple> Dimacs10Reader::getOriginalEdegs()
 	{
+		fin.seekg(std::ios::beg);
 		fUtil::Progress progress(v);
 		while (fin.peek() == '%')
 			fileUtil::skipLines(fin);
@@ -209,6 +225,7 @@ namespace graph {
 
 	vector<TriTuple> Dimacs9Reader::getOriginalEdegs()
 	{
+		fin.seekg(std::ios::beg);
 		fUtil::Progress progress(nof_lines);
 
 		char c;
@@ -272,6 +289,7 @@ namespace graph {
 
 	vector<TriTuple> SnapReader::getOriginalEdegs()
 	{
+		fin.seekg(std::ios::beg);
 		fUtil::Progress progress(nof_lines);
 		while (fin.peek() == '#')
 			fileUtil::skipLines(fin);
@@ -307,6 +325,7 @@ namespace graph {
 
 	vector<TriTuple> DDSGReader::getOriginalEdegs()
 	{
+		fin.seekg(std::ios::beg);
 		while (fin.peek() == 'd')
 			fileUtil::skipLines(fin);
 		fileUtil::skipLines(fin);
@@ -435,5 +454,113 @@ namespace graph {
 		bfin.close();
 		return addEdges;
 	}
-}
 
+	grReader::grReader(const char * filename, EdgeType direction, IntRandom & ir):GraphRead(filename, direction, ir)
+	{
+		userDirection = EdgeType::UNDEF_EDGE_TYPE;
+		fileDirection = EdgeType::DIRECTED;
+		fileWeightFlag = true;
+	}
+
+	GraphHeader grReader::getHeader()
+	{
+		ifstream bfin(filename, ios::in | ios::binary);
+		unsigned long long value;
+		bfin.read((char*)&value, sizeof(value)); //1
+		if (value != 1) {
+			__ERROR("uncorrect gr version")
+		}
+		bfin.read((char*)&value, sizeof(value)); // 1
+
+		bfin.read((char*)&v, sizeof(value)); // v
+		bfin.read((char*)&nof_lines, sizeof(value)); // m1
+		bfin.close();
+		return makeSureDirection();
+	}
+
+	vector<TriTuple> grReader::getOriginalEdegs()
+	{
+		std::ifstream cfile;
+		cfile.open(filename);
+
+		// copied from GaloisCpp/trunk/src/FileGraph.h
+		int masterFD = open(filename.c_str(), O_RDONLY);
+		if (masterFD == -1) {
+			printf("FileGraph::structureFromFile: unable to open %s.\n", filename);
+			exit(-1);
+		}
+
+		struct stat buf;
+		int f = fstat(masterFD, &buf);
+		if (f == -1) {
+			printf("FileGraph::structureFromFile: unable to stat %s.\n", filename);
+			abort();
+		}
+		size_t masterLength = buf.st_size;
+
+		int _MAP_BASE = MAP_PRIVATE;
+		//#ifdef MAP_POPULATE
+		//  _MAP_BASE  |= MAP_POPULATE;
+		//#endif
+
+		void* m = mmap(0, masterLength, PROT_READ, _MAP_BASE, masterFD, 0);
+		if (m == MAP_FAILED) {
+			m = 0;
+			printf("FileGraph::structureFromFile: mmap failed.\n");
+			abort();
+		}
+
+		// parse file
+		uint64_t* fptr                           = (uint64_t*)m;
+		__attribute__((unused)) uint64_t version = le64toh(*fptr++);
+		assert(version == 1);
+		uint64_t sizeEdgeTy = le64toh(*fptr++);
+		uint64_t numNodes   = le64toh(*fptr++);
+		uint64_t numEdges   = le64toh(*fptr++);
+		uint64_t* outIdx    = fptr;
+		fptr += numNodes;
+		uint32_t* fptr32 = (uint32_t*)fptr;
+		uint32_t* outs   = fptr32;
+		fptr32 += numEdges;
+		if (numEdges % 2)
+			fptr32 += 1;
+		typedef int edge_data_type;
+		edge_data_type* edgeData = (edge_data_type*)fptr32;
+
+		// cuda.
+		int nnodes = numNodes;
+		int nedges = numEdges;
+		vector<TriTuple> originEdges;
+		originEdges.reserve(e);
+
+		printf("nnodes=%d, nedges=%d, sizeEdge=%d.\n", nnodes, nedges, sizeEdgeTy);
+
+		vector<int> row_start(nnodes+1,0);
+		row_start[0] = 0;
+
+		for (unsigned ii = 0; ii < nnodes; ++ii) {
+			row_start[ii + 1] = le64toh(outIdx[ii]);
+			//   //noutgoing[ii] = le64toh(outIdx[ii]) - le64toh(outIdx[ii - 1]);
+			int degree = row_start[ii + 1] - row_start[ii];
+
+			for (unsigned jj = 0; jj < degree; ++jj) {
+				unsigned edgeindex = row_start[ii] + jj;
+
+				unsigned dst = le32toh(outs[edgeindex]);
+				if (dst >= nnodes){
+					printf("\tinvalid edge from %d to %d at index %d(%d).\n", ii, dst, jj,
+						edgeindex);
+				}
+				// cout<<jj<<v<<endl;
+
+				if (sizeEdgeTy){
+					originEdges.push_back(TriTuple(ii,dst,edgeData[edgeindex]));
+				}else{
+					originEdges.push_back(TriTuple(ii,dst,weightRandom.getNextValue()));
+				}
+			}
+		}
+		cfile.close();
+		return originEdges;
+	}
+}

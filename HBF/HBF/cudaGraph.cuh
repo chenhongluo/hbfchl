@@ -1,5 +1,7 @@
 #pragma once
 #include "graph.h"
+#include <climits>
+#include <condition_variable>
 #include <cuda_runtime.h>
 #include <cuda_runtime_api.h>
 
@@ -25,6 +27,11 @@ inline void __getLastCudaError(const char *errorMessage, const char *file, const
 
 using namespace graph;
 namespace cuda_graph {
+	struct ValidStruct{
+		int d;
+		int flag;
+	};
+
 	class CudaConfigs {
 	public:
 		string kernelVersion;
@@ -33,10 +40,14 @@ namespace cuda_graph {
 		int gridDim;
 		int blockDim;
 		int sharedLimit;
+		int bcea;
+		int bcek;
 		string distanceLimitStrategy;
 		float distanceLimit;
+		int dp;
 		CudaConfigs() {
 			atomic64 = true;
+			dp = INT_MAX;
 		}
 		CudaConfigs(string kv,int vs,int gd,int bd,int sl,string dls,float dl){
 			kernelVersion = kv;
@@ -47,6 +58,13 @@ namespace cuda_graph {
 			sharedLimit = sl;
 			distanceLimitStrategy = dls;
 			distanceLimit = dl;
+			dp = INT_MAX;
+			if(dls.find("strict")==0?1:0){
+				vector<string> sss = stringUtil::split(dls, "-");
+				distanceLimitStrategy = "strict";
+				bcea = atoi(sss[1].c_str());
+				bcek = atoi(sss[2].c_str());
+			}
 		}
 	};
 	class CudaProfiles {
@@ -71,8 +89,8 @@ namespace cuda_graph {
 	class CudaGraph : ComputeGraph {
 	private:
 		int v, e;
-		GraphWeight &gp;
 	public:
+		GraphWeight &gp;
 		int* f1, *f2, *f3;
 		int *devSizes;
 		int *devMM;
@@ -83,11 +101,21 @@ namespace cuda_graph {
 		int *devIntDistances;
 		int2 *devInt2Distances;
 
+		int2 *devTrueInt2Distances;
+		int2 *validRes;
+		int* validSizes;
+		int2 *devBF;
+		int* devBFSize;
+
+		int* devPF1,*devPF2,*devPF3;
+		int* devPFSize1,*devPFSize2,*devPFSize3;
+
 		CudaConfigs configs;
 		CudaGraph(GraphWeight & _gp, CudaConfigs  _configs);
 		float nodeAllocTest(vector<int> sources,int n, CudaProfiles & profile);
 		float nodeWriteTest(vector<int> sources,int n,int nl, CudaProfiles & profile);
 		void* computeAndTick(node_t source, vector<dist_t>& res, double & t);
+		void cacValid(node_t source,int printInterval);
 		~CudaGraph();
 	private:
 		void cudaMallocMem();
@@ -97,8 +125,12 @@ namespace cuda_graph {
 		void cudaGetRes(vector<int> &res);
 		void searchV0(int source, CudaProfiles& profile);
 		void searchV1(int source, CudaProfiles& profile);
+		void searchV2(int source, CudaProfiles& profile);
+		void initValidRes();
+		void getValidRes(int level,int printInterval,float distanceLimit);
+		int getTrueDistance(int source);
 	};
-
+	void justTest();
 	/*class CHCudaGraph : ComputeGraph {
 	private:
 		CudaGraph *upGraph;
