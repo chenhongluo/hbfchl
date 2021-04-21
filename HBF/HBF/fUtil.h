@@ -230,6 +230,7 @@ namespace stringUtil {
 		stream >> result;
 		return result;
 	}
+	int startsWith(std::string s, std::string sub);
 }
 
 namespace randomUtil {

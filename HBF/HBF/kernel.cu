@@ -7,6 +7,7 @@
 #include <climits>
 #include <cstdlib>
 #include <stdio.h>
+#include "fUtil.h"
 #include "graph.h"
 #include "cudaGraph.cuh"
 #include <cub/cub.cuh>
@@ -14,6 +15,7 @@
 #include <chrono>
 #include <algorithm>
 #include <cmath>
+#include <map>
 // Declare, allocate, and initialize device-accessible pointers for input and output
 
 using namespace graph;
@@ -38,7 +40,7 @@ void test(GraphWeight &graph, CudaConfigs configs,int testNodeSize);
 int compareRes(vector<int>& res1, vector<int>& res2);
 
 bool isCudaKv(string kv){
-	if(kv == "V0" || kv == "V1" || kv=="V5" || kv=="V2"){
+	if(kv == "V0" || kv == "V1" || kv=="V5" || kv=="V2" || kv=="V3" || kv == "V4"){
 		return true;
 	}else {
 		return false;
@@ -84,25 +86,103 @@ int main(int argc, char* argv[])
 
 	int seed = 0;
 	cout.precision(3); 
-	IntRandomUniform ir = IntRandomUniform(seed, 1, 100000);
+	IntRandomUniform ir = IntRandomUniform(seed, 1, 10000);
 	seed = 1000;
 	EdgeType userEdgeType = EdgeType::UNDEF_EDGE_TYPE;
 	GraphRead* reader = getGraphReader(graphPath.c_str(), userEdgeType, ir);
 	GraphWeight graphWeight(reader);
+	// cout<<graphWeight.originEdges.size() << " "<<graphWeight.addEdges.size()<<endl;
+	int addFlag = 1;
+	if (addFlag == 1) {
+		float addUsePercent = atof(argv[8]);
+		vector<TriTuple> newEdges;
+		int nodeAddLimit = addUsePercent * graphWeight.v;
+		newEdges.reserve(graphWeight.originEdges.size() + graphWeight.addEdges.size());
+		newEdges.assign(graphWeight.originEdges.begin(), graphWeight.originEdges.end());
+		for (auto shortcut : graphWeight.addEdges) {
+			unsigned order = graphWeight.orders[shortcut.r];
+			if (order <= nodeAddLimit + 1) {
+				newEdges.push_back(TriTuple(shortcut.s, shortcut.t, shortcut.w));
+			}
+			else if(order > graphWeight.v){
+				cout << "unkown v"<< endl;
+			}
+		}
+		int predealSize = 0;
+		if(graphWeight.orders.size() > 0){
+			for(int i= 0;i<graphWeight.v;i++){
+				if(graphWeight.orders[i]<graphWeight.v-1){
+					predealSize ++;
+				}
+			}
+		}
+		cout<<"predealSize: "<< predealSize << " per: " << (float)predealSize/graphWeight.v << endl;
+		graphWeight.e = newEdges.size();
+		graphWeight.originEdges = newEdges;
+		graphWeight.toCSR();
+		vector<TriTuple> newfilterEdges;
+		newfilterEdges.reserve(graphWeight.e);
+		int hhhhflag = 1;
+		for(int i= 0;i<graphWeight.v;i++){
+			map<int,int> fm;
+			for(int j = graphWeight.outNodes[i];j<graphWeight.outNodes[i+1];j++){
+				int2 index2 = graphWeight.outEdgeWeights[j];
+				auto it = fm.find(index2.x);
+				if(it == fm.end() || it->second > index2.y){
+					fm[index2.x] = index2.y;
+				}
+			}
+			for(auto x:fm){
+				if(graphWeight.orders.size() > 0 && hhhhflag){
+					if(graphWeight.orders[x.first] >= graphWeight.orders[i]){
+						newfilterEdges.push_back(TriTuple(i, x.first, x.second));
+					}
+				}else{
+					newfilterEdges.push_back(TriTuple(i, x.first, x.second));
+				}
+			}
+		}
+		graphWeight.e = newfilterEdges.size();
+		graphWeight.originEdges = newfilterEdges;
+	}
+	else if (addFlag == 2) {
+
+	}
+	
 	graphWeight.name = fileUtil::extractFileName(graphPath);
 	graphWeight.toCSR();
 	graphWeight.analyseSimple();
-	CudaConfigs configs = CudaConfigs(kv,vwSize,68*2,256,1024*4,dsl,ds);
+	// {
+	// 	for(int kkk = 0;kkk<7;kkk++){
+	// 		auto vs = graphWeight.getOutEdgesOfNode(kkk);
+	// 		cout << kkk << ":"<<endl;
+	// 		for(auto v: vs){
+	// 			cout<<v.x << " "<<v.y<<endl;
+	// 		}
+	// 	}
+	// }
+	CudaConfigs configs = CudaConfigs(kv,vwSize,68*2,256,1024*8,dsl,ds);
+	if(stringUtil::startsWith(dsl,"PBCE")){
+		vector<string> vs = stringUtil::split(dsl, "_");
+		configs.distanceLimitStrategy = vs[0];
+		configs.PBCENUM = atoi(vs[1].c_str());
+	}
 	if(action == "run"){
-		if(argc == 9){
-			configs.dp = atoi(argv[8]);
-		}
+		// if(argc == 9){
+		// 	configs.dp = atoi(argv[8]);
+		// }
+		// configs.atomic64 = false;
 		run(graphWeight,configs,testNodeSize);
 	}
-	else if(action == "transfer"){
+	else if(action == "transferGr"){
 		string stemp = graphWeight.name;
 		stemp +=".gr";
 		graphWeight.toGr(stemp.c_str());
+	}
+	else if(action == "transferDDSG"){
+		string stemp = graphWeight.name;
+		stemp +=".ddsg";
+		graphWeight.toDDSG(stemp.c_str());
 	}
 	else if(action == "test"){
 		test(graphWeight,configs,testNodeSize);
@@ -180,6 +260,7 @@ int compareRes(vector<int>& res1, vector<int>& res2)
 	}
 	for (int i = 0; i < res1.size(); i++) {
 		if (res1[i] != res2[i]) {
+			cout<< i <<" not correct" << endl;
 			return -1;
 		}
 	}
@@ -197,6 +278,9 @@ void test(GraphWeight &graph,CudaConfigs configs,int testNodeSize)
 	for (int i = 0; i < testNodes.size(); i++) {
 		ct->computeAndTick(testNodes[i], dis1, t1);
 		cmpCt->computeAndTick(testNodes[i], dis2, t2);
+		for(int j = 0;j<dis1.size();j++){
+			// cout<<dis1[j]<<endl;
+		}
 		if (compareRes(dis1, dis2) == 0) {
 			cout << "the "<< i << " source node: " << testNodes[i] << " is correct" << endl;
 		}
@@ -217,20 +301,22 @@ void run(GraphWeight &graph, CudaConfigs configs,int testNodeSize)
 	double t, allt = 0.0, allkt = 0.0, allst = 0.0, allct = 0.0 ,allslt = 0.0;
 	double allRN = 0.0, allRE = 0.0, allDP = 0.0 ,allRM = 0.0;
 	double allDl = 0.0,dl;
-	cout.precision(4);
+	cout.precision(2);
 	if(!isCudaKv(configs.kernelVersion)){
 		ComputeGraph* ct = getCtGraphFromConfig(graph, configs);
 		for (int i = 0; i < testNodes.size(); i++) {
 			ct->computeAndTick(testNodes[i], dis, t);
-			cout << "Relax Source: " << testNodes[i] << "\trelaxNodes: " << 0 << "\trelaxEdges: " << 0 << "\tuseTime: " << t << endl;
+			// cout << "Relax Source: " << testNodes[i] << "\trelaxNodes: " << 0 << "\trelaxEdges: " << 0 << "\tuseTime: " << t << endl;
 			allt += t;
 		}
 	}
 	else{
 		ComputeGraph* cg = getCtGraphFromConfig(graph, configs);
 		for (int i = 0; i < testNodes.size(); i++) {
+
 			CudaProfiles pf = *(CudaProfiles*)cg->computeAndTick(testNodes[i], dis, t);
 			dl = 0.0;
+			// cout<< "res:" << dis[100] << dis[1000]  << dis[10000] << endl;
 			for(auto &x:dis){
 				if(x!=INT_MAX && x>dl){
 					dl = x;
@@ -238,16 +324,17 @@ void run(GraphWeight &graph, CudaConfigs configs,int testNodeSize)
 			}
 			dl = dl / pf.depth;
 			if (printDeatil) {
-				cout << "Relax Source: " << testNodes[i]
-					<< "\trelaxNodes: " << pf.relaxNodes << "\trelaxNodesDivV: " << (double)pf.relaxNodes / graph.v
-					<< "\trelaxEdges: " << pf.relaxEdges << "\trelaxEdgesDivE: " << (double)pf.relaxEdges / graph.e
-					<< "\tdepth: " << pf.depth
-					<< "\tuseTime: " << t
-					<< "\tkernelTime: " << pf.kernel_time << "\tcacTime: " << pf.cac_time << "\tcopyTime: " << pf.copy_time 
-					<< "\tselectTime: " << pf.select_time
-					<< "\trelaxRemain: " << pf.relaxRemain
-					<<"\tdl: "<<dl
-					<< endl;
+				// cout << "Relax Source: " << testNodes[i]
+				// 	<< "\trelaxNodes: " << pf.relaxNodes << "\trelaxNodesDivV: " << (double)pf.relaxNodes / graph.v
+				// 	<< "\trelaxEdges: " << pf.relaxEdges << "\trelaxEdgesDivE: " << (double)pf.relaxEdges / graph.e
+				// 	<< "\tdepth: " << pf.depth
+				// 	<< "\tuseTime: " << t
+				// 	<< "\tkernelTime: " << pf.kernel_time << "\tcacTime: " << pf.cac_time << "\tcopyTime: " << pf.copy_time 
+				// 	<< "\tselectTime: " << pf.select_time
+				// 	<< "\trelaxRemain: " << pf.relaxRemain
+				// 	<<"\tdl: "<<dl
+				// 	<< endl;
+				
 			}
 			allDl += dl;
 			allt += t;
@@ -274,15 +361,25 @@ void run(GraphWeight &graph, CudaConfigs configs,int testNodeSize)
 	allslt /= testNodes.size();
 
 	cout << " Avg Profile: " << endl;
-	cout << "\trelaxNodes: " << allRN << "\trelaxNodesDivV: " << allRN / graph.v
-		<< "\trelaxNodesPerKernel: " << allRN/allDP
-		<< "\trelaxEdges: " << allRE << "\trelaxEdgesDivE: " << allRE / graph.e
+	// cout << "\trelaxNodes: " << allRN << "\trelaxNodesDivV: " << allRN / graph.v
+	// 	<< "\trelaxNodesPerKernel: " << allRN/allDP
+	// 	<< "\trelaxEdges: " << allRE << "\trelaxEdgesDivE: " << allRE / graph.e
+	// 	<< "\trelaxDepth: " << allDP
+	// 	<< "\trelaxEdgesPerKernel: " << allRE/allDP
+	// 	<< "\tuseTime: " << allt << " " << allkt + allct << " " << allkt
+	// 	<< "\tkernelTime: " << allkt << "\tcacTime: " << allst << "\tcopyTime: " << allct
+	// 	<< "\tselectTime: " << allslt
+	// 	<< "\trelaxRemain: " << allRM
+	// 	<< "\tDL: "<< allDl
+	// 	<< endl;
+	cout << "relaxNodesDivV: " << allRN / graph.v
 		<< "\trelaxDepth: " << allDP
-		<< "\trelaxEdgesPerKernel: " << allRE/allDP
-		<< "\tuseTime: " << allt << " " << allkt + allct
-		<< "\tkernelTime: " << allkt << "\tcacTime: " << allst << "\tcopyTime: " << allct
+		<< "\tkernelTime: " << allkt 
+		<< "\tcacTime: " << allst 
+		<< "\tcopyTime: " << allct
 		<< "\tselectTime: " << allslt
-		<< "\trelaxRemain: " << allRM
 		<< "\tDL: "<< allDl
 		<< endl;
+	cout.precision(2);
+	cout << "here::: " << allkt << " " << allst << " " << allslt << " " << allRN / graph.v << " " << allDP << " " << configs.distanceLimit << endl;
 }

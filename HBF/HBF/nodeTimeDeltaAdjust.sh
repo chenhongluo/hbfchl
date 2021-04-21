@@ -7,6 +7,8 @@ gpu=GTX2080Ti
 prefix=HBFV1Delta
 device=2
 
+
+
 d=circuit5M_dc.mtx
 CUDA_VISIBLE_DEVICES=${device} ./HBF ${datadir}/${d} run V1 16 delta 296.6 100 10 > ${logdir}/nodeTime..cpu..${d}..${prefix}
 

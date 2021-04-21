@@ -192,4 +192,8 @@ namespace stringUtil {
 		}
 		return res;
 	}
+
+	int startsWith(std::string s, std::string sub){
+        return s.find(sub)==0?1:0;
+	}
 }

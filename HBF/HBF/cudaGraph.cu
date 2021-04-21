@@ -1,3 +1,4 @@
+#include "WorkList.cuh"
 #include "cudaGraph.cuh"
 #include "HBFV0.cuh"
 #include "HBFV1.cuh"
@@ -10,6 +11,9 @@
 #include "HBFV9.cuh"
 #include "mutex.cuh"
 #include "memManager.cuh"
+#include "HBFV11.cuh"
+#include "HBFV12.cuh"
+#include "HBFV13.cuh"
 #include "WK.cuh"
 #include "ana.cuh"
 #include "fUtil.h"
@@ -220,6 +224,13 @@ namespace cuda_graph {
 		profile.select_time *= 0.001;
 	}
 
+	int get_GPU_Rate()
+	{
+		cudaDeviceProp deviceProp;
+		cudaGetDeviceProperties(&deviceProp,0);
+		return deviceProp.clockRate;
+	}
+
 	void CudaGraph::searchV2(int source, CudaProfiles & profile)
 	{
 		// f1 select to f3,remain to f2 ,devSizes 0->f1Size,1->f2Size,2->f3Size,3->relaxEdges
@@ -236,9 +247,10 @@ namespace cuda_graph {
 		int &depth = profile.depth;
 
 		// init
-		vector<int> hostSizes(8, 0);
+		vector<int> hostSizes(10, 0);
+		vector<float> timess(10,0);
 		hostSizes[0] = 1;
-		cudaMemcpy(devSizes, &(hostSizes[0]), 8 * sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(devSizes, &(hostSizes[0]), 10 * sizeof(int), cudaMemcpyHostToDevice);
 		cudaMemcpy(devF1, &source, 1 * sizeof(int), cudaMemcpyHostToDevice);
 		int level = 0;
 
@@ -252,7 +264,20 @@ namespace cuda_graph {
 		int dp = configs.dp;
 		float initDL = distanceLimit; 
 		static GlobalBarrierLifetime gb;
+		int clockFrec = get_GPU_Rate();
 		gb.Setup(gdim);
+		int strategyNum = 0;
+		if (configs.distanceLimitStrategy == "delta"){
+			strategyNum = -1;
+		} else if(configs.distanceLimitStrategy == "PBCE"){
+			// strategyNum = (gdim*bdim) / (pow(2,int(log2(e/v)) + 1));
+			strategyNum = configs.PBCENUM;
+		} else if(configs.distanceLimitStrategy == "perfect"){
+			strategyNum = -2;
+		} else if(configs.distanceLimitStrategy == "none"){
+			strategyNum = -3;
+		}
+		// vwSize = pow(2,int(log2(E/V)) + 1);
 
 		auto time1 = chrono::high_resolution_clock::now();
 		// cout<<gdim << " "<<bdim <<endl;
@@ -261,15 +286,120 @@ namespace cuda_graph {
 		cudaEventCreate(&start_event);
 		cudaEventCreate(&stop_event);
 		cudaEventRecord(start_event, 0);
+		// kernelV10Atmoic64(gdim, bdim,sharedLimit,initDL,distanceLimit,gb);
 		kernelV8Atmoic64(gdim, bdim,sharedLimit,initDL,distanceLimit,gb);
+		// kernelV9Atmoic64(gdim, bdim,sharedLimit,initDL,distanceLimit,gb);
 		cudaEventRecord(stop_event, 0);
 		cudaEventSynchronize(stop_event);
 	
 		cudaEventElapsedTime(&elapsed_time, start_event, stop_event);
 		profile.kernel_time = elapsed_time;
-		cudaMemcpy(&(hostSizes[0]), devSizes, 8 * sizeof(int), cudaMemcpyDeviceToHost);
+		// cout<<"kernelTime:"<<profile.kernel_time<<endl;
+
+		cudaMemcpy(&(hostSizes[0]), devSizes, 10 * sizeof(int), cudaMemcpyDeviceToHost);
+		cudaMemcpy(&(timess[0]), times, 10 * sizeof(float), cudaMemcpyDeviceToHost);
 		profile.depth = hostSizes[7];
 		profile.relaxNodes = hostSizes[6];
+		profile.select_time = timess[0];
+		profile.cac_time = timess[1];
+		profile.copy_time = profile.kernel_time - profile.cac_time - profile.select_time;
+	}
+
+	void CudaGraph::searchV3(int source, CudaProfiles & profile)
+	{
+		// f1 select to f3,remain to f2 ,devSizes 0->f1Size,1->f2Size,2->f3Size,3->relaxEdges
+		// f3 relax to f2
+		// swap(f1,f2)
+		// f1Size = f2Size,f2Size = f3Size = relaxEdges = 0
+
+		long &relaxNodes = profile.relaxNodes; //f3Size
+		long &relaxRemain = profile.relaxRemain; //f2Size
+		long &relaxEdges = profile.relaxEdges;
+		int &depth = profile.depth;
+
+		// init
+		int qnum = 32;
+		WorkListsPlain workLists(qnum + 2,v);
+		int ggsize = 1;
+		cudaMemcpy(workLists.data, &source, 1 * sizeof(int), cudaMemcpyHostToDevice);
+		cudaMemcpy(workLists.qsizes, &ggsize, 1 * sizeof(int), cudaMemcpyHostToDevice);
+
+		vector<int> hostSizes(128, 0);
+		vector<float> timess(10,0);
+		hostSizes[0] = 1;
+		cudaMemcpy(devSizes, &(hostSizes[0]), 128 * sizeof(int), cudaMemcpyHostToDevice);
+		cudaStream_t stream1,stream2;
+		cudaStreamCreate(&stream1);
+		cudaStreamCreate(&stream2);
+
+
+		// config
+		int gdim = configs.gridDim;
+		int bdim = configs.blockDim;
+		int sharedLimit = configs.sharedLimit;
+		float distanceLimit = configs.distanceLimit;
+		float delta = configs.distanceLimit;
+		int vwSize = configs.vwSize;
+		int dp = configs.dp;
+		float initDL = distanceLimit; 
+		static GlobalBarrierLifetime gb;
+		int clockFrec = get_GPU_Rate();
+		gb.Setup(gdim);
+		int strategyNum = 0;
+		if (configs.distanceLimitStrategy == "delta"){
+			strategyNum = -1;
+		} else if(configs.distanceLimitStrategy == "PBCE"){
+			// strategyNum = (gdim*bdim) / (pow(2,int(log2(e/v)) + 1));
+			strategyNum = configs.PBCENUM;
+		} else if(configs.distanceLimitStrategy == "perfect"){
+			strategyNum = -2;
+		}
+		int kernelFlag = 0;
+		if(configs.kernelVersion == "V4"){
+			kernelFlag = 1;
+		}
+		if(configs.kernelVersion == "V5"){
+			kernelFlag = 2;
+		}
+		
+		auto time1 = chrono::high_resolution_clock::now();
+		// cout<<gdim << " "<<bdim <<endl;
+		float elapsed_time;
+		cudaEvent_t start_event, stop_event;
+		cudaEventCreate(&start_event);
+		cudaEventCreate(&stop_event);
+		cudaEventRecord(start_event, 0);
+		#if Profile
+			unsigned long long maxTimeCounts = clockFrec * 500; 
+			printDetail<<<1,1,0,stream1>>>(devSizes,clockFrec,maxTimeCounts);
+		#endif
+
+		if(strategyNum == 0){
+			kernelV11Atmoic64(gdim, bdim,sharedLimit,workLists,distanceLimit,gb);
+		}else if(strategyNum > 0){
+			if(configs.atomic64 == true){
+				kernelV12Atmoic64(gdim, bdim,sharedLimit,workLists,distanceLimit,gb);
+			}else{
+				kernelV13Atmoic64(gdim, bdim,sharedLimit,workLists,distanceLimit,gb);
+			}
+		}
+		cudaEventRecord(stop_event, 0);
+		cudaEventSynchronize(stop_event);
+		cudaEventElapsedTime(&elapsed_time, start_event, stop_event);
+		profile.kernel_time = elapsed_time;
+		__CUDA_ERROR("run");
+
+		cudaMemcpy(&(hostSizes[0]), devSizes, 128 * sizeof(int), cudaMemcpyDeviceToHost);
+		profile.depth = hostSizes[7];
+		profile.relaxNodes = hostSizes[6];
+		cudaMemcpy(&(timess[0]), times, 10 * sizeof(float), cudaMemcpyDeviceToHost);
+		profile.select_time = timess[0];
+		profile.cac_time = timess[1];
+		workLists.deleteData();
+		__CUDA_ERROR("run");
+		
+		cudaStreamDestroy(stream1);
+		cudaStreamDestroy(stream2);
 	}
 
 	bool myfunction (ValidStruct i,ValidStruct j) { return (i.d<j.d); }
@@ -306,7 +436,10 @@ namespace cuda_graph {
 	int CudaGraph::getTrueDistance(int source){
 		CudaProfiles cudaProfiles;
 		cudaInitComputer(source);
+		// string temp = configs.distanceLimitStrategy;
+		// configs.distanceLimitStrategy == "PBCE";
 		searchV0(source, cudaProfiles);
+		// configs.distanceLimitStrategy = temp;
 		cudaMemcpy(devTrueInt2Distances, devInt2Distances, v * sizeof(int2), cudaMemcpyDeviceToDevice);
 		return cudaProfiles.depth;
 	}
@@ -346,7 +479,7 @@ namespace cuda_graph {
 		while (1)
 		{
 			level++;
-			if(configs.distanceLimitStrategy == "normal"){
+			if(configs.distanceLimitStrategy == "normal" || configs.distanceLimitStrategy == "PBCE"){
 				distanceLimit += configs.distanceLimit;
 			}else if(configs.distanceLimitStrategy == "delta"){
 				distanceLimit = delta;
@@ -376,7 +509,11 @@ namespace cuda_graph {
 				cacValidInternal();
 				__CUDA_ERROR("GNRSearchMain Kernel");
 				switchKernelV2Config(configs)
-			}
+			} else if(configs.distanceLimitStrategy == "PBCE"){
+				selectNodesV1(configs)
+				cacValidInternal();
+				switchKernelV2Config(configs)
+			} 
 			__CUDA_ERROR("GNRSearchMain Kernel");
 			std::swap(devF1, devF2);
 			cudaMemcpy(&(hostSizes[0]), devSizes, 4 * sizeof(int), cudaMemcpyDeviceToHost);
@@ -384,9 +521,9 @@ namespace cuda_graph {
 				delta += configs.distanceLimit;
 				distanceLimit = delta;
 			}
-			// if(hostSizes[2] > 17408){
-			// 	distanceLimit -= configs.distanceLimit;
-			// }
+			if(configs.distanceLimitStrategy == "PBCE" && hostSizes[2] > configs.PBCENUM){
+				distanceLimit -= configs.distanceLimit;
+			}
 			// cout << "level: " << level << " " << hostSizes[0] << " " << hostSizes[1] << " " << hostSizes[2] << endl;
 			hostSizes[0] = hostSizes[1], hostSizes[1] = hostSizes[2] = hostSizes[3] = 0;
 			if (hostSizes[0] == 0) break;
@@ -598,6 +735,7 @@ namespace cuda_graph {
 
 		cudaMalloc((void**)&devSizes, 128 * sizeof(int));
 		cudaMalloc((void**)&devMM, 128 * sizeof(int));
+		cudaMalloc((void**)&times, 10 * sizeof(float));
 		if (configs.atomic64 == true) {
 			cudaMalloc((void**)&f1, 1 * v * sizeof(int));
 			cudaMalloc((void**)&f2, 1 * v * sizeof(int));
@@ -609,10 +747,10 @@ namespace cuda_graph {
 			cudaMalloc((void**)&f3, 1 * sizeof(int));
 		}
 
-		if (configs.atomic64 == true)
-			cudaMalloc((void**)&devInt2Distances, v * sizeof(int2));
-		else
-			cudaMalloc((void**)&devIntDistances, v * sizeof(int));
+		cudaMalloc((void**)&devIntDistances, v * sizeof(int));
+		cudaMalloc((void**)&devInt2Distances, v * sizeof(int2));
+
+
 		
 		cudaMalloc((void**)&devTrueInt2Distances, v * sizeof(int2));
 		cudaMalloc((void**)&validRes, v * sizeof(int2));
@@ -640,11 +778,9 @@ namespace cuda_graph {
 
 		cudaFree(devUpOutNodes);
 		cudaFree(devUpOutEdges);
-		if (configs.atomic64 == true)
-			cudaFree(devInt2Distances);
-		else
-			cudaFree(devIntDistances);
+		cudaFree(devInt2Distances);
 		cudaFree(devIntDistances);
+
 		cudaFree(devTrueInt2Distances);
 		cudaFree(validRes);
 		cudaFree(validSizes);
@@ -656,6 +792,7 @@ namespace cuda_graph {
 		cudaFree(devPFSize2);
 		cudaFree(devPF3);
 		cudaFree(devPFSize3);
+		cudaFree(times);
 		__CUDA_ERROR("copy");
 	}
 
@@ -671,6 +808,8 @@ namespace cuda_graph {
 		//init devDistance
 		int2 INF2 = make_int2(0, INT_MAX);
 		int INF = INT_MAX;
+		__CUDA_ERROR("copy0");
+
 		if (configs.atomic64 == true) {
 			vector<int2> temp(v, INF2);
 			temp[initNode] = make_int2(0, 0);
@@ -695,7 +834,7 @@ namespace cuda_graph {
 				res[i] = res2[i].y;
 		}
 		else {
-			cudaMemcpy(&(res[0]),devIntDistances , v * sizeof(int2), cudaMemcpyDeviceToHost);
+			cudaMemcpy(&(res[0]),devIntDistances , v * sizeof(int), cudaMemcpyDeviceToHost);
 		}
 	}
 	void* CudaGraph::computeAndTick(node_t source, vector<dist_t>& res, double & t)
@@ -703,6 +842,9 @@ namespace cuda_graph {
 		if(configs.distanceLimitStrategy == "perfect"){
 			getTrueDistance(source);
 		}
+	#if Profile
+		getTrueDistance(source);
+	#endif
 		CudaProfiles cudaProfiles;
 		cudaProfiles.v = v;
 		cudaProfiles.e = e;
@@ -714,7 +856,9 @@ namespace cuda_graph {
 		// 	cout << reses[i].y << " ";
 		// }
 		// cout << endl;
+		__CUDA_ERROR("at1");
 		cudaInitComputer(source);
+		__CUDA_ERROR("at2");
 		if (configs.kernelVersion == "V0") {
 			searchV0(source, cudaProfiles);
 		}
@@ -724,12 +868,17 @@ namespace cuda_graph {
 		else if (configs.kernelVersion == "V2") {
 			searchV2(source, cudaProfiles);
 		}
+		else if (configs.kernelVersion == "V3" || configs.kernelVersion == "V4" || configs.kernelVersion == "V5") {
+			searchV3(source, cudaProfiles);
+		}
 		else{
 			__ERROR("no this cuda kernelversion")
 		}
+		__CUDA_ERROR("at3");
 		long long duration = chrono::duration_cast<chrono::microseconds>(chrono::high_resolution_clock::now() - start).count();
 		t = duration * 0.001;
 		cudaGetRes(res);
+		__CUDA_ERROR("at4");
 		cudaProfiles.cac();
 		return new CudaProfiles(cudaProfiles);
 	}

@@ -81,7 +81,7 @@ run.sh 执行
 
 target/linux-desktop-glibc_2_11_3-x64/ncu --kernel-id :::100 -f --export /home/chl/nvprof/hbf8 --section ComputeWorkloadAnalysis --section InstructionStats --section LaunchStats --section MemoryWorkloadAnalysis --section MemoryWorkloadAnalysis_Chart --section MemoryWorkloadAnalysis_Deprecated --section MemoryWorkloadAnalysis_Tables --section Occupancy --section SchedulerStats --section SourceCounters --section SpeedOfLight --section SpeedOfLight_RooflineChart --section WarpStateStats /home/chl/hbftest/HBF/HBF/build/HBF /home/chl/data/delaunay_n20.graph run V1 8 none 100 1 1 0
 
-target/linux-desktop-glibc_2_11_3-x64/ncu --kernel-id :::1000 --metric dram__sectors_read.sum,dram__sectors_write.sum,l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum,l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum,lts__t_sectors_op_read.sum,lts__t_sectors_op_atom.sum,lts__t_sectors_op_red.sum,lts__t_sectors_op_write.sum /home/chl/hbftest/HBF/HBF/build/HBF /home/chl/data/delaunay_n24.mtx run V1 32 none 100 1 1 0
+target/linux-desktop-glibc_2_11_3-x64/ncu --kernel-id :::0 --metric dram__sectors_read.sum,dram__sectors_write.sum,l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum,l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum,lts__t_sectors_op_read.sum,lts__t_sectors_op_atom.sum,lts__t_sectors_op_red.sum,lts__t_sectors_op_write.sum /home/chl/hbftest/HBF/HBF/build/HBF /home/chl/data/delaunay_n24.mtx run V1 32 none 100 1 1 0
 ./HBF /home/chl/data/flickr.mtx run V1 32 none 100 1 1 0
 ./HBF /home/chl/data/flickr.mtx run V1 32 none 100 1 1 0
 
@@ -97,10 +97,64 @@ target/linux-desktop-glibc_2_11_3-x64/ncu --kernel-id :::0 -f --export /home/chl
 
 target/linux-desktop-glibc_2_11_3-x64/ncu --metric dram__sectors_read.sum,dram__sectors_write.sum,l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum,l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum,lts__t_sectors_op_read.sum,lts__t_sectors_op_atom.sum,	smsp__inst_executed_op_global_ld.sum /home/chl/hbftest/HBF/HBF/build/HBF /home/chl/data/avg_graph/avg_100_16.gr nodeAllocTest V2 8 none 100 1 1 0
 
-CUDA_VISIBLE_DEVICES=1 ./HBF /home/chl/data/rmat.3Mv.20Me nodeAllocTest V2 1 none 0 0 2048 50000
+./release/node-order -s -p -c -f $1 -o $1.hcn -l $1.node-order.log -Z $1.sgr -C $1.cn -x 190 -y 1 -p 1000 -n 1000 -V 60 -S 145
+ -e 70
+circuit5M_dc.mtx delaunay_n20.graph flickr.mtx ldoor.mtx msdoor.mtx rmat.3Mv.20Me USA-road-d.CAL.gr USA-road-d.USA.gr asia_osm.mtx
+
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/circuit5M_dc.mtx transferDDSG V1 32 normal 10000 1 0
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/delaunay_n20.graph transferDDSG V1 32 normal 10000 1 0
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/flickr.mtx transferDDSG V1 32 normal 10000 1 0
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/ldoor.mtx transferDDSG V1 32 normal 10000 1 0
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/msdoor.mtx transferDDSG V1 32 normal 10000 1 0
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/rmat.3Mv.20Me transferDDSG V1 32 normal 10000 1 0
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/USA-road-d.CAL.gr transferDDSG V1 32 normal 10000 1 0
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/USA-road-d.USA.gr transferDDSG V1 32 normal 10000 1 0
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/asia_osm.mtx transferDDSG V1 32 normal 10000 1 0
+
+CUDA_VISIBLE_DEVICES=7 ./HBF ./circuit5M_dc.ddsg transferGr V1 32 normal 10000 1 0
+CUDA_VISIBLE_DEVICES=7 ./HBF ./delaunay_n20.ddsg transferGr V1 32 normal 10000 1 0
+CUDA_VISIBLE_DEVICES=7 ./HBF ./flickr.ddsg transferGr V1 32 normal 10000 1 0
+CUDA_VISIBLE_DEVICES=7 ./HBF ./ldoor.ddsg transferGr V1 32 normal 10000 1 0
+CUDA_VISIBLE_DEVICES=7 ./HBF ./msdoor.ddsg transferGr V1 32 normal 10000 1 0
+CUDA_VISIBLE_DEVICES=7 ./HBF ./rmat.3Mv.ddsg transferGr V1 32 normal 10000 1 0
+CUDA_VISIBLE_DEVICES=7 ./HBF ./USA-road-d.CAL.ddsg transferGr V1 32 normal 10000 1 0
+CUDA_VISIBLE_DEVICES=7 ./HBF ./USA-road-d.USA.ddsg transferGr V1 32 normal 10000 1 0
+CUDA_VISIBLE_DEVICES=7 ./HBF ./asia_osm.ddsg transferGr V1 32 normal 10000 1 0
+
+cd /home/chl/ppopp-code/ads_int/
+./sssp -s 0 /home/chl/ppopp-code/inputs/graph-int/delaunay_n20.gr 
+./sssp -s 0 /home/chl/ppopp-code/inputs/graph-int/msdoor.gr 
+./sssp -s 0 /home/chl/ppopp-code/inputs/graph-int/ldoor.gr 
+./sssp -s 0 /home/chl/ppopp-code/inputs/graph-int/circuit5M_dc.gr 
+./sssp -s 0 /home/chl/ppopp-code/inputs/graph-int/rmat.3Mv.gr 
+./sssp -s 0 /home/chl/ppopp-code/inputs/graph-int/flickr.gr 
+./sssp -s 0 /home/chl/ppopp-code/inputs/graph-int/USA-road-d.CAL.gr 
+./sssp -s 0 /home/chl/ppopp-code/inputs/graph-int/USA-road-d.USA.gr 
+cd/asia_osm.gr 
+
+./sssp-gpu -s 0 /home/chl/ppopp-code/inputs/graph-int/delaunay_n20.gr 
+./sssp-gpu -s 0 /home/chl/ppopp-code/inputs/graph-int/msdoor.gr 
+./sssp-gpu -s 0 /home/chl/ppopp-code/inputs/graph-int/ldoor.gr 
+./sssp-gpu -s 0 /home/chl/ppopp-code/inputs/graph-int/circuit5M_dc.gr 
+./sssp-gpu -s 0 /home/chl/ppopp-code/inputs/graph-int/rmat.3Mv.gr 
+./sssp-gpu -s 0 /home/chl/ppopp-code/inputs/graph-int/flickr.gr 
+./sssp-gpu -s 0 /home/chl/ppopp-code/inputs/graph-int/USA-road-d.CAL.gr 
+./sssp-gpu -s 0 /home/chl/ppopp-code/inputs/graph-int/USA-road-d.USA.gr 
+./sssp-gpu -s 0 /home/chl/ppopp-code/inputs/graph-int/asia_osm.gr 
+
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/circuit5M_dc.ddsg run V2 8 normal 2300 8 0
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/delaunay_n20.ddsg run V2 16 normal 1500 8 0
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/flickr.ddsg run V2 32 normal 1500 8 0
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/ldoor.ddsg run V2 32 normal 140 8 0
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/msdoor.ddsg run V2 32 normal 130 8 0
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/rmat.3Mv.ddsg run V2 32 normal 3.6 8 0
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/USA-road-d.CAL.ddsg run V2 4 PBCE 3500 8 0
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/USA-road-d.USA.ddsg run V2 4 PBCE 3500 8 0
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/asia_osm.ddsg run V2 4 normal 5000 8 0
 
 单独测：
-CUDA_VISIBLE_DEVICES=1 ./HBF /home/chl/data/asia_osm.mtx cacValid V1 4 none 0 1 1000000
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/flickr.ddsg test V2 32 normal 10000 1 0
+CUDA_VISIBLE_DEVICES=1 ./HBF /home/比chl/data/asia_osm.mtx cacValid V1 4 none 0 1 1000000
 
 CUDA_VISIBLE_DEVICES=1 ./HBF /home/chl/data/asia_osm.mtx cacValid V3 4 none 0 1 1000
 
@@ -123,6 +177,7 @@ cd /home/chl/ppopp-code/nf_int/build/lonestar/analytics/gpu/sssp && make &&
 
 cd /home/chl/ppopp-code/ads_int/ &&
 ./sssp -s 0 -o /home/chl/ppopp-code/ads_int_final_dist/USA-road-d.USA.gr /home/chl/ppopp-code/inputs/graph-int/USA-road-d.USA.gr
+CUDA_VISIBLE_DEVICES=7 ./sssp -s 0 /home/chl/ppopp-code/inputs/graph-int/msdoor.gr
 
 CUDA_VISIBLE_DEVICES=2 ./HBF /home/chl/data/ldoor.mtx run V1 32 delta 32.5 100
 
@@ -133,6 +188,7 @@ CUDA_VISIBLE_DEVICES=5 ./HBF /home/chl/data/rmat.3Mv.20Me run V1 32 delta 60 100
 CUDA_VISIBLE_DEVICES=2 ./HBF /home/chl/data/USA-road-d.USA.gr run V1 32 delta 38757.9 100
 
 
+target/linux-desktop-glibc_2_11_3-x64/ncu --kernel-id :::0 --metric dram__sectors_read.sum,dram__sectors_write.sum,l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum,l1tex__t_sectors_pipe_lsu_mem_global_op_st.sum,lts__t_sectors_op_read.sum,lts__t_sectors_op_atom.sum,lts__t_sectors_op_red.sum,lts__t_sectors_op_write.sum /home/chl/hbftest/HBF/HBF/build/HBF  /home/chl/data/ldoor.ddsg run V3 4 BCE 140 1 0 
 1.5 47979.4
 1.9 40171.4
 2.2 36247.6

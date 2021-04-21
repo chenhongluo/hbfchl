@@ -17,3 +17,18 @@ struct gpu_mutex{
 	}
 };
 
+struct mutexs{
+	int* lockv;
+	mutexs(int size){
+		cudaMalloc((void**)&lockv, size * sizeof(int));
+		vector<int> vs(size,0);
+		cudaMemcpy(lockv, &vs[0], size * sizeof(int), cudaMemcpyHostToDevice);
+	}
+	__device__ void lock(int i){
+		while(atomicCAS(lockv + i,0,1) != 0);
+	}
+
+	__device__ void unlock(int i){
+		atomicExch(lockv + i,0);
+	}
+};

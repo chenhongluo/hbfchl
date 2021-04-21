@@ -59,7 +59,13 @@ namespace graph {
 			return new CHReader(filename, direction, ir);
 		}
 		if (fileExtension == ".gr") {
-			return new grReader(filename, direction, ir);
+			ifstream bfin(filename, ios::in | ios::binary);
+			unsigned long long value;
+			bfin.read((char*)&value, sizeof(value)); //1
+			bfin.close();
+			if (value == 1) {
+				return new grReader(filename, direction, ir);
+			}
 		}
 
 		ifstream f = ifstream(filename);

@@ -34,6 +34,8 @@
 
  #include <cub/cub.cuh>
  #include "cutil_subset.h"
+#define WriteGO true
+#define Profiel false
  
  /**
   * Manages device storage needed for implementing a global software barrier
@@ -93,6 +95,7 @@
 			 // Wait for everyone else to report in
 			 for (int peer_block = threadIdx.x; peer_block < gridDim.x; peer_block += blockDim.x) {
 				 while (LoadCG(d_sync + peer_block) == 0) {
+					//  printf("lock:%d,%d\n",peer_block);
 					 __threadfence_block();
 				 }
 			 }

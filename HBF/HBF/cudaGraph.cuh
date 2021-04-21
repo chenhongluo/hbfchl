@@ -44,6 +44,7 @@ namespace cuda_graph {
 		int bcek;
 		string distanceLimitStrategy;
 		float distanceLimit;
+		int PBCENUM;
 		int dp;
 		CudaConfigs() {
 			atomic64 = true;
@@ -59,6 +60,7 @@ namespace cuda_graph {
 			distanceLimitStrategy = dls;
 			distanceLimit = dl;
 			dp = INT_MAX;
+			PBCENUM = 3000;
 			if(dls.find("strict")==0?1:0){
 				vector<string> sss = stringUtil::split(dls, "-");
 				distanceLimitStrategy = "strict";
@@ -83,7 +85,7 @@ namespace cuda_graph {
 		}
 
 		void cac(){
-			cac_time = kernel_time - select_time;
+			// cac_time = kernel_time - select_time;
 		}
 	};
 	class CudaGraph : ComputeGraph {
@@ -110,6 +112,8 @@ namespace cuda_graph {
 		int* devPF1,*devPF2,*devPF3;
 		int* devPFSize1,*devPFSize2,*devPFSize3;
 
+		float* times;
+
 		CudaConfigs configs;
 		CudaGraph(GraphWeight & _gp, CudaConfigs  _configs);
 		float nodeAllocTest(vector<int> sources,int n, CudaProfiles & profile);
@@ -126,6 +130,7 @@ namespace cuda_graph {
 		void searchV0(int source, CudaProfiles& profile);
 		void searchV1(int source, CudaProfiles& profile);
 		void searchV2(int source, CudaProfiles& profile);
+		void searchV3(int source, CudaProfiles& profile);
 		void initValidRes();
 		void getValidRes(int level,int printInterval,float distanceLimit);
 		int getTrueDistance(int source);

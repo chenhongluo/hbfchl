@@ -122,6 +122,7 @@ namespace graph {
 		for (boost::tie(vi, vend) = vertices(g); vi != vend; ++vi) {
 			res[i++] = d[*vi];
 		}
+		cout << "here::: " << t << endl;
 		return NULL;
 	}
 

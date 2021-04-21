@@ -45,6 +45,13 @@ prefix=delta
 CUDA_VISIBLE_DEVICES=${device} ./HBF ${datadir}/${d} cacValid V1 32 ${prefix} 60.5 100 1 0 > ${logdir}/nodeTime..cpu..${d}..${prefix}
 prefix=normal
 CUDA_VISIBLE_DEVICES=${device} ./HBF ${datadir}/${d} cacValid V1 32 ${prefix} 6.6 100 1 0 > ${logdir}/nodeTime..cpu..${d}..${prefix}
+CUDA_VISIBLE_DEVICES=3 ./HBF /home/chl/data/rmat.3Mv.ddsg cacValid V1 32 normal 3.5 100 1 0 > /home/chl/hbftest/HBF/HBF/nodeValid/nodeTime..cpu..rmat.3Mv.20Me..none
+CUDA_VISIBLE_DEVICES=3 ./HBF /home/chl/data/flickr.ddsg cacValid V1 32 normal 400 100 1 0 > /home/chl/hbftest/HBF/HBF/nodeValid/nodeTime..cpu..flickr.ddsg..BCE
+CUDA_VISIBLE_DEVICES=3 ./HBF /home/chl/data/flickr.ddsg cacValid V1 32 delta 6000 100 1 0 > /home/chl/hbftest/HBF/HBF/nodeValid/nodeTime..cpu..flickr.ddsg..delta
+CUDA_VISIBLE_DEVICES=3 ./HBF /home/chl/data/flickr.ddsg cacValid V1 32 none 400 100 1 0 > /home/chl/hbftest/HBF/HBF/nodeValid/nodeTime..cpu..flickr.ddsg..none
+
+CUDA_VISIBLE_DEVICES=7 ./HBF /home/chl/data/flickr.ddsg cacValid V1 32 normal 400 100 1 0 > /home/chl/hbftest/HBF/HBF/nodeValid/nodeTime..cpu..flickr.ddsg..BCE
+
 
 d=USA-road-d.CAL.gr
 prefix=none

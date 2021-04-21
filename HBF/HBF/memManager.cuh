@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cub/cub.cuh>
+#include  <vector>
+using namespace std;
 #include "mutex.cuh"
 struct memManager{
 	int* mem;
@@ -35,6 +37,14 @@ struct memManager{
 		vector<int> vvs(blockSize,0);
 		cudaMemcpy(&vvs[0], getDevicePoint(2047), blockSize * sizeof(int), cudaMemcpyDeviceToHost);
 		cout<<vvvv<<" "<<vs[bsize-1] <<" "<< vvs[0]<<vvs[1]<<vvs[2]<<endl;
+	}
+
+	__host__ __device__ int getData(int posi,int posj){
+		return mem[posi*blockSize+posj];
+	}
+
+	__host__ __device__ void setData(int posi,int posj,int data){
+		mem[posi*blockSize+posj] = data;
 	}
 
 	__host__ __device__ int* getDevicePoint(int v){
